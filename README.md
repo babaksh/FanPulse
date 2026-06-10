@@ -7,6 +7,7 @@ FanPulse is an intelligent dual-agent system that helps fans understand and expe
 [![IBM Granite](https://img.shields.io/badge/IBM-Granite-blue)](https://www.ibm.com/granite)
 [![Docling](https://img.shields.io/badge/IBM-Docling-green)](https://github.com/DS4SD/docling)
 [![Langflow](https://img.shields.io/badge/Langflow-Orchestration-purple)](https://www.langflow.org/)
+[![IBM Bob](https://img.shields.io/badge/IBM-Bob-orange)](https://bob.ibm.com)
 [![Python](https://img.shields.io/badge/Python-3.11+-yellow)](https://www.python.org/)
 
 ---
@@ -62,6 +63,9 @@ This project leverages multiple IBM technologies as required by the challenge:
 - Assisted with debugging and optimization
 - Helped create comprehensive documentation
 - Accelerated development of 12,000+ lines of code
+
+### Note on Context Forge
+[Context Forge](https://ibm.github.io/mcp-context-forge/) is an MCP gateway/proxy for federating multiple MCP servers with centralized governance. While it's a powerful tool for complex multi-server deployments, our project uses a direct LangChain + FAISS implementation which better suits our dual-agent architecture and provides more control over the RAG pipeline.
 
 ---
 

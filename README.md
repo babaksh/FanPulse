@@ -182,7 +182,6 @@ uvicorn src.api.main:app --reload
 - **[Setup Guide](docs/var-lens-setup-guide.md)** - Complete setup instructions
 - **[LLM Setup](docs/llm-setup-guide.md)** - Configure LLM providers
 - **[API Documentation](src/api/README.md)** - REST API reference
-- **[Langflow Guide](docs/langflow-quick-start.md)** - Visual workflow setup
 - **[Tactical Pulse Design](docs/tactical-pulse-design.md)** - Architecture details
 
 ---

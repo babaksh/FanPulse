@@ -14,7 +14,7 @@ FastAPI Backend
 Langflow API (Orchestrator)
     ↓
 ┌─────────────┴─────────────┐
-│                            │
+│                           │
 VAR-Lens Flow          Tactical Pulse Flow
 (Inside Langflow)         (Inside Langflow)
 ```
@@ -43,42 +43,42 @@ Langflow Components (Only for specific parts)
 ### General Structure
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    User Interface                        │
-│              (Browser / API Client / Postman)            │
-└────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│                    User Interface                      │
+│              (Browser / API Client / Postman)          │
+└────────────────────────┬───────────────────────────────┘
                          │ HTTP Request
                          ↓
-┌─────────────────────────────────────────────────────────┐
-│                  FastAPI Backend                         │
-│                  (src/api/main.py)                       │
-│                                                           │
-│  Endpoints:                                              │
-│  • POST /api/var-lens/explain                           │
-│  • POST /api/tactical-pulse/analyze                     │
-│  • GET /api/health                                       │
-└────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│                  FastAPI Backend                       │
+│                  (src/api/main.py)                     │
+│                                                        │
+│  Endpoints:                                            │
+│  • POST /api/var-lens/explain                          │
+│  • POST /api/tactical-pulse/analyze                    │
+│  • GET /api/health                                     │
+└────────────────────────┬───────────────────────────────┘
                          │ HTTP Request
                          ↓
-┌─────────────────────────────────────────────────────────┐
-│              Langflow Server (localhost:7860)            │
-│                                                           │
+┌────────────────────────────────────────────────────────┐
+│              Langflow Server (localhost:7860)          │
+│                                                        │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │         VAR-Lens Flow (JSON Workflow)             │  │
-│  │                                                    │  │
+│  │         VAR-Lens Flow (JSON Workflow)            │  │
+│  │                                                  │  │
 │  │  [Input] → [Docling Loader] → [Vector Store]     │  │
-│  │     ↓                                              │  │
+│  │     ↓                                            │  │
 │  │  [Retriever] → [Granite LLM] → [Output]          │  │
 │  └──────────────────────────────────────────────────┘  │
-│                                                           │
+│                                                        │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │      Tactical Pulse Flow (JSON Workflow)          │  │
-│  │                                                    │  │
+│  │      Tactical Pulse Flow (JSON Workflow)         │  │
+│  │                                                  │  │
 │  │  [Input] → [Data Processor] → [IBM Bob]          │  │
-│  │     ↓                                              │  │
+│  │     ↓                                            │  │
 │  │  [Pattern Detector] → [Granite LLM] → [Output]   │  │
 │  └──────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -208,39 +208,39 @@ In Langflow UI:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              VAR-Lens Flow                           │
+│              VAR-Lens Flow                          │
 ├─────────────────────────────────────────────────────┤
-│                                                       │
-│  [1] Directory Loader Component                      │
-│      ↓                                                │
-│      Path: data/processed_documents/fifa_rules/      │
-│      ↓                                                │
-│  [2] Markdown Text Splitter                          │
-│      ↓                                                │
-│      Chunk Size: 1000                                │
-│      Chunk Overlap: 200                              │
-│      ↓                                                │
-│  [3] Embeddings Component                            │
-│      ↓                                                │
-│      Model: sentence-transformers/all-MiniLM-L6-v2   │
-│      ↓                                                │
-│  [4] FAISS Vector Store                              │
-│      ↓                                                │
-│      Store vectors in memory or disk                 │
-│      ↓                                                │
-│  [5] Retriever Component                             │
-│      ↓                                                │
-│      Search Type: similarity                         │
+│                                                     │
+│  [1] Directory Loader Component                     │
+│      ↓                                              │
+│      Path: data/processed_documents/fifa_rules/     │
+│      ↓                                              │
+│  [2] Markdown Text Splitter                         │
+│      ↓                                              │
+│      Chunk Size: 1000                               │
+│      Chunk Overlap: 200                             │
+│      ↓                                              │
+│  [3] Embeddings Component                           │
+│      ↓                                              │
+│      Model: sentence-transformers/all-MiniLM-L6-v2  │
+│      ↓                                              │
+│  [4] FAISS Vector Store                             │
+│      ↓                                              │
+│      Store vectors in memory or disk                │
+│      ↓                                              │
+│  [5] Retriever Component                            │
+│      ↓                                              │
+│      Search Type: similarity                        │
 │      K: 3 (top 3 results)                           │
-│      ↓                                                │
-│  [6] Granite LLM Component                           │
-│      ↓                                                │
-│      Model: ibm/granite-13b-chat-v2                  │
-│      Prompt: "Based on these rules: {context}        │
-│               Explain: {question}"                   │
-│      ↓                                                │
-│  [7] Output Component                                │
-│                                                       │
+│      ↓                                              │
+│  [6] Granite LLM Component                          │
+│      ↓                                              │
+│      Model: ibm/granite-13b-chat-v2                 │
+│      Prompt: "Based on these rules: {context}       │
+│               Explain: {question}"                  │
+│      ↓                                              │
+│  [7] Output Component                               │
+│                                                     │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -325,22 +325,22 @@ Langflow automatically saves the vector store:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│           VAR-Lens Agent (in Langflow)               │
+│           VAR-Lens Agent (in Langflow)              │
 ├─────────────────────────────────────────────────────┤
-│                                                       │
-│  [Agent Component]                                   │
-│    ↓                                                  │
-│    Tools:                                            │
+│                                                     │
+│  [Agent Component]                                  │
+│    ↓                                                │
+│    Tools:                                           │
 │    • search_fifa_rules (Vector Store Retriever)     │
 │    • translate_to_language (Translation Tool)       │
 │    • get_similar_cases (Historical DB)              │
-│    ↓                                                  │
-│    LLM: Granite                                      │
-│    ↓                                                  │
-│    System Prompt:                                    │
+│    ↓                                                │
+│    LLM: Granite                                     │
+│    ↓                                                │
+│    System Prompt:                                   │
 │    "You are a VAR expert. Use the tools to          │
 │     find relevant rules and explain decisions."     │
-│                                                       │
+│                                                     │
 └─────────────────────────────────────────────────────┘
 ```
 

@@ -91,4 +91,10 @@ Thumbs.db
 temp/
 tmp/
 
+# Personal development guides (keep local only)
+docs/docling-workflow.md
+docs/langflow-integration-guide.md
+docs/langflow-var-lens-guide.md
+docs/langflow-quick-start.md
+
 # Made with Bob

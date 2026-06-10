@@ -35,6 +35,36 @@ Analyzes tactical shifts, match dynamics, and team performance.
 
 ---
 
+## 🔧 IBM Technologies Integration
+
+This project leverages multiple IBM technologies as required by the challenge:
+
+### 1. **IBM Granite** (via watsonx.ai)
+- Integrated as one of 5 LLM providers in our multi-provider architecture
+- Used for generating natural language explanations of VAR decisions
+- Provides tactical analysis insights for match predictions
+- Configured through IBM watsonx.ai API
+
+### 2. **Docling** (Document Processing)
+- Converted 7 FIFA/IFAB PDF rulebooks to clean Markdown format
+- Processed 450 KB of official football regulations
+- Enabled efficient text extraction for RAG pipeline
+- Output stored in `data/processed_documents/`
+
+### 3. **Langflow** (Visual Orchestration)
+- Created visual workflow templates for VAR-Lens agent
+- Designed reusable flow components for RAG pipeline
+- JSON flow definitions in `langflow_flows/`
+- Enables no-code/low-code agent customization
+
+### 4. **IBM Bob** (AI Coding Assistant)
+- Used throughout development for code generation
+- Assisted with debugging and optimization
+- Helped create comprehensive documentation
+- Accelerated development of 12,000+ lines of code
+
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -216,11 +246,11 @@ curl -X POST "http://localhost:8000/api/tactical-pulse/predict" \
 - **FastAPI** - REST API
 - **Pandas** - Data processing
 
-### IBM Technologies
-- **IBM Granite** - Large Language Model
-- **Docling** - Document processing
-- **Langflow** - Visual orchestration
-- **IBM Bob** - AI-powered coding assistant for developers
+### IBM Technologies Used
+- **IBM Granite** - Large Language Model via watsonx.ai for generating explanations
+- **Docling** - Document processing tool used to convert 7 FIFA PDF rulebooks to Markdown
+- **Langflow** - Visual workflow orchestration for building AI agent pipelines
+- **IBM Bob** - AI-powered coding assistant used throughout development for code generation and debugging
 
 ### LLM Providers
 - IBM Granite (watsonx.ai)

@@ -1,0 +1,25 @@
+# LLM Provider Dependencies for FanPulse
+# Install with: pip install -r requirements-llm.txt
+
+# Core LangChain
+langchain>=0.2.0
+langchain-core>=0.2.0
+
+# IBM Granite (watsonx.ai) - Required for IBM Challenge
+ibm-watsonx-ai>=1.0.0
+langchain-ibm>=0.1.0
+
+# OpenAI - For quick testing
+langchain-openai>=0.1.0
+
+# HuggingFace - Free alternative
+langchain-huggingface>=0.0.1
+
+# Anthropic Claude - Optional
+langchain-anthropic>=0.1.0
+
+# Google Gemini - Optional
+langchain-google-genai>=1.0.0
+
+# Additional utilities
+python-dotenv>=1.0.0  # For .env file support

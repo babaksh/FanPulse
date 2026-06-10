@@ -1,0 +1,61 @@
+{
+  "processed_at": "2026-06-07T23:13:12.158635",
+  "total_files": 7,
+  "processed": 5,
+  "skipped": 2,
+  "failed": 0,
+  "max_file_size_mb": 5.0,
+  "results": [
+    {
+      "filename": "Throw-in and goal-kick countdown protocol.pdf",
+      "status": "success",
+      "pages": 3,
+      "characters": 2071,
+      "output_file": "Throw-in and goal-kick countdown protocol.md",
+      "size_mb": 0.23264598846435547
+    },
+    {
+      "filename": "Off-field treatment and assessment protocol.pdf",
+      "status": "success",
+      "pages": 3,
+      "characters": 3347,
+      "output_file": "Off-field treatment and assessment protocol.md",
+      "size_mb": 0.2579793930053711
+    },
+    {
+      "filename": "Time-limited substitution protocol.pdf",
+      "status": "success",
+      "pages": 3,
+      "characters": 2684,
+      "output_file": "Time-limited substitution protocol.md",
+      "size_mb": 0.2728090286254883
+    },
+    {
+      "filename": "Video Assistant Referee (VAR) protocol _ IFAB.pdf",
+      "status": "success",
+      "pages": 16,
+      "characters": 15487,
+      "output_file": "Video Assistant Referee (VAR) protocol _ IFAB.md",
+      "size_mb": 0.8357181549072266
+    },
+    {
+      "filename": "FWC26_regulations_EN.pdf",
+      "status": "success",
+      "pages": 98,
+      "characters": 156887,
+      "output_file": "FWC26_regulations_EN.md",
+      "size_mb": 0.9142265319824219
+    },
+    {
+      "filename": "Changes to the Laws of the Game 2026_27.pdf",
+      "status": "skipped",
+      "reason": "already_processed"
+    },
+    {
+      "filename": "Laws of the Game 2026_27.pdf",
+      "status": "skipped",
+      "reason": "file_too_large",
+      "size_mb": 22.351414680480957
+    }
+  ]
+}

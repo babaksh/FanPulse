@@ -17,38 +17,38 @@
 ## 🏗️ General Architecture (Modular Architecture)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     FanPulse Platform                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
+┌────────────────────────────────────────────────────────────┐
+│                     FanPulse Platform                      │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │           Langflow Orchestration Layer                │  │
-│  │  (Workflow management and communication between agents)   │  │
+│  │           Langflow Orchestration Layer               │  │
+│  │ (Workflow management & communication between agents) │  │
 │  └──────────────────────────────────────────────────────┘  │
-│                          │                                   │
-│         ┌────────────────┴────────────────┐                 │
-│         │                                  │                 │
+│                          │                                 │
+│         ┌────────────────┴────────────────┐                │
+│         │                                 │                │
 │  ┌──────▼──────┐                  ┌───────▼──────┐         │
 │  │  VAR-Lens   │                  │   Tactical   │         │
 │  │   Agent     │                  │ Pulse Agent  │         │
 │  └──────┬──────┘                  └───────┬──────┘         │
-│         │                                  │                 │
-│  ┌──────▼──────────────────────────────────▼──────┐        │
-│  │         Shared Services Layer                   │        │
-│  │  • IBM Granite (NLG)                            │        │
-│  │  • Context Forge (Context Management)           │        │
-│  │  • Data Processing Pipeline                     │        │
-│  └─────────────────────────────────────────────────┘        │
-│                          │                                   │
-│  ┌──────────────────────▼──────────────────────┐           │
-│  │          Data Sources Layer                  │           │
-│  │  • Docling (FIFA Rules Processing)           │           │
-│  │  • IBM Bob (Match Data Analytics)            │           │
-│  │  • Static Datasets (Historical Data)         │           │
-│  │  • Live Data API (Real-time Feed)            │           │
-│  └──────────────────────────────────────────────┘           │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
+│         │                                 │                │
+│  ┌──────▼─────────────────────────────────▼──────┐         │
+│  │         Shared Services Layer                 │         │
+│  │  • IBM Granite (NLG)                          │         │
+│  │  • Context Forge (Context Management)         │         │
+│  │  • Data Processing Pipeline                   │         │
+│  └───────────────────────────────────────────────┘         │
+│                         │                                  │
+│  ┌──────────────────────▼───────────────────────┐          │
+│  │          Data Sources Layer                  │          │
+│  │  • Docling (FIFA Rules Processing)           │          │
+│  │  • IBM Bob (Match Data Analytics)            │          │
+│  │  • Static Datasets (Historical Data)         │          │
+│  │  • Live Data API (Real-time Feed)            │          │
+│  └──────────────────────────────────────────────┘          │
+│                                                            │
+└────────────────────────────────────────────────────────────┘
                           │
                           ▼
         ┌─────────────────────────────────┐

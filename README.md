@@ -38,32 +38,32 @@ Analyzes tactical shifts, match dynamics, and team performance.
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         FanPulse                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────────────┐         ┌──────────────────┐          │
-│  │   VAR-Lens       │         │  Tactical Pulse  │          │
-│  │   Agent          │         │  Agent           │          │
-│  ├──────────────────┤         ├──────────────────┤          │
-│  │ • RAG Engine     │         │ • Data Loader    │          │
-│  │ • FAISS Store    │         │ • Metrics Calc   │          │
-│  │ • FIFA Docs      │         │ • Match Analyzer │          │
-│  └────────┬─────────┘         └────────┬─────────┘          │
-│           │                            │                     │
-│           └────────────┬───────────────┘                     │
-│                        │                                     │
-│              ┌─────────▼─────────┐                           │
-│              │  LLM Factory      │                           │
-│              │  (5 Providers)    │                           │
-│              └─────────┬─────────┘                           │
-│                        │                                     │
-│              ┌─────────▼─────────┐                           │
-│              │  IBM Granite      │                           │
-│              │  OpenAI / HF      │                           │
-│              └───────────────────┘                           │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                         FanPulse                    │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  ┌──────────────────┐         ┌──────────────────┐  │
+│  │   VAR-Lens       │         │  Tactical Pulse  │  │
+│  │   Agent          │         │  Agent           │  │
+│  ├──────────────────┤         ├──────────────────┤  │
+│  │ • RAG Engine     │         │ • Data Loader    │  │
+│  │ • FAISS Store    │         │ • Metrics Calc   │  │
+│  │ • FIFA Docs      │         │ • Match Analyzer │  │
+│  └────────┬─────────┘         └────────┬─────────┘  │
+│           │                            │            │
+│           └────────────┬───────────────┘            │
+│                        │                            │
+│              ┌─────────▼─────────┐                  │
+│              │  LLM Factory      │                  │
+│              │  (5 Providers)    │                  │
+│              └─────────┬─────────┘                  │
+│                        │                            │
+│              ┌─────────▼─────────┐                  │
+│              │  IBM Granite      │                  │
+│              │  OpenAI / HF      │                  │
+│              └───────────────────┘                  │
+│                                                     │
+└─────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -354,7 +354,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-## 📧 Contact
+## 👤 Author
+
+**Babak Shahifar**
+- GitHub: [@babaksh](https://github.com/babaksh)
+- Project: [FanPulse](https://github.com/babaksh/FanPulse)
+
+---
+
+## � Contact
 
 For questions or feedback about this project:
 - GitHub Issues: [Create an issue](https://github.com/yourusername/FanPulse/issues)

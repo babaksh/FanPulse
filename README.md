@@ -220,7 +220,7 @@ curl -X POST "http://localhost:8000/api/tactical-pulse/predict" \
 - **IBM Granite** - Large Language Model
 - **Docling** - Document processing
 - **Langflow** - Visual orchestration
-- **IBM Bob** - AI development assistant
+- **IBM Bob** - AI-powered coding assistant for developers
 
 ### LLM Providers
 - IBM Granite (watsonx.ai)

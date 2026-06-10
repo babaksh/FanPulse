@@ -98,4 +98,17 @@ docs/langflow-integration-guide.md
 docs/langflow-var-lens-guide.md
 docs/langflow-quick-start.md
 
+# Development and test scripts (keep local only)
+scripts/monitor_processing.py
+scripts/process_fifa_docs_simple.py
+scripts/process_fifa_docs_smart.py
+scripts/process_fifa_docs.py
+scripts/process_large_pdf.py
+scripts/process_var_protocol_only.py
+scripts/test_data_loader.py
+scripts/test_docling.py
+scripts/test_match_analyzer.py
+scripts/test_var_lens_rag.py
+scripts/test_var_lens_with_llm.py
+
 # Made with Bob

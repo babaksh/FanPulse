@@ -70,6 +70,7 @@ secrets/
 
 # External repositories (IBM hands-on labs)
 hands-on-labs/
+notebooks/
 
 # Large data files
 data/match_data/*.csv

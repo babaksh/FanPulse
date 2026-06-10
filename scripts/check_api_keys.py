@@ -3,10 +3,15 @@ Check which LLM API keys are configured
 """
 import os
 import sys
+import io
 
 # Set UTF-8 encoding for Windows console
 if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
+    else:
+        # Fallback for older Python versions
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 def check_api_keys():
     """Check which API keys are set"""

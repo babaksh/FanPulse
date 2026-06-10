@@ -372,9 +372,13 @@ This project was built for the IBM Skills Build AI Builders Challenge. Contribut
 
 ---
 
-## 📝 License
+## 📝 License & Copyright
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+**Copyright (c) 2026 Babak Shahifar**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project was created specifically for the **IBM Skills Build AI Builders Challenge (June 2026)** and is the original work of Babak Shahifar. See [NOTICE](NOTICE) file for additional information.
 
 ---
 

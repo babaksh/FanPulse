@@ -98,22 +98,22 @@ langflow run --host 0.0.0.0 --port 7860
 # http://localhost:7860
 ```
 
-### مرحله 2: ساخت Flows در Langflow UI
+### Step 2: Building Flows in Langflow UI
 
 #### VAR-Lens Flow:
-1. باز کردن Langflow UI
-2. ساخت یک Flow جدید با نام "VAR-Lens"
-3. اضافه کردن Components:
-   - **Input Component**: دریافت سوال کاربر
-   - **Document Loader**: بارگذاری Markdown های Docling
-   - **Text Splitter**: تقسیم متن
-   - **Embeddings**: تبدیل به vector
-   - **Vector Store (FAISS)**: ذخیره vectors
-   - **Retriever**: جستجوی مرتبط‌ترین قوانین
-   - **Granite LLM**: تولید پاسخ
-   - **Output Component**: برگرداندن نتیجه
+1. Open Langflow UI
+2. Create a new Flow named "VAR-Lens"
+3. Add Components:
+   - **Input Component**: Receive user question
+   - **Document Loader**: Load Docling Markdown files
+   - **Text Splitter**: Split text into chunks
+   - **Embeddings**: Convert to vectors
+   - **Vector Store (FAISS)**: Store vectors
+   - **Retriever**: Search for most relevant rules
+   - **Granite LLM**: Generate response
+   - **Output Component**: Return result
 
-4. **Export Flow**: ذخیره به عنوان JSON
+4. **Export Flow**: Save as JSON
 
 ```json
 // var_lens_flow.json
@@ -125,7 +125,7 @@ langflow run --host 0.0.0.0 --port 7860
 }
 ```
 
-### مرحله 3: فراخوانی Langflow از FastAPI
+### Step 3: Calling Langflow from FastAPI
 
 ```python
 # src/api/routes/var_lens.py
@@ -144,24 +144,24 @@ class VARRequest(BaseModel):
 @router.post("/explain")
 async def explain_var_decision(request: VARRequest):
     """
-    فراخوانی VAR-Lens Flow در Langflow
+    Call VAR-Lens Flow in Langflow
     """
     
-    # آدرس Langflow API
+    # Langflow API URL
     langflow_url = "http://localhost:7860/api/v1/run/var-lens"
     
-    # ساخت payload برای Langflow
+    # Create payload for Langflow
     payload = {
         "inputs": {
             "decision_type": request.decision_type,
             "description": request.description,
             "language": request.language
         },
-        "tweaks": {}  # تنظیمات اضافی
+        "tweaks": {}  # Additional settings
     }
     
     try:
-        # فراخوانی Langflow
+        # Call Langflow
         response = requests.post(
             langflow_url,
             json=payload,
@@ -169,7 +169,7 @@ async def explain_var_decision(request: VARRequest):
         )
         response.raise_for_status()
         
-        # دریافت نتیجه
+        # Get result
         result = response.json()
         
         return {
@@ -187,24 +187,24 @@ async def explain_var_decision(request: VARRequest):
 
 ---
 
-## 📦 ساخت پایگاه دانش در Langflow
+## 📦 Building Knowledge Base in Langflow
 
-### آیا Vector Database را در Langflow می‌سازیم؟
-**جواب**: بله! همه چیز داخل Langflow
+### Do we build the Vector Database in Langflow?
+**Answer**: Yes! Everything inside Langflow
 
-### مراحل:
+### Steps:
 
-#### 1. پردازش اسناد با Docling (خارج از Langflow)
+#### 1. Process Documents with Docling (Outside Langflow)
 ```bash
-# این کار یکبار انجام می‌شود
+# This is done once
 python scripts/process_documents.py
 
-# نتیجه: Markdown files در data/processed_documents/
+# Result: Markdown files in data/processed_documents/
 ```
 
-#### 2. ساخت Vector Store در Langflow
+#### 2. Build Vector Store in Langflow
 
-در Langflow UI:
+In Langflow UI:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -244,14 +244,14 @@ python scripts/process_documents.py
 └─────────────────────────────────────────────────────┘
 ```
 
-#### 3. ذخیره Vector Store
+#### 3. Save Vector Store
 
-Langflow به صورت خودکار vector store رو ذخیره می‌کنه:
-- در حافظه (برای تست)
-- یا روی دیسک (برای production)
+Langflow automatically saves the vector store:
+- In memory (for testing)
+- Or on disk (for production)
 
 ```python
-# در Langflow، FAISS Component تنظیمات داره:
+# In Langflow, FAISS Component has settings:
 {
   "persist_directory": "data/vector_stores/var_lens_faiss",
   "allow_dangerous_deserialization": true
@@ -260,9 +260,9 @@ Langflow به صورت خودکار vector store رو ذخیره می‌کنه:
 
 ---
 
-## 🔄 جریان کامل یک Request
+## 🔄 Complete Request Flow
 
-### مثال: توضیح یک تصمیم VAR
+### Example: Explaining a VAR Decision
 
 ```
 1. User → Frontend/Postman
@@ -274,9 +274,9 @@ Langflow به صورت خودکار vector store رو ذخیره می‌کنه:
    }
 
 2. FastAPI Backend
-   • دریافت request
-   • Validation با Pydantic
-   • آماده‌سازی payload برای Langflow
+   • Receive request
+   • Validation with Pydantic
+   • Prepare payload for Langflow
 
 3. FastAPI → Langflow
    POST http://localhost:7860/api/v1/run/var-lens
@@ -289,16 +289,16 @@ Langflow به صورت خودکار vector store رو ذخیره می‌کنه:
    }
 
 4. Langflow Processing
-   • دریافت input
-   • جستجو در Vector Store (FAISS)
-   • پیدا کردن قوانین مرتبط
-   • ارسال به Granite LLM
-   • تولید توضیح به فارسی
+   • Receive input
+   • Search in Vector Store (FAISS)
+   • Find relevant rules
+   • Send to Granite LLM
+   • Generate explanation in Persian
 
 5. Langflow → FastAPI
    {
      "outputs": [{
-       "text": "طبق قانون 11...",
+       "text": "According to Law 11...",
        "metadata": {
          "source_rules": ["Law 11 - Offside"],
          "confidence": 0.95
@@ -309,23 +309,23 @@ Langflow به صورت خودکار vector store رو ذخیره می‌کنه:
 6. FastAPI → User
    {
      "success": true,
-     "explanation": "طبق قانون 11...",
+     "explanation": "According to Law 11...",
      "source_rules": ["Law 11 - Offside"]
    }
 ```
 
 ---
 
-## 🎨 ساخت Agents در Langflow
+## 🎨 Building Agents in Langflow
 
-### آیا Agents را در Langflow می‌سازیم؟
-**جواب**: بله! Langflow قابلیت ساخت Agent دارد
+### Do we build Agents in Langflow?
+**Answer**: Yes! Langflow has Agent building capabilities
 
-### مثال: VAR-Lens Agent
+### Example: VAR-Lens Agent
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│           VAR-Lens Agent (در Langflow)              │
+│           VAR-Lens Agent (in Langflow)               │
 ├─────────────────────────────────────────────────────┤
 │                                                       │
 │  [Agent Component]                                   │
@@ -346,65 +346,65 @@ Langflow به صورت خودکار vector store رو ذخیره می‌کنه:
 
 ---
 
-## 💾 مدیریت داده در Langflow
+## 💾 Data Management in Langflow
 
-### دیتاهایی که در Langflow ذخیره می‌شوند:
+### Data Stored in Langflow:
 
 1. **Vector Stores**: 
    - FAISS indexes
-   - مسیر: `data/vector_stores/`
+   - Path: `data/vector_stores/`
 
 2. **Flows (Workflows)**:
    - JSON files
-   - مسیر: `langflow_flows/`
+   - Path: `langflow_flows/`
 
 3. **Cache**:
-   - نتایج موقت
-   - در حافظه یا Redis
+   - Temporary results
+   - In memory or Redis
 
-### دیتاهایی که خارج از Langflow هستند:
+### Data Outside Langflow:
 
-1. **Markdown های پردازش شده**:
-   - مسیر: `data/processed_documents/`
-   - تولید شده با Docling
+1. **Processed Markdown files**:
+   - Path: `data/processed_documents/`
+   - Generated with Docling
 
-2. **دیتای مسابقات**:
-   - مسیر: `data/match_data/`
-   - برای Tactical Pulse Agent
+2. **Match data**:
+   - Path: `data/match_data/`
+   - For Tactical Pulse Agent
 
-3. **Database اصلی**:
+3. **Main Database**:
    - PostgreSQL/SQLite
-   - برای ذخیره تاریخچه و metadata
+   - For storing history and metadata
 
 ---
 
-## 🚀 Setup کامل
+## 🚀 Complete Setup
 
-### مرحله 1: نصب و راه‌اندازی
+### Step 1: Installation and Setup
 
 ```bash
-# 1. نصب dependencies
+# 1. Install dependencies
 pip install langflow fastapi uvicorn
 
-# 2. راه‌اندازی Langflow
+# 2. Start Langflow
 langflow run --host 0.0.0.0 --port 7860 &
 
-# 3. راه‌اندازی FastAPI
+# 3. Start FastAPI
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload &
 ```
 
-### مرحله 2: ساخت Flows در Langflow
+### Step 2: Build Flows in Langflow
 
-1. باز کردن `http://localhost:7860`
-2. ساخت VAR-Lens Flow
-3. ساخت Tactical Pulse Flow
-4. Export هر دو Flow به JSON
-5. ذخیره در `langflow_flows/`
+1. Open `http://localhost:7860`
+2. Create VAR-Lens Flow
+3. Create Tactical Pulse Flow
+4. Export both Flows to JSON
+5. Save in `langflow_flows/`
 
-### مرحله 3: تست
+### Step 3: Testing
 
 ```bash
-# تست VAR-Lens
+# Test VAR-Lens
 curl -X POST http://localhost:8000/api/var-lens/explain \
   -H "Content-Type: application/json" \
   -d '{
@@ -413,7 +413,7 @@ curl -X POST http://localhost:8000/api/var-lens/explain \
     "language": "en"
   }'
 
-# تست Tactical Pulse
+# Test Tactical Pulse
 curl -X POST http://localhost:8000/api/tactical-pulse/analyze \
   -H "Content-Type: application/json" \
   -d '{
@@ -425,61 +425,61 @@ curl -X POST http://localhost:8000/api/tactical-pulse/analyze \
 
 ---
 
-## 📊 مزایا و معایب
+## 📊 Advantages and Disadvantages
 
-### مزایای استفاده از Langflow:
+### Advantages of Using Langflow:
 
-✅ **بصری و قابل فهم**: داوران می‌تونن workflow رو ببینن  
-✅ **سریع‌تر**: نیازی به کد نویسی زیاد نیست  
-✅ **قابل تغییر**: راحت می‌شه components رو عوض کرد  
-✅ **Built-in Components**: خیلی از کارها آماده هست  
-✅ **Demo عالی**: برای ارائه خیلی خوبه  
+✅ **Visual and Understandable**: Judges can see the workflow
+✅ **Faster**: No need for extensive coding
+✅ **Modifiable**: Easy to change components
+✅ **Built-in Components**: Many features ready to use
+✅ **Great Demo**: Excellent for presentations
 
-### معایب:
+### Disadvantages:
 
-❌ **Learning Curve**: باید Langflow رو یاد بگیری  
-❌ **محدودیت‌ها**: بعضی کارهای پیچیده سخت‌تره  
-❌ **Debugging**: debug کردن سخت‌تر از Python خالص  
+❌ **Learning Curve**: Need to learn Langflow
+❌ **Limitations**: Some complex tasks are harder
+❌ **Debugging**: Debugging is harder than pure Python
 
 ---
 
-## 🎯 توصیه نهایی
+## 🎯 Final Recommendation
 
-### استراتژی پیشنهادی:
+### Recommended Strategy:
 
-1. **Core Logic در Langflow** ✅
+1. **Core Logic in Langflow** ✅
    - RAG pipeline
    - Agent workflows
    - LLM calls
 
-2. **Preprocessing خارج از Langflow** ✅
-   - پردازش اسناد با Docling
+2. **Preprocessing Outside Langflow** ✅
+   - Document processing with Docling
    - Data cleaning
    - Feature engineering
 
-3. **API Layer در FastAPI** ✅
+3. **API Layer in FastAPI** ✅
    - Authentication
    - Rate limiting
    - Error handling
    - Logging
 
-4. **Frontend (اختیاری)** 
+4. **Frontend (Optional)**
    - React dashboard
-   - یا استفاده مستقیم از Langflow UI
+   - Or use Langflow UI directly
 
 ---
 
-## 📝 خلاصه
+## 📝 Summary
 
-**سوال**: همه کار را در Langflow انجام می‌دهیم؟  
-**جواب**: خیر، ولی بخش اصلی (agents و workflows) را در Langflow می‌سازیم.
+**Question**: Do we do everything in Langflow?
+**Answer**: No, but we build the main parts (agents and workflows) in Langflow.
 
-**سوال**: چطوری بین اپ و Langflow ارتباط برقرار می‌کنیم؟  
-**جواب**: از طریق HTTP API - FastAPI به Langflow request می‌فرسته و response می‌گیره.
+**Question**: How do we communicate between the app and Langflow?
+**Answer**: Through HTTP API - FastAPI sends requests to Langflow and receives responses.
 
-**سوال**: Vector database را کجا می‌سازیم؟  
-**جواب**: داخل Langflow با استفاده از FAISS Component.
+**Question**: Where do we build the vector database?
+**Answer**: Inside Langflow using the FAISS Component.
 
 ---
 
-**گام بعدی**: شروع ساخت اولین Flow در Langflow! 🚀
+**Next Step**: Start building your first Flow in Langflow! 🚀

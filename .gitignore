@@ -98,6 +98,17 @@ docs/langflow-integration-guide.md
 docs/langflow-var-lens-guide.md
 docs/langflow-quick-start.md
 
+# Persian guides (personal use only - not for public repo)
+docs/PERSIAN_GUIDE.md
+docs/OLLAMA_SETUP_FA.md
+docs/DEMO_GUIDE_FA.md
+
+# Ollama test scripts (keep local only)
+scripts/test_ollama_connection.py
+scripts/quick_test_ollama.py
+scripts/show_llm_info.py
+scripts/demo_ollama_usage.py
+
 # Development and test scripts (keep local only)
 scripts/monitor_processing.py
 scripts/process_fifa_docs_simple.py
@@ -105,10 +116,21 @@ scripts/process_fifa_docs_smart.py
 scripts/process_fifa_docs.py
 scripts/process_large_pdf.py
 scripts/process_var_protocol_only.py
+scripts/check_api_keys.py
+scripts/check_setup.py
+
+# Test scripts (development only - not needed in public repo)
 scripts/test_data_loader.py
 scripts/test_docling.py
 scripts/test_match_analyzer.py
 scripts/test_var_lens_rag.py
 scripts/test_var_lens_with_llm.py
+scripts/test_ai_insights.py
+scripts/test_dynamic_tactical_pulse.py
+scripts/test_dynamic_var_lens.py
+scripts/test_orchestrator.py
+
+# Demo script (keep local for practice, not needed in public repo)
+scripts/demo_scenarios.py
 
 # Made with Bob

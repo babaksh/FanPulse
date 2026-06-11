@@ -21,5 +21,8 @@ langchain-anthropic>=0.1.0
 # Google Gemini - Optional
 langchain-google-genai>=1.0.0
 
+# Ollama - Local LLM support
+langchain-ollama>=0.1.0
+
 # Additional utilities
 python-dotenv>=1.0.0  # For .env file support

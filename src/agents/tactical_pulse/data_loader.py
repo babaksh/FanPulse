@@ -7,6 +7,8 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import logging
+from datetime import datetime
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +53,12 @@ class MatchDataLoader:
             logger.error(f"Error loading match data: {e}")
             self.matches_df = pd.DataFrame()
     
-    def get_match_by_id(self, match_id: int) -> Optional[Dict[str, Any]]:
+    def get_match_by_index(self, match_index: int) -> Optional[Dict[str, Any]]:
         """
-        Get a specific match by ID.
+        Get a specific match by DataFrame index.
         
         Args:
-            match_id: Match identifier
+            match_index: Match index in DataFrame
             
         Returns:
             Dictionary with match details or None if not found
@@ -64,9 +66,9 @@ class MatchDataLoader:
         if self.matches_df is None or self.matches_df.empty:
             return None
         
-        # Assuming the dataframe has an index or ID column
-        if match_id < len(self.matches_df):
-            match = self.matches_df.iloc[match_id]
+        # Get match by index
+        if match_index < len(self.matches_df):
+            match = self.matches_df.iloc[match_index]
             return match.to_dict()
         
         return None
@@ -325,6 +327,266 @@ class MatchDataLoader:
             info['unique_tournaments'] = self.matches_df['tournament'].nunique()
         
         return info
+    
+    def add_match_data(
+        self,
+        match_data: Dict[str, Any],
+        save_to_csv: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Add new match data dynamically to the dataset.
+        This allows real-time updates during matches or adding historical data.
+        
+        Args:
+            match_data: Dictionary containing match information with keys:
+                - date: Match date (str or datetime)
+                - home_team: Home team name
+                - away_team: Away team name
+                - home_score: Home team score
+                - away_score: Away team score
+                - tournament: Tournament name (optional)
+                - city: City where match was played (optional)
+                - country: Country where match was played (optional)
+                - neutral: Whether match was on neutral ground (optional)
+                - Additional fields as needed
+            save_to_csv: Whether to save updated data to CSV file
+            
+        Returns:
+            Dictionary with operation results
+        """
+        logger.info(f"Adding match data: {match_data.get('home_team')} vs {match_data.get('away_team')}")
+        
+        try:
+            # Validate required fields
+            required_fields = ['date', 'home_team', 'away_team', 'home_score', 'away_score']
+            missing_fields = [f for f in required_fields if f not in match_data]
+            
+            if missing_fields:
+                return {
+                    "success": False,
+                    "error": f"Missing required fields: {missing_fields}",
+                    "match_added": False
+                }
+            
+            # Convert date to datetime if it's a string
+            if isinstance(match_data['date'], str):
+                match_data['date'] = pd.to_datetime(match_data['date'])
+            
+            # Create new row as DataFrame
+            new_match = pd.DataFrame([match_data])
+            
+            # Append to existing data
+            if self.matches_df is None or self.matches_df.empty:
+                self.matches_df = new_match
+            else:
+                self.matches_df = pd.concat([self.matches_df, new_match], ignore_index=True)
+            
+            # Save to CSV if requested
+            if save_to_csv:
+                self.matches_df.to_csv(self.data_path, index=False)
+                logger.info(f"Match data saved to {self.data_path}")
+            
+            return {
+                "success": True,
+                "match_added": True,
+                "total_matches": len(self.matches_df),
+                "match_info": {
+                    "date": str(match_data['date']),
+                    "home_team": match_data['home_team'],
+                    "away_team": match_data['away_team'],
+                    "score": f"{match_data['home_score']}-{match_data['away_score']}"
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error adding match data: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "match_added": False
+            }
+    
+    def add_match_batch(
+        self,
+        matches_data: List[Dict[str, Any]],
+        save_to_csv: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Add multiple matches at once.
+        
+        Args:
+            matches_data: List of match dictionaries
+            save_to_csv: Whether to save after adding all matches
+            
+        Returns:
+            Dictionary with batch operation results
+        """
+        logger.info(f"Adding batch of {len(matches_data)} matches")
+        
+        results = {
+            "success": True,
+            "matches_added": 0,
+            "matches_failed": 0,
+            "errors": []
+        }
+        
+        for match_data in matches_data:
+            result = self.add_match_data(match_data, save_to_csv=False)
+            
+            if result["success"]:
+                results["matches_added"] += 1
+            else:
+                results["matches_failed"] += 1
+                results["errors"].append({
+                    "match": f"{match_data.get('home_team')} vs {match_data.get('away_team')}",
+                    "error": result.get("error")
+                })
+        
+        # Save once after all matches are added
+        if save_to_csv and results["matches_added"] > 0:
+            try:
+                self.matches_df.to_csv(self.data_path, index=False)
+                logger.info(f"Batch data saved to {self.data_path}")
+            except Exception as e:
+                results["success"] = False
+                results["errors"].append({"save_error": str(e)})
+        
+        results["total_matches"] = len(self.matches_df) if self.matches_df is not None else 0
+        
+        return results
+    
+    def update_match_data(
+        self,
+        match_id: Optional[str] = None,
+        home_team: Optional[str] = None,
+        away_team: Optional[str] = None,
+        date: Optional[str] = None,
+        updates: Optional[Dict[str, Any]] = None,
+        save_to_csv: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Update existing match data.
+        Can identify match by match_id or by team names and date.
+        
+        Args:
+            match_id: Unique match identifier (if available)
+            home_team: Home team name
+            away_team: Away team name
+            date: Match date
+            updates: Dictionary of fields to update
+            save_to_csv: Whether to save changes
+            
+        Returns:
+            Dictionary with update results
+        """
+        if self.matches_df is None or self.matches_df.empty:
+            return {
+                "success": False,
+                "error": "No data loaded",
+                "matches_updated": 0
+            }
+        
+        if updates is None:
+            return {
+                "success": False,
+                "error": "No updates provided",
+                "matches_updated": 0
+            }
+        
+        try:
+            # Find match
+            if match_id and 'match_id' in self.matches_df.columns:
+                mask = self.matches_df['match_id'] == match_id
+            elif home_team and away_team and date:
+                mask = (
+                    (self.matches_df['home_team'] == home_team) &
+                    (self.matches_df['away_team'] == away_team) &
+                    (self.matches_df['date'] == pd.to_datetime(date))
+                )
+            else:
+                return {
+                    "success": False,
+                    "error": "Insufficient match identification parameters",
+                    "matches_updated": 0
+                }
+            
+            # Update fields
+            matches_found = mask.sum()
+            
+            if matches_found == 0:
+                return {
+                    "success": False,
+                    "error": "Match not found",
+                    "matches_updated": 0
+                }
+            
+            for field, value in updates.items():
+                self.matches_df.loc[mask, field] = value
+            
+            # Save if requested
+            if save_to_csv:
+                self.matches_df.to_csv(self.data_path, index=False)
+            
+            return {
+                "success": True,
+                "matches_updated": matches_found,
+                "updated_fields": list(updates.keys())
+            }
+            
+        except Exception as e:
+            logger.error(f"Error updating match data: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "matches_updated": 0
+            }
+    
+    def get_match_by_id(
+        self,
+        match_id: Optional[str] = None,
+        home_team: Optional[str] = None,
+        away_team: Optional[str] = None,
+        date: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get a specific match by ID or team names and date.
+        
+        Args:
+            match_id: Unique match identifier
+            home_team: Home team name
+            away_team: Away team name
+            date: Match date
+            
+        Returns:
+            Match data as dictionary or None if not found
+        """
+        if self.matches_df is None or self.matches_df.empty:
+            return None
+        
+        try:
+            # Find match
+            if match_id and 'match_id' in self.matches_df.columns:
+                mask = self.matches_df['match_id'] == match_id
+            elif home_team and away_team and date:
+                mask = (
+                    (self.matches_df['home_team'] == home_team) &
+                    (self.matches_df['away_team'] == away_team) &
+                    (self.matches_df['date'] == pd.to_datetime(date))
+                )
+            else:
+                return None
+            
+            matches = self.matches_df[mask]
+            
+            if len(matches) == 0:
+                return None
+            
+            # Return first match as dictionary
+            return matches.iloc[0].to_dict()
+            
+        except Exception as e:
+            logger.error(f"Error getting match: {e}")
+            return None
 
 
 if __name__ == "__main__":

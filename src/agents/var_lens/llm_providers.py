@@ -18,6 +18,7 @@ class LLMProvider(Enum):
     HUGGINGFACE = "huggingface"
     ANTHROPIC = "anthropic"
     GOOGLE = "google"
+    OLLAMA = "ollama"
 
 
 class LLMFactory:
@@ -102,6 +103,15 @@ class LLMFactory:
                 temperature=temperature,
                 max_tokens=max_tokens,
                 api_key=api_key,
+                **kwargs
+            )
+        
+        # Ollama (Local LLMs)
+        elif provider == LLMProvider.OLLAMA.value:
+            return LLMFactory._create_ollama(
+                model_name=model_name,
+                temperature=temperature,
+                max_tokens=max_tokens,
                 **kwargs
             )
         
@@ -206,8 +216,7 @@ class LLMFactory:
         llm = ChatOpenAI(
             model=model_name,
             temperature=temperature,
-            max_tokens=max_tokens,
-            api_key=api_key,
+            api_key=api_key,  # type: ignore
             **kwargs
         )
         
@@ -280,10 +289,9 @@ class LLMFactory:
         logger.info(f"Initializing Anthropic model: {model_name}")
         
         llm = ChatAnthropic(
-            model=model_name,
+            model_name=model_name,
             temperature=temperature,
-            max_tokens=max_tokens,
-            api_key=api_key,
+            api_key=api_key,  # type: ignore
             **kwargs
         )
         
@@ -325,6 +333,40 @@ class LLMFactory:
             temperature=temperature,
             max_output_tokens=max_tokens,
             google_api_key=api_key,
+            **kwargs
+        )
+        
+        return llm
+    
+    @staticmethod
+    def _create_ollama(
+        model_name: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: int = 1000,
+        **kwargs
+    ):
+        """Create Ollama LLM for local models"""
+        try:
+            from langchain_ollama import OllamaLLM
+        except ImportError:
+            raise ImportError(
+                "Ollama library not installed. "
+                "Install with: pip install langchain-ollama"
+            )
+        
+        # Default to Granite 4.1 8B (IBM's model via Ollama)
+        model_name = model_name or "granite4.1:8b"
+        
+        # Get base URL from environment or use default
+        base_url = kwargs.get("base_url") or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        
+        logger.info(f"Initializing Ollama model: {model_name} at {base_url}")
+        
+        llm = OllamaLLM(
+            model=model_name,
+            temperature=temperature,
+            num_predict=max_tokens,
+            base_url=base_url,
             **kwargs
         )
         
@@ -373,6 +415,13 @@ class LLMFactory:
                 "default_model": "gemini-pro",
                 "install": "pip install langchain-google-genai",
                 "description": "Google's Gemini models"
+            },
+            "ollama": {
+                "name": "Ollama (Local)",
+                "env_vars": [],
+                "default_model": "granite4.1:8b",
+                "install": "pip install langchain-ollama",
+                "description": "Run LLMs locally via Ollama (Llama, Gemma, Mistral, etc.)"
             }
         }
 

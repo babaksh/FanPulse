@@ -6,6 +6,7 @@ Combines data loading and metrics calculation for comprehensive match analysis
 import pandas as pd
 from typing import Dict, List, Optional, Any
 import logging
+import json
 
 from .data_loader import MatchDataLoader
 from .metrics_calculator import MetricsCalculator
@@ -28,7 +29,44 @@ class MatchAnalyzer:
         """
         self.data_loader = MatchDataLoader(data_path)
         self.metrics_calc = MetricsCalculator()
+        self.llm = None  # Will be initialized when needed
         logger.info("Match Analyzer initialized")
+    
+    def initialize_llm(
+        self,
+        provider: str = "ollama",
+        model_name: str = "granite4.1:8b",
+        **kwargs
+    ):
+        """
+        Initialize the LLM for AI-powered insights.
+        
+        Args:
+            provider: LLM provider (ollama, ibm_granite, openai, etc.)
+            model_name: Model name
+            **kwargs: Additional provider-specific parameters
+        """
+        try:
+            # Import LLM factory from VAR-Lens
+            import sys
+            from pathlib import Path
+            project_root = Path(__file__).parent.parent.parent
+            sys.path.insert(0, str(project_root))
+            
+            from src.agents.var_lens.llm_providers import LLMFactory
+            
+            self.llm = LLMFactory.create_llm(
+                provider=provider,
+                model_name=model_name,
+                temperature=0.7,
+                max_tokens=1000,
+                **kwargs
+            )
+            logger.info(f"LLM initialized: {provider}/{model_name}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize LLM: {e}")
+            return False
     
     def analyze_team(
         self,
@@ -354,6 +392,230 @@ class MatchAnalyzer:
                     return f"{words[0]} vs {words[1]} H2H: {h2h['team1_wins']}W-{h2h['draws']}D-{h2h['team2_wins']}L"
         
         return "I can help you with team analysis, match predictions, and head-to-head records. Please provide team names or specific questions."
+    
+    def generate_ai_insights(
+        self,
+        team_name: str,
+        num_matches: int = 10,
+        analysis_type: str = "comprehensive"
+    ) -> Dict[str, Any]:
+        """
+        Generate AI-powered insights using Granite LLM.
+        
+        Args:
+            team_name: Team name to analyze
+            num_matches: Number of recent matches
+            analysis_type: Type of analysis (comprehensive, tactical, performance)
+            
+        Returns:
+            Dictionary with AI insights
+        """
+        # Get statistical analysis first
+        analysis = self.analyze_team(team_name, num_matches)
+        
+        if 'error' in analysis:
+            return analysis
+        
+        # Initialize LLM if not already done
+        if self.llm is None:
+            if not self.initialize_llm():
+                return {
+                    'error': 'LLM not available',
+                    'statistics': analysis,
+                    'ai_insights': None
+                }
+        
+        try:
+            # Prepare data for LLM
+            stats = analysis['statistics']
+            form = analysis['form']
+            recent_matches = analysis.get('recent_matches', [])
+            
+            # Create prompt based on analysis type
+            if analysis_type == "comprehensive":
+                prompt = f"""Analyze the following football team statistics and provide comprehensive insights:
+
+Team: {team_name}
+Matches Analyzed: {analysis['matches_analyzed']}
+
+Statistics:
+- Win Rate: {stats['win_rate']:.1%}
+- Wins: {stats['wins']}, Draws: {stats['draws']}, Losses: {stats['losses']}
+- Goals Scored: {stats.get('goals_scored', 'N/A')}
+- Goals Conceded: {stats.get('goals_conceded', 'N/A')}
+- Goal Difference: {stats.get('goal_difference', 'N/A')}
+- Recent Form: {form['form_string']} (Form Score: {form['form_score']:.1f}/100)
+
+Recent Matches:
+{json.dumps(recent_matches[:3], indent=2)}
+
+Provide insights on:
+1. Overall team performance and trends
+2. Strengths and weaknesses
+3. Playing style characteristics
+4. Areas for improvement
+5. Predictions for future performance
+
+Keep the analysis concise, professional, and data-driven."""
+
+            elif analysis_type == "tactical":
+                prompt = f"""Analyze the tactical approach of {team_name} based on these statistics:
+
+Recent Form: {form['form_string']}
+Win Rate: {stats['win_rate']:.1%}
+Goals per Match: {stats.get('avg_goals_scored', 'N/A')}
+Goals Conceded per Match: {stats.get('avg_goals_conceded', 'N/A')}
+
+Recent Matches:
+{json.dumps(recent_matches[:3], indent=2)}
+
+Provide tactical insights on:
+1. Offensive strategy and effectiveness
+2. Defensive organization
+3. Match tempo and control
+4. Key tactical patterns
+5. Recommended tactical adjustments"""
+
+            else:  # performance
+                prompt = f"""Evaluate the performance of {team_name}:
+
+Form Score: {form['form_score']:.1f}/100
+Win Rate: {stats['win_rate']:.1%}
+Recent Results: {form['form_string']}
+
+Provide performance analysis:
+1. Current performance level
+2. Consistency and reliability
+3. Momentum and trajectory
+4. Key performance indicators
+5. Performance outlook"""
+            
+            # Generate insights with LLM
+            logger.info(f"Generating AI insights for {team_name}...")
+            ai_response = self.llm.invoke(prompt)
+            
+            return {
+                'team': team_name,
+                'matches_analyzed': analysis['matches_analyzed'],
+                'statistics': stats,
+                'form': form,
+                'recent_matches': recent_matches,
+                'ai_insights': {
+                    'type': analysis_type,
+                    'content': ai_response,
+                    'generated_by': 'IBM Granite 4.1 8B'
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating AI insights: {e}")
+            return {
+                'error': str(e),
+                'statistics': analysis,
+                'ai_insights': None
+            }
+    
+    def generate_match_preview(
+        self,
+        home_team: str,
+        away_team: str,
+        num_matches: int = 10
+    ) -> Dict[str, Any]:
+        """
+        Generate AI-powered match preview with predictions and insights.
+        
+        Args:
+            home_team: Home team name
+            away_team: Away team name
+            num_matches: Number of recent matches to consider
+            
+        Returns:
+            Dictionary with match preview and AI insights
+        """
+        # Get prediction first
+        prediction = self.predict_match(home_team, away_team, num_matches)
+        
+        if 'error' in prediction:
+            return prediction
+        
+        # Initialize LLM if needed
+        if self.llm is None:
+            if not self.initialize_llm():
+                return {
+                    'error': 'LLM not available',
+                    'prediction': prediction,
+                    'ai_preview': None
+                }
+        
+        try:
+            # Prepare match preview prompt
+            prompt = f"""Generate a professional match preview for this upcoming football match:
+
+Match: {home_team} vs {away_team}
+
+Home Team ({home_team}):
+- Recent Form: {prediction['home_form']['form_string']}
+- Form Score: {prediction['home_form']['form_score']:.1f}/100
+- Win Rate: {prediction['home_stats']['win_rate']:.1%}
+- Average Goals: {prediction['home_stats'].get('avg_goals', 'N/A')}
+
+Away Team ({away_team}):
+- Recent Form: {prediction['away_form']['form_string']}
+- Form Score: {prediction['away_form']['form_score']:.1f}/100
+- Win Rate: {prediction['away_stats']['win_rate']:.1%}
+- Average Goals: {prediction['away_stats'].get('avg_goals', 'N/A')}
+
+Head-to-Head:
+- Total Matches: {prediction['head_to_head']['total_matches']}
+- {home_team} Wins: {prediction['head_to_head']['home_wins']}
+- {away_team} Wins: {prediction['head_to_head']['away_wins']}
+- Draws: {prediction['head_to_head']['draws']}
+
+Statistical Prediction:
+- Predicted Score: {prediction['prediction']['predicted_score']}
+- Home Win: {prediction['prediction']['home_win_probability']}%
+- Draw: {prediction['prediction']['draw_probability']}%
+- Away Win: {prediction['prediction']['away_win_probability']}%
+
+Provide a comprehensive match preview including:
+1. Key matchup analysis
+2. Tactical battle points
+3. Players/factors to watch
+4. Predicted outcome with reasoning
+5. Potential game scenarios
+
+Keep it engaging and insightful for football fans."""
+            
+            logger.info(f"Generating match preview: {home_team} vs {away_team}")
+            ai_preview = self.llm.invoke(prompt)
+            
+            return {
+                'match': f"{home_team} vs {away_team}",
+                'prediction': prediction['prediction'],
+                'home_team_analysis': {
+                    'team': home_team,
+                    'form': prediction['home_form'],
+                    'stats': prediction['home_stats']
+                },
+                'away_team_analysis': {
+                    'team': away_team,
+                    'form': prediction['away_form'],
+                    'stats': prediction['away_stats']
+                },
+                'head_to_head': prediction['head_to_head'],
+                'ai_preview': {
+                    'content': ai_preview,
+                    'generated_by': 'IBM Granite 4.1 8B'
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating match preview: {e}")
+            return {
+                'error': str(e),
+                'prediction': prediction,
+                'ai_preview': None
+            }
 
 
 if __name__ == "__main__":

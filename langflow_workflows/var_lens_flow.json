@@ -1,0 +1,213 @@
+{
+  "name": "FanPulse VAR-Lens Agent",
+  "description": "VAR decision explanation agent using FIFA documents and IBM Granite",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "directory_loader_1",
+      "type": "DirectoryLoader",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "path": "data/processed_documents",
+        "glob": "**/*.md",
+        "loader_cls": "TextLoader",
+        "show_progress": true,
+        "use_multithreading": true,
+        "max_concurrency": 4
+      }
+    },
+    {
+      "id": "text_splitter_1",
+      "type": "RecursiveCharacterTextSplitter",
+      "position": {
+        "x": 100,
+        "y": 250
+      },
+      "data": {
+        "chunk_size": 1000,
+        "chunk_overlap": 200,
+        "separators": ["\n\n", "\n", " ", ""]
+      }
+    },
+    {
+      "id": "embeddings_1",
+      "type": "HuggingFaceEmbeddings",
+      "position": {
+        "x": 100,
+        "y": 400
+      },
+      "data": {
+        "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+        "model_kwargs": {
+          "device": "cpu"
+        },
+        "encode_kwargs": {
+          "normalize_embeddings": true
+        }
+      }
+    },
+    {
+      "id": "vector_store_1",
+      "type": "FAISS",
+      "position": {
+        "x": 100,
+        "y": 550
+      },
+      "data": {
+        "index_name": "var_lens_faiss",
+        "folder_path": "data/vector_stores",
+        "allow_dangerous_deserialization": true
+      }
+    },
+    {
+      "id": "chat_input_1",
+      "type": "ChatInput",
+      "position": {
+        "x": 400,
+        "y": 100
+      },
+      "data": {
+        "input_value": "",
+        "sender": "User",
+        "sender_name": "User",
+        "session_id": ""
+      }
+    },
+    {
+      "id": "retriever_1",
+      "type": "VectorStoreRetriever",
+      "position": {
+        "x": 400,
+        "y": 250
+      },
+      "data": {
+        "search_type": "similarity",
+        "search_kwargs": {
+          "k": 4
+        }
+      }
+    },
+    {
+      "id": "prompt_template_1",
+      "type": "PromptTemplate",
+      "position": {
+        "x": 400,
+        "y": 400
+      },
+      "data": {
+        "template": "You are a VAR (Video Assistant Referee) expert assistant. Use the following FIFA rules and regulations to answer questions about VAR decisions.\n\nContext from FIFA documents:\n{context}\n\nQuestion: {question}\n\nProvide a detailed, accurate answer based on the official FIFA rules. Include specific rule references when possible.\n\nAnswer:",
+        "input_variables": ["context", "question"]
+      }
+    },
+    {
+      "id": "llm_1",
+      "type": "Ollama",
+      "position": {
+        "x": 400,
+        "y": 550
+      },
+      "data": {
+        "base_url": "http://localhost:11434",
+        "model": "granite4.1:8b",
+        "temperature": 0.3,
+        "top_p": 0.9,
+        "num_predict": 1000
+      }
+    },
+    {
+      "id": "chat_output_1",
+      "type": "ChatOutput",
+      "position": {
+        "x": 400,
+        "y": 700
+      },
+      "data": {
+        "sender": "AI",
+        "sender_name": "VAR-Lens",
+        "session_id": "",
+        "data_template": "{text}"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1",
+      "source": "directory_loader_1",
+      "target": "text_splitter_1",
+      "sourceHandle": "documents",
+      "targetHandle": "documents"
+    },
+    {
+      "id": "edge_2",
+      "source": "text_splitter_1",
+      "target": "embeddings_1",
+      "sourceHandle": "chunks",
+      "targetHandle": "texts"
+    },
+    {
+      "id": "edge_3",
+      "source": "embeddings_1",
+      "target": "vector_store_1",
+      "sourceHandle": "embeddings",
+      "targetHandle": "embeddings"
+    },
+    {
+      "id": "edge_4",
+      "source": "text_splitter_1",
+      "target": "vector_store_1",
+      "sourceHandle": "chunks",
+      "targetHandle": "texts"
+    },
+    {
+      "id": "edge_5",
+      "source": "chat_input_1",
+      "target": "retriever_1",
+      "sourceHandle": "message",
+      "targetHandle": "query"
+    },
+    {
+      "id": "edge_6",
+      "source": "vector_store_1",
+      "target": "retriever_1",
+      "sourceHandle": "vector_store",
+      "targetHandle": "vector_store"
+    },
+    {
+      "id": "edge_7",
+      "source": "retriever_1",
+      "target": "prompt_template_1",
+      "sourceHandle": "documents",
+      "targetHandle": "context"
+    },
+    {
+      "id": "edge_8",
+      "source": "chat_input_1",
+      "target": "prompt_template_1",
+      "sourceHandle": "message",
+      "targetHandle": "question"
+    },
+    {
+      "id": "edge_9",
+      "source": "prompt_template_1",
+      "target": "llm_1",
+      "sourceHandle": "prompt",
+      "targetHandle": "prompt"
+    },
+    {
+      "id": "edge_10",
+      "source": "llm_1",
+      "target": "chat_output_1",
+      "sourceHandle": "text",
+      "targetHandle": "text"
+    }
+  ],
+  "metadata": {
+    "created_by": "FanPulse",
+    "created_at": "2026-06-10",
+    "tags": ["VAR", "FIFA", "Soccer", "World Cup", "IBM Granite"],
+    "description": "Explains VAR decisions using FIFA official documents processed with Docling and powered by IBM Granite 4.1 8B"
+  }
+}

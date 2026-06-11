@@ -1,0 +1,182 @@
+{
+  "name": "FanPulse Tactical Pulse Agent",
+  "description": "Match analysis and prediction agent using historical data and IBM Granite",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "chat_input_1",
+      "type": "ChatInput",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "input_value": "",
+        "sender": "User",
+        "sender_name": "User",
+        "session_id": ""
+      }
+    },
+    {
+      "id": "python_function_1",
+      "type": "PythonFunction",
+      "position": {
+        "x": 100,
+        "y": 250
+      },
+      "data": {
+        "function_name": "parse_query",
+        "code": "def parse_query(query: str) -> dict:\n    \"\"\"Parse user query to extract intent and parameters\"\"\"\n    query_lower = query.lower()\n    \n    # Check for prediction keywords\n    if any(word in query_lower for word in ['predict', 'vs', 'versus', 'against']):\n        # Extract team names (simplified)\n        words = query.split()\n        teams = [w for w in words if w[0].isupper() and len(w) > 2]\n        return {\n            'intent': 'prediction',\n            'teams': teams[:2] if len(teams) >= 2 else [],\n            'query': query\n        }\n    \n    # Check for analysis keywords\n    elif any(word in query_lower for word in ['analyze', 'analysis', 'performance', 'statistics']):\n        words = query.split()\n        teams = [w for w in words if w[0].isupper() and len(w) > 2]\n        return {\n            'intent': 'analysis',\n            'team': teams[0] if teams else '',\n            'query': query\n        }\n    \n    return {\n        'intent': 'unknown',\n        'query': query\n    }",
+        "input_types": {
+          "query": "str"
+        },
+        "output_type": "dict"
+      }
+    },
+    {
+      "id": "python_function_2",
+      "type": "PythonFunction",
+      "position": {
+        "x": 100,
+        "y": 400
+      },
+      "data": {
+        "function_name": "load_match_data",
+        "code": "import pandas as pd\nimport sys\nsys.path.insert(0, 'd:/MyPythonProjects/FanPulse')\nfrom src.agents.tactical_pulse.match_analyzer import MatchAnalyzer\n\ndef load_match_data(parsed_query: dict) -> dict:\n    \"\"\"Load and analyze match data based on query intent\"\"\"\n    analyzer = MatchAnalyzer(data_path='data/match_data/results.csv')\n    \n    intent = parsed_query.get('intent')\n    \n    if intent == 'prediction' and len(parsed_query.get('teams', [])) >= 2:\n        home_team = parsed_query['teams'][0]\n        away_team = parsed_query['teams'][1]\n        result = analyzer.predict_match(home_team, away_team)\n        return {\n            'type': 'prediction',\n            'data': result,\n            'query': parsed_query['query']\n        }\n    \n    elif intent == 'analysis' and parsed_query.get('team'):\n        team = parsed_query['team']\n        result = analyzer.analyze_team(team, num_matches=10)\n        return {\n            'type': 'analysis',\n            'data': result,\n            'query': parsed_query['query']\n        }\n    \n    return {\n        'type': 'error',\n        'message': 'Could not process query',\n        'query': parsed_query['query']\n    }",
+        "input_types": {
+          "parsed_query": "dict"
+        },
+        "output_type": "dict"
+      }
+    },
+    {
+      "id": "prompt_template_1",
+      "type": "PromptTemplate",
+      "position": {
+        "x": 400,
+        "y": 250
+      },
+      "data": {
+        "template": "You are a football/soccer tactical analyst. Based on the following data, provide insights and analysis.\n\nQuery: {query}\n\nData Type: {data_type}\n\nStatistical Data:\n{data}\n\nProvide a comprehensive analysis including:\n1. Key insights from the data\n2. Tactical observations\n3. Performance trends\n4. Predictions or recommendations\n\nAnalysis:",
+        "input_variables": ["query", "data_type", "data"]
+      }
+    },
+    {
+      "id": "llm_1",
+      "type": "Ollama",
+      "position": {
+        "x": 400,
+        "y": 400
+      },
+      "data": {
+        "base_url": "http://localhost:11434",
+        "model": "granite4.1:8b",
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "num_predict": 1000
+      }
+    },
+    {
+      "id": "python_function_3",
+      "type": "PythonFunction",
+      "position": {
+        "x": 400,
+        "y": 550
+      },
+      "data": {
+        "function_name": "format_response",
+        "code": "def format_response(ai_analysis: str, match_data: dict) -> str:\n    \"\"\"Format the final response with data and AI insights\"\"\"\n    data_type = match_data.get('type', 'unknown')\n    \n    if data_type == 'prediction':\n        pred = match_data['data'].get('prediction', {})\n        response = f\"\"\"🎯 Match Prediction Analysis\n\nTeams: {pred.get('home_team', 'N/A')} vs {pred.get('away_team', 'N/A')}\n\nPredicted Probabilities:\n- Home Win: {pred.get('home_win_prob', 0):.1%}\n- Draw: {pred.get('draw_prob', 0):.1%}\n- Away Win: {pred.get('away_win_prob', 0):.1%}\n\nAI Tactical Analysis:\n{ai_analysis}\n\"\"\"\n    \n    elif data_type == 'analysis':\n        stats = match_data['data'].get('statistics', {})\n        form = match_data['data'].get('form', {})\n        response = f\"\"\"📊 Team Performance Analysis\n\nTeam: {stats.get('team', 'N/A')}\n\nKey Statistics:\n- Win Rate: {stats.get('win_rate', 0):.1%}\n- Matches Played: {stats.get('matches_played', 0)}\n- Recent Form: {form.get('form_string', 'N/A')}\n- Form Score: {form.get('form_score', 0):.1f}/100\n\nAI Tactical Insights:\n{ai_analysis}\n\"\"\"\n    \n    else:\n        response = f\"Error: {match_data.get('message', 'Unknown error')}\"\n    \n    return response",
+        "input_types": {
+          "ai_analysis": "str",
+          "match_data": "dict"
+        },
+        "output_type": "str"
+      }
+    },
+    {
+      "id": "chat_output_1",
+      "type": "ChatOutput",
+      "position": {
+        "x": 400,
+        "y": 700
+      },
+      "data": {
+        "sender": "AI",
+        "sender_name": "Tactical Pulse",
+        "session_id": "",
+        "data_template": "{text}"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1",
+      "source": "chat_input_1",
+      "target": "python_function_1",
+      "sourceHandle": "message",
+      "targetHandle": "query"
+    },
+    {
+      "id": "edge_2",
+      "source": "python_function_1",
+      "target": "python_function_2",
+      "sourceHandle": "result",
+      "targetHandle": "parsed_query"
+    },
+    {
+      "id": "edge_3",
+      "source": "python_function_2",
+      "target": "prompt_template_1",
+      "sourceHandle": "result",
+      "targetHandle": "data"
+    },
+    {
+      "id": "edge_4",
+      "source": "chat_input_1",
+      "target": "prompt_template_1",
+      "sourceHandle": "message",
+      "targetHandle": "query"
+    },
+    {
+      "id": "edge_5",
+      "source": "python_function_2",
+      "target": "prompt_template_1",
+      "sourceHandle": "result.type",
+      "targetHandle": "data_type"
+    },
+    {
+      "id": "edge_6",
+      "source": "prompt_template_1",
+      "target": "llm_1",
+      "sourceHandle": "prompt",
+      "targetHandle": "prompt"
+    },
+    {
+      "id": "edge_7",
+      "source": "llm_1",
+      "target": "python_function_3",
+      "sourceHandle": "text",
+      "targetHandle": "ai_analysis"
+    },
+    {
+      "id": "edge_8",
+      "source": "python_function_2",
+      "target": "python_function_3",
+      "sourceHandle": "result",
+      "targetHandle": "match_data"
+    },
+    {
+      "id": "edge_9",
+      "source": "python_function_3",
+      "target": "chat_output_1",
+      "sourceHandle": "result",
+      "targetHandle": "text"
+    }
+  ],
+  "metadata": {
+    "created_by": "FanPulse",
+    "created_at": "2026-06-10",
+    "tags": ["Tactical Analysis", "Match Prediction", "Soccer", "World Cup", "IBM Granite"],
+    "description": "Analyzes matches and predicts outcomes using 49K+ historical matches and IBM Granite 4.1 8B"
+  }
+}

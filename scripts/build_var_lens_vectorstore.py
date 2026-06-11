@@ -65,7 +65,7 @@ def main():
     
     print()
     print("=" * 70)
-    print("✅ Vector store is ready!")
+    print("[SUCCESS] Vector store is ready!")
     print("=" * 70)
     print()
     print("Next steps:")

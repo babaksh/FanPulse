@@ -18,13 +18,17 @@ import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import logging
+from datetime import datetime
+import json
 
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
 from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.documents import Document
 
 from .llm_providers import LLMFactory
 
@@ -323,13 +327,20 @@ Answer:"""
                 logger.warning("QA chain created but needs LLM to function.")
                 return
         
-        # Create QA chain
-        self.qa_chain = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": prompt}
+        # Create QA chain using LCEL (LangChain Expression Language)
+        # This is the modern way to build chains in LangChain
+        def format_docs(docs):
+            return "\n\n".join(doc.page_content for doc in docs)
+        
+        self.retriever = retriever
+        self.qa_chain = (
+            {
+                "context": retriever | format_docs,
+                "question": RunnablePassthrough()
+            }
+            | prompt
+            | llm
+            | StrOutputParser()
         )
         
         logger.info("QA chain created successfully")
@@ -355,20 +366,323 @@ Answer:"""
         logger.info(f"Processing query: {question}")
         
         try:
-            result = self.qa_chain({"query": question})
+            # Get answer from chain
+            answer = self.qa_chain.invoke(question)
+            
+            # Get source documents separately using invoke
+            source_docs = self.retriever.invoke(question)
             
             return {
-                "answer": result["result"],
+                "answer": answer,
                 "sources": [
                     {
                         "content": doc.page_content,
                         "metadata": doc.metadata
                     }
-                    for doc in result.get("source_documents", [])
+                    for doc in source_docs
                 ]
             }
         except Exception as e:
             logger.error(f"Error processing query: {e}")
+            return {
+                "error": str(e),
+                "answer": None,
+                "sources": []
+            }
+    
+    def add_document_from_file(
+        self,
+        file_path: str,
+        match_id: Optional[str] = None,
+        document_type: str = "match_report",
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Add a new document (PDF or Markdown) to the existing vector store.
+        This allows dynamic ingestion of match reports, VAR decisions, etc.
+        
+        Args:
+            file_path: Path to the document file (PDF or MD)
+            match_id: Optional match identifier
+            document_type: Type of document (match_report, var_decision, etc.)
+            metadata: Additional metadata to attach to the document
+            
+        Returns:
+            Dictionary with ingestion results
+        """
+        if self.vector_store is None:
+            logger.error("Vector store not initialized. Call setup() first.")
+            return {
+                "success": False,
+                "error": "Vector store not initialized",
+                "chunks_added": 0
+            }
+        
+        logger.info(f"Adding document from: {file_path}")
+        
+        try:
+            file_path_obj = Path(file_path)
+            
+            if not file_path_obj.exists():
+                return {
+                    "success": False,
+                    "error": f"File not found: {file_path}",
+                    "chunks_added": 0
+                }
+            
+            # Load document based on file type
+            if file_path_obj.suffix.lower() == '.pdf':
+                # Process PDF with Docling
+                content = self._process_pdf_with_docling(file_path)
+            elif file_path_obj.suffix.lower() in ['.md', '.txt']:
+                # Load text file directly
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            else:
+                return {
+                    "success": False,
+                    "error": f"Unsupported file type: {file_path_obj.suffix}",
+                    "chunks_added": 0
+                }
+            
+            # Create document with metadata
+            doc_metadata = {
+                "source": str(file_path),
+                "document_type": document_type,
+                "added_at": datetime.now().isoformat(),
+                "file_name": file_path_obj.name
+            }
+            
+            if match_id:
+                doc_metadata["match_id"] = match_id
+            
+            if metadata:
+                doc_metadata.update(metadata)
+            
+            # Create LangChain document
+            document = Document(
+                page_content=content,
+                metadata=doc_metadata
+            )
+            
+            # Split into chunks
+            chunks = self.split_documents([document])
+            
+            # Add to vector store
+            self.vector_store.add_documents(chunks)
+            
+            # Save updated vector store
+            self.save_vector_store()
+            
+            logger.info(f"Successfully added {len(chunks)} chunks from {file_path}")
+            
+            return {
+                "success": True,
+                "chunks_added": len(chunks),
+                "file_name": file_path_obj.name,
+                "match_id": match_id,
+                "document_type": document_type
+            }
+            
+        except Exception as e:
+            logger.error(f"Error adding document: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "chunks_added": 0
+            }
+    
+    def _process_pdf_with_docling(self, pdf_path: str) -> str:
+        """
+        Process PDF file using Docling to extract text.
+        
+        Args:
+            pdf_path: Path to PDF file
+            
+        Returns:
+            Extracted text content
+        """
+        try:
+            from docling.document_converter import DocumentConverter
+            
+            logger.info(f"Processing PDF with Docling: {pdf_path}")
+            
+            converter = DocumentConverter()
+            result = converter.convert(pdf_path)
+            
+            # Export to markdown
+            markdown_content = result.document.export_to_markdown()
+            
+            return markdown_content
+            
+        except ImportError:
+            logger.warning("Docling not available, using fallback text extraction")
+            # Fallback: simple text extraction
+            try:
+                import PyPDF2
+                with open(pdf_path, 'rb') as file:
+                    reader = PyPDF2.PdfReader(file)
+                    text = ""
+                    for page in reader.pages:
+                        text += page.extract_text() + "\n"
+                    return text
+            except:
+                raise Exception("Could not process PDF. Install docling or PyPDF2.")
+    
+    def add_text_content(
+        self,
+        content: str,
+        match_id: Optional[str] = None,
+        document_type: str = "text_content",
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Add text content directly to the vector store without a file.
+        Useful for adding live data, API responses, etc.
+        
+        Args:
+            content: Text content to add
+            match_id: Optional match identifier
+            document_type: Type of content
+            metadata: Additional metadata
+            
+        Returns:
+            Dictionary with ingestion results
+        """
+        if self.vector_store is None:
+            logger.error("Vector store not initialized. Call setup() first.")
+            return {
+                "success": False,
+                "error": "Vector store not initialized",
+                "chunks_added": 0
+            }
+        
+        logger.info(f"Adding text content ({len(content)} characters)")
+        
+        try:
+            # Create document with metadata
+            doc_metadata = {
+                "source": "direct_input",
+                "document_type": document_type,
+                "added_at": datetime.now().isoformat(),
+                "content_length": len(content)
+            }
+            
+            if match_id:
+                doc_metadata["match_id"] = match_id
+            
+            if metadata:
+                doc_metadata.update(metadata)
+            
+            # Create LangChain document
+            document = Document(
+                page_content=content,
+                metadata=doc_metadata
+            )
+            
+            # Split into chunks
+            chunks = self.split_documents([document])
+            
+            # Add to vector store
+            self.vector_store.add_documents(chunks)
+            
+            # Save updated vector store
+            self.save_vector_store()
+            
+            logger.info(f"Successfully added {len(chunks)} chunks from text content")
+            
+            return {
+                "success": True,
+                "chunks_added": len(chunks),
+                "match_id": match_id,
+                "document_type": document_type,
+                "content_length": len(content)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error adding text content: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "chunks_added": 0
+            }
+    
+    def query_with_filter(
+        self,
+        question: str,
+        match_id: Optional[str] = None,
+        document_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Query the system with optional filtering by match_id or document_type.
+        
+        Args:
+            question: User's question
+            match_id: Filter by specific match
+            document_type: Filter by document type
+            
+        Returns:
+            Dictionary containing answer and filtered sources
+        """
+        if self.qa_chain is None:
+            logger.error("QA chain not initialized. Call create_qa_chain() first.")
+            return {
+                "error": "System not initialized",
+                "answer": None,
+                "sources": []
+            }
+        
+        logger.info(f"Processing filtered query: {question}")
+        
+        try:
+            # Get all relevant documents first
+            source_docs = self.retriever.invoke(question)
+            
+            # Apply filters
+            filtered_docs = []
+            for doc in source_docs:
+                metadata = doc.metadata
+                
+                # Check match_id filter
+                if match_id and metadata.get("match_id") != match_id:
+                    continue
+                
+                # Check document_type filter
+                if document_type and metadata.get("document_type") != document_type:
+                    continue
+                
+                filtered_docs.append(doc)
+            
+            # If no documents match filter, use all documents
+            if not filtered_docs:
+                logger.warning("No documents matched filter, using all retrieved documents")
+                filtered_docs = source_docs
+            
+            # Format context from filtered documents
+            context = "\n\n".join(doc.page_content for doc in filtered_docs)
+            
+            # Generate answer using the chain
+            answer = self.qa_chain.invoke(question)
+            
+            return {
+                "answer": answer,
+                "sources": [
+                    {
+                        "content": doc.page_content,
+                        "metadata": doc.metadata
+                    }
+                    for doc in filtered_docs
+                ],
+                "filter_applied": {
+                    "match_id": match_id,
+                    "document_type": document_type
+                },
+                "total_sources": len(source_docs),
+                "filtered_sources": len(filtered_docs)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error processing filtered query: {e}")
             return {
                 "error": str(e),
                 "answer": None,

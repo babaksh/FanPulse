@@ -19,16 +19,24 @@ class MatchDataLoader:
     Provides access to historical match results, team statistics, and player data.
     """
     
-    def __init__(self, data_path: str = "data/match_data/results.csv"):
+    def __init__(
+        self,
+        data_path: str = "data/match_data/results.csv",
+        tactical_data_path: str = "data/match_data/tactical_stats.csv"
+    ):
         """
         Initialize the Match Data Loader.
         
         Args:
             data_path: Path to the match results CSV file
+            tactical_data_path: Path to the tactical statistics CSV file
         """
         self.data_path = Path(data_path)
+        self.tactical_data_path = Path(tactical_data_path)
         self.matches_df: Optional[pd.DataFrame] = None
+        self.tactical_df: Optional[pd.DataFrame] = None
         self._load_data()
+        self._load_tactical_data()
     
     def _load_data(self):
         """Load match data from CSV file"""
@@ -52,6 +60,68 @@ class MatchDataLoader:
         except Exception as e:
             logger.error(f"Error loading match data: {e}")
             self.matches_df = pd.DataFrame()
+    
+    def _load_tactical_data(self):
+        """Load tactical statistics data from CSV file"""
+        try:
+            if self.tactical_data_path.exists():
+                logger.info(f"Loading tactical data from: {self.tactical_data_path}")
+                self.tactical_df = pd.read_csv(self.tactical_data_path)
+                
+                # Convert date column to datetime
+                if 'date' in self.tactical_df.columns:
+                    self.tactical_df['date'] = pd.to_datetime(self.tactical_df['date'])
+                
+                logger.info(f"Loaded {len(self.tactical_df)} matches with tactical data")
+                logger.info(f"Tactical columns: {list(self.tactical_df.columns)}")
+            else:
+                logger.warning(f"Tactical data file not found: {self.tactical_data_path}")
+                self.tactical_df = pd.DataFrame()
+                
+        except Exception as e:
+            logger.error(f"Error loading tactical data: {e}")
+            self.tactical_df = pd.DataFrame()
+    
+    def get_tactical_data(
+        self,
+        team_name: Optional[str] = None,
+        match_id: Optional[str] = None,
+        limit: int = 10
+    ) -> pd.DataFrame:
+        """
+        Get tactical statistics data.
+        
+        Args:
+            team_name: Filter by team name (optional)
+            match_id: Get specific match by ID (optional)
+            limit: Maximum number of matches to return
+            
+        Returns:
+            DataFrame with tactical statistics
+        """
+        if self.tactical_df is None or self.tactical_df.empty:
+            return pd.DataFrame()
+        
+        # Filter by match_id if provided
+        if match_id:
+            result = self.tactical_df[self.tactical_df['match_id'] == match_id]
+            return cast(pd.DataFrame, result)
+        
+        # Filter by team_name if provided
+        if team_name:
+            matches = self.tactical_df[
+                (self.tactical_df['home_team'].str.contains(team_name, case=False, na=False)) |
+                (self.tactical_df['away_team'].str.contains(team_name, case=False, na=False))
+            ]
+            
+            # Sort by date (most recent first) and limit
+            if 'date' in matches.columns:
+                matches = cast(pd.DataFrame, matches.sort_values(by='date', ascending=False))  # type: ignore[call-overload]
+            
+            return cast(pd.DataFrame, matches.head(limit))
+        
+        # Return all tactical data (limited)
+        return cast(pd.DataFrame, self.tactical_df.head(limit))
     
     def get_match_by_index(self, match_index: int) -> Optional[Dict[str, Any]]:
         """
@@ -188,8 +258,16 @@ class MatchDataLoader:
         for _, match in matches.iterrows():
             is_home = team_name.lower() in str(match.get('home_team', '')).lower()
             
-            home_score = int(match.get('home_score', 0) or 0)
-            away_score = int(match.get('away_score', 0) or 0)
+            # Handle NaN scores
+            home_score = match.get('home_score', 0)
+            away_score = match.get('away_score', 0)
+            
+            # Skip if scores are NaN or None
+            if pd.isna(home_score) or pd.isna(away_score) or home_score is None or away_score is None:
+                continue
+            
+            home_score = int(float(home_score))
+            away_score = int(float(away_score))
             
             if is_home:
                 stats['goals_scored'] += home_score

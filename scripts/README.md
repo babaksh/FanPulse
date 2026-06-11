@@ -14,9 +14,33 @@ This directory contains utility scripts for building, testing, and managing the 
 
 **`test_complete_system.py`**
 - Comprehensive end-to-end system validation
-- Tests all components: imports, data files, Ollama, agents, orchestrator
+- Tests all components: imports, data files, Ollama, agents, orchestrator, tactical data integration
 - Usage: `python scripts/test_complete_system.py`
-- Should show 7/7 tests passing when system is ready
+- Should show 8/8 tests passing when system is ready
+
+**`fetch_match_data.py`**
+- Unified script to fetch match data from API-Football
+- Combines all fetch functionality: single matches, World Cup 2022, national teams, by date
+- Usage examples:
+  ```bash
+  # Single match
+  python scripts/fetch_match_data.py --fixture-id 215662
+  
+  # World Cup 2022 matches
+  python scripts/fetch_match_data.py --world-cup-2022 --key-matches
+  python scripts/fetch_match_data.py --world-cup-2022 --knockout
+  python scripts/fetch_match_data.py --world-cup-2022 --next 5
+  
+  # National teams
+  python scripts/fetch_match_data.py --team brazil --last 3
+  python scripts/fetch_match_data.py --hosts --last 2
+  
+  # By date
+  python scripts/fetch_match_data.py --date 2026-06-15
+  python scripts/fetch_match_data.py --today
+  ```
+- Automatically handles rate limiting and duplicate detection
+- Saves data to `data/match_data/tactical_stats.csv`
 
 ---
 
@@ -79,10 +103,10 @@ python scripts/build_var_lens_vectorstore.py --rebuild
 
 ### Testing System
 ```bash
-# Complete system test
+# Complete system test (includes tactical data integration)
 python scripts/test_complete_system.py
 
-# Expected output: 7/7 tests passing
+# Expected output: 8/8 tests passing
 ```
 
 ### Practice Demo (Local Only)

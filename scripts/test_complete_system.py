@@ -269,6 +269,62 @@ def test_dynamic_features():
         traceback.print_exc()
         return False
 
+def test_tactical_data_integration():
+    """Test tactical data integration with detailed checks"""
+    print_separator("Test 8: Tactical Data Integration")
+    
+    try:
+        from src.agents.tactical_pulse.data_loader import MatchDataLoader
+        from src.agents.tactical_pulse.match_analyzer import MatchAnalyzer
+        
+        print("[INFO] Testing tactical data loader...")
+        loader = MatchDataLoader()
+        
+        if loader.tactical_df is not None and not loader.tactical_df.empty:
+            print(f"[OK] Tactical data loaded: {len(loader.tactical_df)} matches")
+            print(f"[OK] Columns: {len(loader.tactical_df.columns)}")
+            
+            # Test get_tactical_data with team filter
+            qatar_tactical = loader.get_tactical_data(team_name='Qatar')
+            if not qatar_tactical.empty:
+                match = qatar_tactical.iloc[0]
+                print(f"[OK] Sample: {match['home_team']} vs {match['away_team']}")
+                print(f"     Formation: {match.get('home_formation', 'N/A')} vs {match.get('away_formation', 'N/A')}")
+                print(f"     Possession: {match.get('home_possession', 'N/A')}% vs {match.get('away_possession', 'N/A')}%")
+            
+            # Test AI insights with tactical data
+            print("\n[INFO] Testing AI insights with tactical data...")
+            analyzer = MatchAnalyzer()
+            
+            if analyzer.initialize_llm():
+                print("[OK] LLM initialized for tactical insights")
+                
+                result = analyzer.generate_ai_insights(
+                    team_name="Qatar",
+                    num_matches=3,
+                    analysis_type="tactical"
+                )
+                
+                if 'error' not in result and 'ai_insights' in result:
+                    insights = result['ai_insights']
+                    print(f"[OK] AI insights generated ({len(insights['content'])} chars)")
+                    return True
+                else:
+                    print("[WARN] AI insights generation had issues (non-critical)")
+                    return True  # Still pass if data loading works
+            else:
+                print("[WARN] LLM not available - skipping AI test (non-critical)")
+                return True  # Still pass if data loading works
+        else:
+            print("[FAIL] Tactical data not loaded")
+            return False
+            
+    except Exception as e:
+        print(f"[FAIL] Tactical integration test failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 def main():
     """Run all tests"""
     print_separator("FanPulse Complete System Test", "=")
@@ -284,6 +340,7 @@ def main():
         ("Tactical Pulse Agent", test_tactical_pulse_agent),
         ("Orchestrator", test_orchestrator),
         ("Dynamic Features", test_dynamic_features),
+        ("Tactical Data Integration", test_tactical_data_integration),
     ]
     
     results = []

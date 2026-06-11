@@ -17,20 +17,18 @@ src/
 │       ├── data_loader.py         # Match data loading
 │       ├── match_analyzer.py      # Team analysis
 │       └── metrics_calculator.py  # Statistical calculations
-├── orchestrator/
-│   ├── fanpulse_orchestrator.py   # Main orchestrator
-│   ├── query_router.py            # Intelligent query routing
-│   └── response_handler.py        # Response formatting
-└── api/
-    ├── main.py                    # FastAPI application
-    └── routes/                    # API endpoints
+└── orchestrator/
+    ├── fanpulse_orchestrator.py   # Main orchestrator
+    ├── query_router.py            # Intelligent query routing
+    └── response_handler.py        # Response formatting
 ```
 
 ### Essential Scripts
 ```
 scripts/
 ├── build_var_lens_vectorstore.py  # Build vector store
-├── test_complete_system.py        # System validation
+├── fetch_match_data.py            # Unified data fetching
+├── test_complete_system.py        # System validation (8 tests)
 └── README.md                      # Scripts documentation
 ```
 
@@ -40,14 +38,23 @@ langflow_workflows/
 ├── fanpulse_main_flow.json        # Main orchestrator workflow
 ├── var_lens_flow.json             # VAR-Lens workflow
 ├── tactical_pulse_flow.json       # Tactical Pulse workflow
-├── README.md                      # Workflows overview
-└── IMPORT_GUIDE.md                # Import instructions
+├── LANGFLOW_GUIDE.md              # Complete guide (545 lines)
+└── README.md                      # Workflows overview
 ```
 
 ### Documentation
 ```
 docs/
+├── README.md                      # Documentation index
+├── REPOSITORY_STRUCTURE.md        # This file
 ├── LANGFLOW_SETUP.md              # LangFlow setup guide
+├── TACTICAL_PULSE_CAPABILITIES.md # Tactical Pulse features
+├── API_FOOTBALL_GUIDE.md          # API-Football integration
+├── ADMIN_LIVE_DATA_INGESTION.md   # Advanced data ingestion
+├── DEMO_GUIDE_FA.md               # Demo guide (Persian)
+├── PERSIAN_GUIDE.md               # Complete guide (Persian)
+├── DATA_COLLECTION_FINAL_FA.md    # Data collection (Persian)
+└── JSON_IMPORT_SIMPLE_FA.md       # JSON import (Persian)
 ├── demo-scenarios.md              # Demo scenarios
 ├── llm-setup-guide.md             # LLM setup guide
 ├── processed-documents-guide.md   # Document processing guide

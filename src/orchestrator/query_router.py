@@ -46,14 +46,18 @@ class QueryRouter:
             'review', 'check', 'overturn', 'correct', 'incorrect'
         ]
         
-        # Keywords for Tactical Pulse (statistics, predictions, analysis)
+        # Keywords for Tactical Pulse (statistics, predictions, analysis, tactical data)
         self.tactical_keywords = [
             'predict', 'prediction', 'forecast', 'odds', 'probability',
             'statistics', 'stats', 'performance', 'form', 'win rate',
             'goals', 'score', 'result', 'match', 'team', 'player',
             'analysis', 'analyze', 'compare', 'versus', 'vs',
             'head to head', 'h2h', 'history', 'record', 'trend',
-            'tactical', 'strategy', 'formation', 'style'
+            'tactical', 'strategy', 'formation', 'style', 'approach',
+            'possession', 'shots', 'passes', 'passing', 'xg', 'expected goals',
+            'defensive', 'attacking', 'defense', 'attack', 'counter',
+            'pressing', 'build-up', 'transition', 'set piece', 'corner',
+            'offside', 'discipline', 'cards', 'fouls', 'saves'
         ]
         
         logger.info("Query Router initialized")

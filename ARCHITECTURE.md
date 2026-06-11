@@ -1,20 +1,17 @@
 # FanPulse - System Architecture
 
-## 🎯 Project Name: **FanPulse**
-> Feel the Football Pulse - Intelligent Game Understanding with AI
+## 🎯 Project Overview
+
+**FanPulse** is an AI-powered platform that enhances the football viewing experience through two specialized agents:
+
+1. **VAR-Lens Agent**: Explains VAR decisions using official FIFA documentation
+2. **Tactical Pulse Agent**: Analyzes team performance and tactical changes with real match data
+
+Built with IBM Granite, Docling, LangFlow, and IBM Bob for the IBM Skills Build AI Builders Challenge (June 2026).
 
 ---
 
-## 📋 Project Summary
-
-**FanPulse** is an AI-powered platform that offers two intelligent agents to enhance the football viewing experience:
-
-1. **VAR-Lens Agent**: Transparently explains VAR decisions using official FIFA documentation.
-2. **Tactical Pulse Agent**: A real-time analyst of tactical changes and game momentum.
-
----
-
-## 🏗️ General Architecture (Modular Architecture)
+## 🏗️ System Architecture
 
 ```
 ┌────────────────────────────────────────────────────────────┐
@@ -22,8 +19,8 @@
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │           Langflow Orchestration Layer               │  │
-│  │ (Workflow management & communication between agents) │  │
+│  │           LangFlow Orchestration Layer               │  │
+│  │ (Visual workflows & agent coordination)              │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                          │                                 │
 │         ┌────────────────┴────────────────┐                │
@@ -35,145 +32,88 @@
 │         │                                 │                │
 │  ┌──────▼─────────────────────────────────▼──────┐         │
 │  │         Shared Services Layer                 │         │
-│  │  • IBM Granite (NLG)                          │         │
-│  │  • Context Forge (Context Management)         │         │
-│  │  • Data Processing Pipeline                   │         │
+│  │  • IBM Granite 4.1 8B (via Ollama)            │         │
+│  │  • Query Router (Keyword + LLM)               │         │
+│  │  • Response Handler (Unified formatting)      │         │
 │  └───────────────────────────────────────────────┘         │
 │                         │                                  │
 │  ┌──────────────────────▼───────────────────────┐          │
 │  │          Data Sources Layer                  │          │
 │  │  • Docling (FIFA Rules Processing)           │          │
-│  │  • IBM Bob (Match Data Analytics)            │          │
-│  │  • Static Datasets (Historical Data)         │          │
-│  │  • Live Data API (Real-time Feed)            │          │
+│  │  • FAISS Vector Store (658 vectors)          │          │
+│  │  • Match Data (49,329 historical matches)    │          │
+│  │  • Tactical Stats (20 WC 2022, 49 columns)   │          │
+│  │  • API-Football (Live data ingestion)        │          │
 │  └──────────────────────────────────────────────┘          │
 │                                                            │
 └────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-        ┌─────────────────────────────────┐
-        │   API Layer (FastAPI/Flask)     │
-        │   • REST Endpoints              │
-        │   • WebSocket (optional)        │
-        └─────────────────────────────────┘
-                          │
-                          ▼
-        ┌─────────────────────────────────┐
-        │   Frontend (Optional - Phase 2) │
-        │   • React Dashboard             │
-        │   • Real-time Visualization     │
-        └─────────────────────────────────┘
 ```
 
 ---
 
-## 🔧 Implementation Strategy (2 Phases)
+## 📁 Repository Structure
 
-### **Phase 1: Core Backend + Langflow Demo** ⭐ (Priority)
-- Full implementation of backend and agents
-- Use Langflow UI for workflow demonstration
-- Testing with static data and live data simulation
-- **Advantage**: Faster, focus on AI and logic, stronger demo
-- **Output**: A fully functional system demonstrable via Langflow
-
-### **Phase 2: Frontend Dashboard** (Optional)
-- If time permits, we will add a React dashboard
-- **Advantage**: Better UX, more attractive for presentation
-- **Note**: The project is complete and evaluable even without the frontend
-
----
-
-## 📦 Project Structure (Modular)
+**What's in GitHub:**
 
 ```
 FanPulse/
 │
-├── README.md                          # Main project documentation
-├── ARCHITECTURE.md                    # This file
-├── requirements.txt                   # Python dependencies
-├── .env.example                       # Sample environment variables
-├── .gitignore
-│
-├── docs/                              # Supplementary documentation
-│   ├── setup.md                       # Installation guide
-│   ├── api-reference.md               # API documentation
-│   └── demo-guide.md                  # Demo guide
-│
-├── data/                              # Datasets
-│   ├── fifa_rules/                    # FIFA Rules (PDF/JSON)
-│   ├── match_data/                    # Match Data
-│   │   ├── historical/                # Historical data
-│   │   └── sample_live/               # Sample live data for testing
-│   └── processed/                     # Processed data
-│
-├── src/                               # Main source code
-│   │
-│   ├── agents/                        # Core Agents
-│   │   ├── __init__.py
+├── src/                               # Source code
+│   ├── agents/
 │   │   ├── var_lens/                  # VAR-Lens Agent
-│   │   │   ├── __init__.py
-│   │   │   ├── agent.py               # Main agent logic
-│   │   │   ├── rule_retriever.py      # Rule retrieval
-│   │   │   └── explainer.py           # Explanation generation
-│   │   │
+│   │   │   ├── rag_engine.py          # RAG pipeline with FAISS
+│   │   │   └── llm_providers.py       # LLM abstraction layer
 │   │   └── tactical_pulse/            # Tactical Pulse Agent
-│   │       ├── __init__.py
-│   │       ├── agent.py               # Main agent logic
-│   │       ├── pattern_detector.py    # Tactical pattern detection
-│   │       └── momentum_analyzer.py   # Momentum analysis
-│   │
-│   ├── services/                      # Shared Services
-│   │   ├── __init__.py
-│   │   ├── granite_service.py         # IBM Granite integration
-│   │   ├── docling_service.py         # Docling integration
-│   │   ├── bob_service.py             # IBM Bob integration
-│   │   ├── context_forge_service.py   # Context Forge integration
-│   │   └── data_processor.py          # Data processing
-│   │
-│   ├── orchestration/                 # Langflow workflows
-│   │   ├── __init__.py
-│   │   ├── var_lens_flow.json         # Workflow for VAR-Lens
-│   │   ├── tactical_pulse_flow.json   # Workflow for Tactical Pulse
-│   │   └── main_orchestrator.json     # Main orchestrator
-│   │
-│   ├── api/                           # API Layer
-│   │   ├── __init__.py
-│   │   ├── main.py                    # FastAPI app
-│   │   ├── routes/
-│   │   │   ├── var_lens.py
-│   │   │   └── tactical_pulse.py
-│   │   └── models/                    # Pydantic models
-│   │       ├── var_request.py
-│   │       └── tactical_request.py
-│   │
-│   ├── utils/                         # Utilities
-│   │   ├── __init__.py
-│   │   ├── config.py                  # Configuration
-│   │   ├── logger.py                  # Logging
-│   │   └── validators.py              # Validation
-│   │
-│   └── frontend/                      # Frontend (Phase 2 - Optional)
-│       ├── package.json
-│       ├── src/
-│       │   ├── components/
-│       │   ├── pages/
-│       │   └── App.jsx
-│       └── public/
+│   │       ├── data_loader.py         # Match data loading
+│   │       ├── match_analyzer.py      # Team analysis & predictions
+│   │       └── metrics_calculator.py  # Statistical calculations
+│   └── orchestrator/                  # Query Orchestration
+│       ├── fanpulse_orchestrator.py   # Main orchestrator (436 lines)
+│       ├── query_router.py            # Smart routing (224 lines)
+│       └── response_handler.py        # Response formatting (341 lines)
 │
-├── tests/                             # Tests
-│   ├── test_var_lens.py
-│   ├── test_tactical_pulse.py
-│   └── test_integration.py
+├── langflow_workflows/                # LangFlow Workflows
+│   ├── fanpulse_main_flow.json        # Main orchestrator workflow
+│   ├── var_lens_flow.json             # VAR-Lens workflow
+│   ├── tactical_pulse_flow.json       # Tactical Pulse workflow
+│   ├── LANGFLOW_GUIDE.md              # Complete guide (545 lines)
+│   └── README.md
 │
-├── notebooks/                         # Jupyter notebooks for analysis
-│   ├── data_exploration.ipynb
-│   └── model_testing.ipynb
+├── scripts/                           # Utility Scripts
+│   ├── build_var_lens_vectorstore.py  # Build FAISS vector store
+│   ├── fetch_match_data.py            # Unified data fetching (569 lines)
+│   ├── test_complete_system.py        # System validation (8 tests)
+│   └── README.md
 │
-└── deployment/                        # Deployment files
-    ├── docker-compose.yml
-    ├── Dockerfile
-    └── kubernetes/
+├── data/                              # Data Files
+│   ├── raw_documents/                 # 7 FIFA/IFAB PDFs (original)
+│   └── processed_documents/           # 7 FIFA/IFAB documents (Markdown)
+│
+├── README.md                          # Main documentation
+├── ARCHITECTURE.md                    # This file
+├── LICENSE                            # MIT License
+├── NOTICE                             # Third-party notices
+├── requirements.txt                   # Python dependencies
+└── .gitignore                         # Git ignore rules
 ```
+
+**What's NOT in GitHub (generated locally):**
+
+```
+data/
+├── vector_stores/                     # FAISS index (built locally)
+│   └── var_lens_faiss/
+│       ├── index.faiss                # 658 vectors
+│       └── index.pkl                  # Metadata
+└── match_data/                        # CSV files (fetched locally)
+    ├── results.csv                    # 49,329 historical matches
+    └── tactical_stats.csv             # 20 WC 2022 matches (49 columns)
+```
+
+**Why not in GitHub?**
+- **Vector stores**: Can be rebuilt using `scripts/build_var_lens_vectorstore.py`
+- **Match data**: Can be fetched using `scripts/fetch_match_data.py` (requires API key)
+- **Large files**: Keep repository size manageable
 
 ---
 
@@ -181,131 +121,290 @@ FanPulse/
 
 ### VAR-Lens Agent Flow:
 ```
-User Input (VAR Decision) 
-    → Langflow Orchestrator
+User Query (VAR Decision) 
+    → Query Router (Keyword/LLM classification)
     → VAR-Lens Agent
-    → Docling (Retrieve relevant rules)
-    → Context Forge (Context management)
-    → IBM Granite (Generate explanation in simple language)
-    → Response (Multilingual explanation)
+    → Document Retrieval (FAISS similarity search)
+    → Context Assembly (Top-k relevant chunks)
+    → IBM Granite 4.1 8B (Generate explanation)
+    → Response Handler (Format with sources)
+    → User (Clear explanation with FIFA citations)
 ```
 
 ### Tactical Pulse Agent Flow:
 ```
-Match Data (Live/Static)
-    → Langflow Orchestrator
+User Query (Team/Match Analysis)
+    → Query Router (Keyword/LLM classification)
     → Tactical Pulse Agent
-    → IBM Bob (Statistical analysis)
-    → Pattern Detection (Tactical changes detection)
-    → Context Forge (Context integration)
-    → IBM Granite (Generate analytical report)
-    → Response (Analysis + data visualization)
+    → Data Loader (Load match data + tactical stats)
+    → Metrics Calculator (Compute statistics)
+    → IBM Granite 4.1 8B (Generate AI insights)
+    → Response Handler (Format with metrics)
+    → User (Analysis with formations, possession, shots, AI insights)
+```
+
+### Orchestrator Flow:
+```
+User Query
+    → Query Router
+        ├─ Keyword Matching (Fast classification)
+        └─ LLM Classification (Complex queries)
+    → Agent Selection (VAR-Lens or Tactical Pulse)
+    → Agent Execution
+    → Response Handler (Unified formatting)
+    → User (Consistent response structure)
 ```
 
 ---
 
-## 🛠️ Used Technologies
+## 🧩 Component Details
 
-### Core IBM Technologies:
-- **IBM Granite**: Language model for NLG and explanation generation.
-- **Docling**: Processing and extracting information from FIFA documents.
-- **Langflow**: Orchestration and workflow management.
-- **Context Forge**: Context management and data integration.
-- **IBM Bob**: Data analysis and data science workflows.
+### 1. VAR-Lens Agent
 
-### Supporting Technologies:
-- **Python 3.10+**: Core language.
-- **FastAPI**: API framework.
-- **Pydantic**: Data validation.
-- **SQLite/PostgreSQL**: Data storage (Optional).
-- **React** (Phase 2): Frontend framework
-- **Docker**: Containerization
+**Purpose:** Explain VAR decisions using official FIFA rules
 
----
+**Components:**
+- **RAG Engine** (`rag_engine.py`):
+  - Document loading from processed Markdown files
+  - Text splitting with RecursiveCharacterTextSplitter
+  - HuggingFace embeddings (all-MiniLM-L6-v2)
+  - FAISS vector store for similarity search
+  - RAG chain with IBM Granite
 
-## 🎯 Key Features
+- **LLM Providers** (`llm_providers.py`):
+  - Abstraction layer for multiple LLM providers
+  - Supports: Ollama, IBM Granite, OpenAI, HuggingFace
+  - Easy provider switching
 
-### VAR-Lens Agent:
-✅ Explanation of VAR decisions based on official laws.  
-✅ Multilingual support (English, Persian, Arabic, Spanish).  
-✅ Displaying the exact relevant section of the law.  
-✅ History of similar decisions.  
+**Data:**
+- 7 FIFA/IFAB documents processed with Docling
+- 658 vectors in FAISS index (built locally)
+- Chunk size: 1000 characters, overlap: 200
 
-### Tactical Pulse Agent:
-✅ Real-time tactical changes detection.  
-✅ Momentum and game pressure analysis.  
-✅ Goal probability prediction.  
-✅ Tactical data visualization.  
+**Key Features:**
+- Source citation for transparency
+- Multilingual support (via Granite)
+- Dynamic document ingestion
+- Efficient similarity search
 
 ---
 
-## 📊 Success Criteria (Aligned with Judging Criteria)
+### 2. Tactical Pulse Agent
 
-### 1. Technical Execution (30%)
-- ✅ Using 5 IBM tools (Granite, Docling, Langflow, Context Forge, Bob).
-- ✅ Modular and extensible architecture.
-- ✅ Clean and documented code.
+**Purpose:** Analyze team performance and predict match outcomes
 
-### 2. Innovation (25%)
-- ✅ Combining two agents for comprehensive coverage.
-- ✅ Creative use of Docling for rule processing.
-- ✅ Explainable AI approach.
+**Components:**
+- **Data Loader** (`data_loader.py`):
+  - Loads historical match data (49,329 matches)
+  - Loads tactical statistics (20 WC 2022 matches, 49 columns)
+  - Filters by team, date, tournament
+  - Dynamic data ingestion from API-Football
 
-### 3. Challenge Fit (25%)
-- ✅ Covering 2 main areas: Trust & Transparency + Understanding.
-- ✅ Relevant to World Cup and fan experience.
-- ✅ Solving real problems.
+- **Match Analyzer** (`match_analyzer.py`):
+  - Team performance analysis
+  - Match predictions
+  - AI-powered insights generation
+  - Formation and tactical analysis
 
-### 4. Implementation & Feasibility (20%)
-- ✅ Executable and testable.
-- ✅ Scalable.
-- ✅ Usable in the real world.
+- **Metrics Calculator** (`metrics_calculator.py`):
+  - Win/loss/draw statistics
+  - Goals scored/conceded
+  - Form calculation
+  - Head-to-head analysis
 
----
+**Data (fetched locally):**
+- **Historical Matches:** 49,329 matches (1872-2024)
+- **Tactical Stats:** 20 World Cup 2022 matches with 49 columns:
+  - Formations (home/away)
+  - Possession percentages
+  - Shots (total, on target, inside/outside box)
+  - Passes (total, accuracy, key passes)
+  - Expected Goals (xG)
+  - Defensive metrics (tackles, interceptions, blocks)
+  - Discipline (fouls, cards)
+  - Set pieces (corners, offsides)
 
-## 🚀 Development Roadmap
-
-### Week 1: Setup & Foundation
-- [ ] Set up development environment.
-- [ ] Install and test IBM tools.
-- [ ] Collect and process datasets.
-- [ ] Build project structure.
-
-### Week 2: Agent Development
-- [ ] Implement VAR-Lens Agent.
-- [ ] Implement Tactical Pulse Agent.
-- [ ] Integrate with IBM services.
-
-### Week 3: Orchestration & Integration
-- [ ] Build Langflow workflows.
-- [ ] Develop API layer.
-- [ ] Integration testing.
-
-### Week 4: Testing & Documentation
-- [ ] Full system testing.
-- [ ] Documentation.
-- [ ] Prepare demo.
-- [ ] (Optional) Frontend development.
+**Key Features:**
+- Comprehensive tactical analysis
+- AI-generated insights
+- Match predictions with probabilities
+- Real-time data integration
 
 ---
 
-## 💡 Important Notes
+### 3. Orchestrator
 
-1. **Priority on Phase 1**: Focus on backend and Langflow demo.
-2. **Modular Design**: Each agent is independent and extensible.
-3. **Documentation**: Detailed documentation for judges.
-4. **Demo-Ready**: Ready for demo from day one.
-5. **Scalable**: Extensible for more features.
+**Purpose:** Route queries to appropriate agents and coordinate responses
+
+**Components:**
+- **FanPulse Orchestrator** (`fanpulse_orchestrator.py`):
+  - Main coordination logic
+  - Agent initialization (lazy loading)
+  - Query processing pipeline
+  - System status monitoring
+
+- **Query Router** (`query_router.py`):
+  - Keyword-based classification (fast)
+  - LLM-based classification (accurate)
+  - 60+ keywords for routing
+  - Confidence scoring
+
+- **Response Handler** (`response_handler.py`):
+  - Unified response formatting
+  - Error handling
+  - Metadata enrichment
+  - Display formatting
+
+**Routing Logic:**
+- **VAR-Lens Keywords:** var, referee, offside, penalty, handball, foul, rule, law, protocol
+- **Tactical Pulse Keywords:** predict, statistics, performance, formation, possession, shots, tactical, analysis
+
+**Fallback:** Defaults to Tactical Pulse if uncertain
 
 ---
 
-## 📝 Conclusion
+## 🔧 IBM Technologies Integration
 
-This architecture allows us to:
-- ✅ Start quickly (with Phase 1).
-- ✅ Utilize all IBM tools.
-- ✅ Have a strong and practical demo.
-- ✅ Add a frontend if needed in Phase 2.
-- ✅ Score well across all judging criteria.
+### IBM Granite 4.1 8B
+- **Deployment:** Via Ollama (local inference)
+- **Model Size:** 5.3 GB
+- **Usage:**
+  - VAR-Lens: Generate rule explanations (temperature: 0.3)
+  - Tactical Pulse: Generate tactical insights (temperature: 0.7)
+  - Orchestrator: Intent classification (temperature: 0.3)
 
-**Recommendation**: Start with Phase 1 and, if time permits, add the frontend in Phase 2.
+### Docling
+- **Purpose:** Convert FIFA PDFs to clean Markdown
+- **Process:**
+  1. PDF ingestion (7 FIFA/IFAB documents)
+  2. Layout analysis
+  3. Text extraction
+  4. Markdown conversion
+  5. Metadata preservation
+- **Output:** 7 Markdown files in `data/processed_documents/`
+
+### LangFlow
+- **Purpose:** Visual workflow orchestration
+- **Workflows:**
+  1. `fanpulse_main_flow.json` - Complete orchestration
+  2. `var_lens_flow.json` - Rule explanations
+  3. `tactical_pulse_flow.json` - Match analysis
+- **Benefits:**
+  - No-code deployment
+  - Visual debugging
+  - Easy testing
+
+### IBM Bob
+- **Purpose:** AI coding assistant
+- **Contributions:**
+  - 13,000+ lines of Python code
+  - Complete documentation
+  - Architecture design
+  - Debugging assistance
+
+---
+
+## 📊 Data Pipeline
+
+### Document Processing (VAR-Lens)
+```
+FIFA PDFs (in repo: data/raw_documents/)
+    → Docling (PDF to Markdown)
+    → Processed Markdown (in repo: data/processed_documents/)
+    → Text Splitting (1000 chars, 200 overlap)
+    → HuggingFace Embeddings (all-MiniLM-L6-v2)
+    → FAISS Vector Store (built locally: data/vector_stores/)
+    → Ready for RAG queries
+```
+
+### Match Data Pipeline (Tactical Pulse)
+```
+API-Football (requires API key)
+    → fetch_match_data.py (Rate-limited fetching)
+    → Data Validation & Cleaning
+    → CSV Storage (local: data/match_data/)
+    → Data Loader (Pandas DataFrame)
+    → Metrics Calculator
+    → Ready for analysis
+```
+
+---
+
+## 🧪 Testing Strategy
+
+### System Validation (8 Tests)
+1. **Module Imports:** Verify all Python modules load correctly
+2. **Data Files:** Check existence of required data files
+3. **Ollama Connection:** Test Ollama API connectivity
+4. **Granite Model:** Verify Granite 4.1 8B availability
+5. **VAR-Lens Agent:** Test RAG pipeline and query processing
+6. **Tactical Pulse Agent:** Test team analysis functionality
+7. **Orchestrator:** Test query routing and coordination
+8. **Tactical Data Integration:** Test 49-column tactical data
+
+**Run Tests:**
+```bash
+python scripts/test_complete_system.py
+```
+
+---
+
+## 🚀 Deployment Options
+
+### Option 1: LangFlow (Recommended for Demo)
+- Visual interface at `http://localhost:7860`
+- Import workflows from `langflow_workflows/`
+- No-code deployment
+- Real-time testing
+- Easy debugging
+
+### Option 2: Python API
+- Direct Python integration
+- Programmatic access
+- Custom workflows
+- Production deployment
+
+### Option 3: Command Line
+- Quick testing
+- Batch processing
+- Automation scripts
+
+---
+
+## 🔐 Security & Privacy
+
+- **API Keys:** Stored in `.env` file (not in repository)
+- **Local Inference:** Granite runs locally via Ollama (no data sent to cloud)
+- **Data Privacy:** All match data and documents stored locally
+- **Open Source:** MIT License, transparent codebase
+
+---
+
+## 📈 Performance Metrics
+
+- **VAR-Lens Query Time:** ~2-5 seconds (including LLM generation)
+- **Tactical Pulse Query Time:** ~1-3 seconds (without AI insights)
+- **Vector Store Size:** 658 vectors, ~5 MB (built locally)
+- **Match Data Size:** 49,329 matches, ~15 MB (fetched locally)
+- **Tactical Data Size:** 20 matches, 49 columns, ~50 KB (fetched locally)
+
+---
+
+## 🔮 Future Enhancements
+
+1. **Real-time Data Streaming:** Live match data integration
+2. **Multi-language Support:** Expand beyond English
+3. **Player-level Analysis:** Individual player statistics
+4. **Video Integration:** Link to match highlights
+5. **Mobile App:** iOS/Android deployment
+6. **Advanced Predictions:** ML models for match outcomes
+
+---
+
+## 🤝 Contributing
+
+This project was built for the IBM Skills Build AI Builders Challenge (June 2026). Contributions welcome after challenge submission!
+
+---
+
+**Made with ❤️ using IBM Bob** 🤖

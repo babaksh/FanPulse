@@ -92,24 +92,29 @@ Thumbs.db
 temp/
 tmp/
 
-# Personal development guides (keep local only)
-docs/docling-workflow.md
-docs/langflow-integration-guide.md
-docs/langflow-var-lens-guide.md
-docs/langflow-quick-start.md
+# Bob configuration
+.bob/
 
-# Persian guides (personal use only - not for public repo)
-docs/PERSIAN_GUIDE.md
-docs/OLLAMA_SETUP_FA.md
-docs/DEMO_GUIDE_FA.md
+# IDE configuration files
+pyrightconfig.json
 
-# Ollama test scripts (keep local only)
+# Temporary processing files
+data/temp_chunks/
+
+# Empty metadata folders
+data/processed_documents/fifa_rules/
+data/processed_documents/metadata/
+data/raw_documents/fifa_rules/
+data/raw_documents/tournament_docs/
+
+# Documentation (keep local only - README.md has everything needed)
+docs/
+
+# Development scripts (keep local only - not needed in public repo)
 scripts/test_ollama_connection.py
 scripts/quick_test_ollama.py
 scripts/show_llm_info.py
 scripts/demo_ollama_usage.py
-
-# Development and test scripts (keep local only)
 scripts/monitor_processing.py
 scripts/process_fifa_docs_simple.py
 scripts/process_fifa_docs_smart.py
@@ -118,8 +123,6 @@ scripts/process_large_pdf.py
 scripts/process_var_protocol_only.py
 scripts/check_api_keys.py
 scripts/check_setup.py
-
-# Test scripts (development only - not needed in public repo)
 scripts/test_data_loader.py
 scripts/test_docling.py
 scripts/test_match_analyzer.py
@@ -129,8 +132,8 @@ scripts/test_ai_insights.py
 scripts/test_dynamic_tactical_pulse.py
 scripts/test_dynamic_var_lens.py
 scripts/test_orchestrator.py
-
-# Demo script (keep local for practice, not needed in public repo)
 scripts/demo_scenarios.py
+scripts/list_tactical_columns.py
+scripts/add_tactical_data_manual.py
 
 # Made with Bob

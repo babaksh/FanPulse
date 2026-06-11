@@ -392,6 +392,170 @@ class MatchAnalyzer:
                     return f"{words[0]} vs {words[1]} H2H: {h2h['team1_wins']}W-{h2h['draws']}D-{h2h['team2_wins']}L"
         
         return "I can help you with team analysis, match predictions, and head-to-head records. Please provide team names or specific questions."
+    def _calculate_comprehensive_tactical_stats(
+        self,
+        tactical_data: pd.DataFrame,
+        team_name: str
+    ) -> Dict[str, Any]:
+        """
+        Calculate comprehensive tactical statistics from all 49 columns.
+        
+        Args:
+            tactical_data: DataFrame with tactical match data
+            team_name: Name of the team to analyze
+            
+        Returns:
+            Dictionary with comprehensive tactical statistics
+        """
+        if tactical_data.empty:
+            return {}
+        
+        stats = {}
+        
+        # Determine if team is home or away in each match
+        is_home_matches = tactical_data['home_team'].str.contains(team_name, case=False, na=False)
+        is_away_matches = tactical_data['away_team'].str.contains(team_name, case=False, na=False)
+        
+        # Formation Analysis
+        home_formations = tactical_data.loc[is_home_matches, 'home_formation'].dropna()
+        away_formations = tactical_data.loc[is_away_matches, 'away_formation'].dropna()
+        all_formations = list(home_formations) + list(away_formations)
+        if all_formations:
+            stats['most_used_formation'] = max(set(all_formations), key=all_formations.count)
+            stats['formation_variety'] = len(set(all_formations))
+        
+        # Possession Statistics
+        home_poss = tactical_data.loc[is_home_matches, 'home_possession'].dropna()
+        away_poss = tactical_data.loc[is_away_matches, 'away_possession'].dropna()
+        all_poss = pd.concat([home_poss, away_poss])
+        if not all_poss.empty:
+            stats['avg_possession'] = float(all_poss.mean())
+            stats['possession_consistency'] = float(all_poss.std())
+        
+        # Shooting Statistics
+        home_shots = tactical_data.loc[is_home_matches, 'home_shots'].dropna()
+        away_shots = tactical_data.loc[is_away_matches, 'away_shots'].dropna()
+        all_shots = pd.concat([home_shots, away_shots])
+        if not all_shots.empty:
+            stats['avg_shots'] = float(all_shots.mean())
+            stats['shots_consistency'] = float(all_shots.std())
+        
+        # Shot Accuracy
+        home_shots_on = tactical_data.loc[is_home_matches, 'home_shots_on_target'].dropna()
+        away_shots_on = tactical_data.loc[is_away_matches, 'away_shots_on_target'].dropna()
+        all_shots_on = pd.concat([home_shots_on, away_shots_on])
+        if not all_shots.empty and not all_shots_on.empty:
+            stats['shot_accuracy'] = float((all_shots_on.sum() / all_shots.sum()) * 100)
+        
+        # Shot Distribution
+        home_inside = tactical_data.loc[is_home_matches, 'home_shots_insidebox'].dropna()
+        away_inside = tactical_data.loc[is_away_matches, 'away_shots_insidebox'].dropna()
+        home_outside = tactical_data.loc[is_home_matches, 'home_shots_outsidebox'].dropna()
+        away_outside = tactical_data.loc[is_away_matches, 'away_shots_outsidebox'].dropna()
+        all_inside = pd.concat([home_inside, away_inside])
+        all_outside = pd.concat([home_outside, away_outside])
+        if not all_inside.empty:
+            stats['avg_shots_insidebox'] = float(all_inside.mean())
+        if not all_outside.empty:
+            stats['avg_shots_outsidebox'] = float(all_outside.mean())
+        
+        # Expected Goals (xG)
+        home_xg = tactical_data.loc[is_home_matches, 'home_xg'].dropna()
+        away_xg = tactical_data.loc[is_away_matches, 'away_xg'].dropna()
+        all_xg = pd.concat([home_xg, away_xg])
+        if not all_xg.empty:
+            stats['avg_xg'] = float(all_xg.mean())
+        
+        # Passing Statistics
+        home_passes = tactical_data.loc[is_home_matches, 'home_passes'].dropna()
+        away_passes = tactical_data.loc[is_away_matches, 'away_passes'].dropna()
+        all_passes = pd.concat([home_passes, away_passes])
+        if not all_passes.empty:
+            stats['avg_passes'] = float(all_passes.mean())
+        
+        home_pass_acc = tactical_data.loc[is_home_matches, 'home_pass_accuracy'].dropna()
+        away_pass_acc = tactical_data.loc[is_away_matches, 'away_pass_accuracy'].dropna()
+        all_pass_acc = pd.concat([home_pass_acc, away_pass_acc])
+        if not all_pass_acc.empty:
+            stats['avg_pass_accuracy'] = float(all_pass_acc.mean())
+        
+        # Defensive Statistics
+        home_tackles = tactical_data.loc[is_home_matches, 'home_tackles'].dropna()
+        away_tackles = tactical_data.loc[is_away_matches, 'away_tackles'].dropna()
+        all_tackles = pd.concat([home_tackles, away_tackles])
+        if not all_tackles.empty:
+            stats['avg_tackles'] = float(all_tackles.mean())
+        
+        home_interceptions = tactical_data.loc[is_home_matches, 'home_interceptions'].dropna()
+        away_interceptions = tactical_data.loc[is_away_matches, 'away_interceptions'].dropna()
+        all_interceptions = pd.concat([home_interceptions, away_interceptions])
+        if not all_interceptions.empty:
+            stats['avg_interceptions'] = float(all_interceptions.mean())
+        
+        home_clearances = tactical_data.loc[is_home_matches, 'home_clearances'].dropna()
+        away_clearances = tactical_data.loc[is_away_matches, 'away_clearances'].dropna()
+        all_clearances = pd.concat([home_clearances, away_clearances])
+        if not all_clearances.empty:
+            stats['avg_clearances'] = float(all_clearances.mean())
+        
+        # Set Pieces
+        home_corners = tactical_data.loc[is_home_matches, 'home_corners'].dropna()
+        away_corners = tactical_data.loc[is_away_matches, 'away_corners'].dropna()
+        all_corners = pd.concat([home_corners, away_corners])
+        if not all_corners.empty:
+            stats['avg_corners'] = float(all_corners.mean())
+        
+        home_offsides = tactical_data.loc[is_home_matches, 'home_offsides'].dropna()
+        away_offsides = tactical_data.loc[is_away_matches, 'away_offsides'].dropna()
+        all_offsides = pd.concat([home_offsides, away_offsides])
+        if not all_offsides.empty:
+            stats['avg_offsides'] = float(all_offsides.mean())
+        
+        # Discipline
+        home_fouls = tactical_data.loc[is_home_matches, 'home_fouls'].dropna()
+        away_fouls = tactical_data.loc[is_away_matches, 'away_fouls'].dropna()
+        all_fouls = pd.concat([home_fouls, away_fouls])
+        if not all_fouls.empty:
+            stats['avg_fouls'] = float(all_fouls.mean())
+        
+        home_yellows = tactical_data.loc[is_home_matches, 'home_yellow_cards'].dropna()
+        away_yellows = tactical_data.loc[is_away_matches, 'away_yellow_cards'].dropna()
+        all_yellows = pd.concat([home_yellows, away_yellows])
+        if not all_yellows.empty:
+            stats['avg_yellow_cards'] = float(all_yellows.mean())
+        
+        home_reds = tactical_data.loc[is_home_matches, 'home_red_cards'].dropna()
+        away_reds = tactical_data.loc[is_away_matches, 'away_red_cards'].dropna()
+        all_reds = pd.concat([home_reds, away_reds])
+        if not all_reds.empty:
+            stats['total_red_cards'] = int(all_reds.sum())
+        
+        # Goalkeeping
+        home_saves = tactical_data.loc[is_home_matches, 'home_goalkeeper_saves'].dropna()
+        away_saves = tactical_data.loc[is_away_matches, 'away_goalkeeper_saves'].dropna()
+        all_saves = pd.concat([home_saves, away_saves])
+        if not all_saves.empty:
+            stats['avg_goalkeeper_saves'] = float(all_saves.mean())
+        
+        # Calculate derived metrics
+        if 'avg_shots' in stats and 'avg_shots_insidebox' in stats:
+            stats['shot_location_ratio'] = (stats['avg_shots_insidebox'] / stats['avg_shots'] * 100) if stats['avg_shots'] > 0 else 0
+        
+        if 'avg_possession' in stats:
+            if stats['avg_possession'] >= 55:
+                stats['playing_style'] = 'Possession-based'
+            elif stats['avg_possession'] <= 45:
+                stats['playing_style'] = 'Counter-attacking'
+            else:
+                stats['playing_style'] = 'Balanced'
+        
+        if 'avg_tackles' in stats and 'avg_interceptions' in stats:
+            stats['defensive_intensity'] = stats['avg_tackles'] + stats['avg_interceptions']
+        
+        stats['matches_analyzed'] = len(tactical_data)
+        
+        return stats
+    
     
     def generate_ai_insights(
         self,
@@ -400,7 +564,7 @@ class MatchAnalyzer:
         analysis_type: str = "comprehensive"
     ) -> Dict[str, Any]:
         """
-        Generate AI-powered insights using Granite LLM.
+        Generate AI-powered insights using Granite LLM with tactical data.
         
         Args:
             team_name: Team name to analyze
@@ -415,6 +579,13 @@ class MatchAnalyzer:
         
         if 'error' in analysis:
             return analysis
+        
+        # Get tactical data if available
+        tactical_data = self.data_loader.get_tactical_data(team_name, limit=num_matches)
+        has_tactical_data = not tactical_data.empty
+        
+        # Calculate comprehensive tactical statistics
+        tactical_stats = self._calculate_comprehensive_tactical_stats(tactical_data, team_name) if has_tactical_data else {}
         
         # Initialize LLM if not already done
         if self.llm is None:
@@ -431,50 +602,158 @@ class MatchAnalyzer:
             form = analysis['form']
             recent_matches = analysis.get('recent_matches', [])
             
-            # Create prompt based on analysis type
+            # Build comprehensive tactical summary if data available
+            tactical_summary = ""
+            if has_tactical_data and tactical_stats:
+                tactical_summary = f"""
+COMPREHENSIVE TACTICAL ANALYSIS (from {tactical_stats.get('matches_analyzed', 0)} matches):
+
+FORMATION & STYLE:
+- Primary Formation: {tactical_stats.get('most_used_formation', 'N/A')}
+- Formation Variety: {tactical_stats.get('formation_variety', 0)} different formations used
+- Playing Style: {tactical_stats.get('playing_style', 'N/A')}
+
+POSSESSION & CONTROL:
+- Average Possession: {tactical_stats.get('avg_possession', 0):.1f}%
+- Possession Consistency: ±{tactical_stats.get('possession_consistency', 0):.1f}%
+
+ATTACKING METRICS:
+- Shots per Match: {tactical_stats.get('avg_shots', 0):.1f}
+- Shot Accuracy: {tactical_stats.get('shot_accuracy', 0):.1f}%
+- Shots Inside Box: {tactical_stats.get('avg_shots_insidebox', 0):.1f} ({tactical_stats.get('shot_location_ratio', 0):.1f}% of total)
+- Shots Outside Box: {tactical_stats.get('avg_shots_outsidebox', 0):.1f}
+- Expected Goals (xG): {tactical_stats.get('avg_xg', 0):.2f} per match
+
+PASSING & BUILD-UP:
+- Total Passes: {tactical_stats.get('avg_passes', 0):.0f} per match
+- Pass Accuracy: {tactical_stats.get('avg_pass_accuracy', 0):.1f}%
+
+DEFENSIVE METRICS:
+- Tackles per Match: {tactical_stats.get('avg_tackles', 0):.1f}
+- Interceptions: {tactical_stats.get('avg_interceptions', 0):.1f}
+- Clearances: {tactical_stats.get('avg_clearances', 0):.1f}
+- Defensive Intensity: {tactical_stats.get('defensive_intensity', 0):.1f}
+
+SET PIECES:
+- Corners Won: {tactical_stats.get('avg_corners', 0):.1f} per match
+- Offsides: {tactical_stats.get('avg_offsides', 0):.1f} per match
+
+DISCIPLINE:
+- Fouls Committed: {tactical_stats.get('avg_fouls', 0):.1f} per match
+- Yellow Cards: {tactical_stats.get('avg_yellow_cards', 0):.1f} per match
+- Red Cards: {tactical_stats.get('total_red_cards', 0)} total
+
+GOALKEEPING:
+- Saves per Match: {tactical_stats.get('avg_goalkeeper_saves', 0):.1f}
+"""
+            
+            # Create enhanced prompt based on analysis type
             if analysis_type == "comprehensive":
-                prompt = f"""Analyze the following football team statistics and provide comprehensive insights:
+                prompt = f"""You are an elite football tactical analyst with expertise in data-driven performance analysis. Analyze the following comprehensive statistics for {team_name}:
 
-Team: {team_name}
-Matches Analyzed: {analysis['matches_analyzed']}
+TEAM: {team_name}
+MATCHES ANALYZED: {analysis['matches_analyzed']}
 
-Statistics:
+PERFORMANCE STATISTICS:
 - Win Rate: {stats['win_rate']:.1%}
-- Wins: {stats['wins']}, Draws: {stats['draws']}, Losses: {stats['losses']}
-- Goals Scored: {stats.get('goals_scored', 'N/A')}
-- Goals Conceded: {stats.get('goals_conceded', 'N/A')}
+- Record: {stats['wins']}W-{stats['draws']}D-{stats['losses']}L
+- Goals Scored: {stats.get('goals_scored', 'N/A')} (Avg: {stats.get('avg_goals_scored', 0):.2f}/match)
+- Goals Conceded: {stats.get('goals_conceded', 'N/A')} (Avg: {stats.get('avg_goals_conceded', 0):.2f}/match)
 - Goal Difference: {stats.get('goal_difference', 'N/A')}
 - Recent Form: {form['form_string']} (Form Score: {form['form_score']:.1f}/100)
-
-Recent Matches:
+{tactical_summary}
+RECENT MATCHES:
 {json.dumps(recent_matches[:3], indent=2)}
 
-Provide insights on:
-1. Overall team performance and trends
-2. Strengths and weaknesses
-3. Playing style characteristics
-4. Areas for improvement
-5. Predictions for future performance
+ANALYSIS REQUIREMENTS:
+Provide a comprehensive, data-driven tactical analysis covering:
 
-Keep the analysis concise, professional, and data-driven."""
+1. FORMATION & TACTICAL SETUP:
+   - Analyze the primary formation and its effectiveness
+   - Evaluate formation variety and tactical flexibility
+   - Assess how the formation supports the team's playing style
+
+2. ATTACKING ANALYSIS:
+   - Shot quality and conversion efficiency (xG vs actual goals)
+   - Shot location patterns (inside vs outside box)
+   - Attacking build-up through passing statistics
+   - Possession effectiveness in creating chances
+
+3. DEFENSIVE ORGANIZATION:
+   - Defensive intensity (tackles + interceptions)
+   - Clearance patterns and defensive solidity
+   - Goalkeeper performance and shot-stopping ability
+   - Defensive discipline (fouls, cards)
+
+4. POSSESSION & CONTROL:
+   - Possession percentage and its correlation with results
+   - Pass accuracy and build-up play quality
+   - Playing style classification (possession-based/counter-attacking/balanced)
+
+5. SET PIECES & DISCIPLINE:
+   - Corner effectiveness
+   - Offside trap usage
+   - Disciplinary record and its impact
+
+6. STRENGTHS & WEAKNESSES:
+   - Identify 3 key strengths based on data
+   - Identify 3 areas for improvement
+   - Provide specific tactical recommendations
+
+7. PERFORMANCE TRENDS & PREDICTIONS:
+   - Analyze form trajectory
+   - Predict likely performance in upcoming matches
+   - Suggest tactical adjustments for improvement
+
+Keep analysis professional, specific, and backed by the provided statistics."""
 
             elif analysis_type == "tactical":
-                prompt = f"""Analyze the tactical approach of {team_name} based on these statistics:
+                prompt = f"""You are a professional football tactical analyst. Conduct an in-depth tactical analysis of {team_name}:
 
-Recent Form: {form['form_string']}
-Win Rate: {stats['win_rate']:.1%}
-Goals per Match: {stats.get('avg_goals_scored', 'N/A')}
-Goals Conceded per Match: {stats.get('avg_goals_conceded', 'N/A')}
-
-Recent Matches:
+TEAM: {team_name}
+FORM: {form['form_string']} (Score: {form['form_score']:.1f}/100)
+WIN RATE: {stats['win_rate']:.1%}
+GOALS: {stats.get('avg_goals_scored', 0):.2f} scored, {stats.get('avg_goals_conceded', 0):.2f} conceded per match
+{tactical_summary}
+RECENT MATCHES:
 {json.dumps(recent_matches[:3], indent=2)}
 
-Provide tactical insights on:
-1. Offensive strategy and effectiveness
-2. Defensive organization
-3. Match tempo and control
-4. Key tactical patterns
-5. Recommended tactical adjustments"""
+TACTICAL ANALYSIS FRAMEWORK:
+
+1. OFFENSIVE TACTICS:
+   - Formation's attacking structure and width
+   - Shot generation: quantity ({tactical_stats.get('avg_shots', 0):.1f}/match) vs quality (xG: {tactical_stats.get('avg_xg', 0):.2f})
+   - Shot location strategy: {tactical_stats.get('shot_location_ratio', 0):.1f}% inside box
+   - Possession-based attack vs direct play
+   - Passing patterns: {tactical_stats.get('avg_passes', 0):.0f} passes at {tactical_stats.get('avg_pass_accuracy', 0):.1f}% accuracy
+   - Set piece threat: {tactical_stats.get('avg_corners', 0):.1f} corners/match
+
+2. DEFENSIVE STRUCTURE:
+   - Formation's defensive shape ({tactical_stats.get('most_used_formation', 'N/A')})
+   - Defensive intensity: {tactical_stats.get('defensive_intensity', 0):.1f} (tackles + interceptions)
+   - Pressing strategy and offside trap: {tactical_stats.get('avg_offsides', 0):.1f} offsides/match
+   - Goalkeeper involvement: {tactical_stats.get('avg_goalkeeper_saves', 0):.1f} saves/match
+   - Defensive discipline: {tactical_stats.get('avg_fouls', 0):.1f} fouls, {tactical_stats.get('avg_yellow_cards', 0):.1f} yellows/match
+
+3. MATCH CONTROL & TEMPO:
+   - Possession dominance: {tactical_stats.get('avg_possession', 0):.1f}%
+   - Playing style: {tactical_stats.get('playing_style', 'N/A')}
+   - Tempo control through passing
+   - Transition speed (counter-attacks vs build-up)
+
+4. TACTICAL PATTERNS:
+   - Formation consistency vs flexibility
+   - Key tactical tendencies from data
+   - Match-to-match adaptability
+
+5. TACTICAL RECOMMENDATIONS:
+   - Specific formation adjustments
+   - Attacking pattern improvements
+   - Defensive organization enhancements
+   - Set piece optimization
+   - Player positioning suggestions
+
+Provide detailed, actionable tactical insights based on all available data."""
 
             else:  # performance
                 prompt = f"""Evaluate the performance of {team_name}:
@@ -548,6 +827,26 @@ Provide performance analysis:
                 }
         
         try:
+            # Get tactical data for both teams
+            home_tactical = self.data_loader.get_tactical_data(home_team, limit=5)
+            away_tactical = self.data_loader.get_tactical_data(away_team, limit=5)
+            
+            # Build tactical summaries
+            home_tactical_summary = ""
+            away_tactical_summary = ""
+            
+            if not home_tactical.empty:
+                home_formations = home_tactical['home_formation'].dropna().tolist() if 'home_formation' in home_tactical.columns else []
+                home_formation = max(set(home_formations), key=home_formations.count) if home_formations else "N/A"
+                home_poss = home_tactical['home_possession'].fillna(0).mean() if 'home_possession' in home_tactical.columns else 0
+                home_tactical_summary = f"\n- Preferred Formation: {home_formation}\n- Average Possession: {home_poss:.1f}%"
+            
+            if not away_tactical.empty:
+                away_formations = away_tactical['away_formation'].dropna().tolist() if 'away_formation' in away_tactical.columns else []
+                away_formation = max(set(away_formations), key=away_formations.count) if away_formations else "N/A"
+                away_poss = away_tactical['away_possession'].fillna(0).mean() if 'away_possession' in away_tactical.columns else 0
+                away_tactical_summary = f"\n- Preferred Formation: {away_formation}\n- Average Possession: {away_poss:.1f}%"
+            
             # Prepare match preview prompt
             prompt = f"""Generate a professional match preview for this upcoming football match:
 
@@ -557,13 +856,13 @@ Home Team ({home_team}):
 - Recent Form: {prediction['home_form']['form_string']}
 - Form Score: {prediction['home_form']['form_score']:.1f}/100
 - Win Rate: {prediction['home_stats']['win_rate']:.1%}
-- Average Goals: {prediction['home_stats'].get('avg_goals', 'N/A')}
+- Average Goals: {prediction['home_stats'].get('avg_goals', 'N/A')}{home_tactical_summary}
 
 Away Team ({away_team}):
 - Recent Form: {prediction['away_form']['form_string']}
 - Form Score: {prediction['away_form']['form_score']:.1f}/100
 - Win Rate: {prediction['away_stats']['win_rate']:.1%}
-- Average Goals: {prediction['away_stats'].get('avg_goals', 'N/A')}
+- Average Goals: {prediction['away_stats'].get('avg_goals', 'N/A')}{away_tactical_summary}
 
 Head-to-Head:
 - Total Matches: {prediction['head_to_head']['total_matches']}
@@ -578,10 +877,10 @@ Statistical Prediction:
 - Away Win: {prediction['prediction']['away_win_probability']}%
 
 Provide a comprehensive match preview including:
-1. Key matchup analysis
-2. Tactical battle points
+1. Key matchup analysis (consider formations and playing styles)
+2. Tactical battle points (possession, formations, attacking patterns)
 3. Players/factors to watch
-4. Predicted outcome with reasoning
+4. Predicted outcome with reasoning based on tactical and statistical data
 5. Potential game scenarios
 
 Keep it engaging and insightful for football fans."""

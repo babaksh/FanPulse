@@ -9,9 +9,9 @@ This directory contains LangFlow workflow definitions for the FanPulse system.
 - **`var_lens_flow.json`** - VAR-Lens agent workflow for FIFA rules and VAR decisions
 - **`tactical_pulse_flow.json`** - Tactical Pulse agent workflow for match analysis and predictions
 
-### Supporting Files
-- **`README.md`** - This file
-- **`IMPORT_GUIDE.md`** - Step-by-step guide to import workflows into LangFlow
+### Documentation
+- **`README.md`** - This file (quick overview)
+- **`LANGFLOW_GUIDE.md`** - Complete guide with import instructions, configuration, testing, and demo scenarios
 
 ## 🚀 Quick Start
 
@@ -77,11 +77,13 @@ User Query
     ↓
 [Data Loader] → Match Database (49K+ matches)
     ↓
-[Metrics Calculator] → Statistics
+[Tactical Data Loader] → Tactical Stats (20 World Cup matches)
     ↓
-[LLM (Granite)] → AI Insights
+[Metrics Calculator] → Statistics + Tactical Data
     ↓
-Analysis + Predictions
+[LLM (Granite)] → AI Insights with Tactical Analysis
+    ↓
+Analysis + Predictions with Formation/Possession/Shots
 ```
 
 ## 🔧 Configuration
@@ -95,6 +97,7 @@ MODEL_NAME=granite4.1:8b
 # Data Paths
 VECTOR_STORE_PATH=data/vector_stores/var_lens_faiss
 MATCH_DATA_PATH=data/match_data/results.csv
+TACTICAL_DATA_PATH=data/match_data/tactical_stats.csv
 DOCS_PATH=data/processed_documents
 ```
 
@@ -115,43 +118,54 @@ Flow: Main → VAR-Lens
 Output: Detailed explanation with FIFA rule references
 ```
 
-### Example 2: Team Analysis
+### Example 2: Team Analysis with Tactical Data
 ```
-Input: "Analyze Brazil's recent performance"
+Input: "Analyze Qatar's recent performance"
 Flow: Main → Tactical Pulse
-Output: Statistics, form, and AI insights
+Output: Statistics, form, tactical data (formation, possession, shots), and AI insights
+
+Sample Output:
+- Win Rate: 20%
+- Formation: 5-3-2 (defensive)
+- Possession: 46% (balanced)
+- Shots: 7.5 per match
+- AI Analysis: "Qatar uses a defensive 5-3-2 formation..."
 ```
 
-### Example 3: Match Prediction
+### Example 3: Match Prediction with Tactical Preview
 ```
-Input: "Predict Brazil vs Argentina"
+Input: "Predict Qatar vs Ecuador"
 Flow: Main → Tactical Pulse
-Output: Win probabilities and match preview
+Output: Win probabilities, tactical matchup, and AI match preview
+
+Sample Output:
+- Predicted Score: 0-2
+- Formations: Qatar 5-3-2 vs Ecuador 4-4-2
+- Tactical Battle: Defensive vs Balanced
+- AI Preview: "Qatar's defensive setup will face Ecuador's balanced approach..."
 ```
 
-## 🎯 Demo Scenarios
+## 📚 Complete Documentation
 
-See `docs/demo-scenarios.md` for complete demo scripts and test cases.
+For detailed instructions on:
+- Importing workflows into LangFlow
+- Configuration and setup
+- Testing scenarios
+- Demo workflows
+- Real-time match scenarios
+- Tactical data integration
+- Troubleshooting
+
+**See:** [`LANGFLOW_GUIDE.md`](LANGFLOW_GUIDE.md) - Complete 545-line guide with everything you need
 
 ## 🔗 Related Documentation
 
 - **Architecture**: `ARCHITECTURE.md`
-- **Setup Guide**: `docs/langflow-integration-guide.md`
-- **API Documentation**: `README.md`
-
-## 🐛 Troubleshooting
-
-### Issue: Workflow won't import
-**Solution**: Ensure you're using LangFlow version 1.0.0 or higher
-
-### Issue: LLM not responding
-**Solution**: Check Ollama is running: `ollama list`
-
-### Issue: Vector store not found
-**Solution**: Run data processing: `python scripts/process_documents.py`
+- **Setup Guide**: `README.md`
+- **Scripts Guide**: `scripts/README.md`
 
 ## 📞 Support
 
 For issues or questions:
 - GitHub: https://github.com/babaksh/FanPulse
-- Documentation: `docs/`
+- Complete Guide: [`LANGFLOW_GUIDE.md`](LANGFLOW_GUIDE.md)

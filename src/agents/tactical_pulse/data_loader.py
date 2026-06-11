@@ -5,7 +5,7 @@ Loads and preprocesses match data from various sources
 
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, cast
 import logging
 from datetime import datetime
 import json
@@ -112,9 +112,9 @@ class MatchDataLoader:
         
         # Sort by date (most recent first) and limit
         if 'date' in matches.columns:
-            matches = matches.sort_values('date', ascending=False)
+            matches = cast(pd.DataFrame, matches.sort_values(by='date', ascending=False))  # type: ignore[call-overload]
         
-        return matches.head(limit)
+        return cast(pd.DataFrame, matches.head(limit))
     
     def get_head_to_head(
         self,
@@ -146,9 +146,9 @@ class MatchDataLoader:
         
         # Sort by date (most recent first) and limit
         if 'date' in matches.columns:
-            matches = matches.sort_values('date', ascending=False)
+            matches = cast(pd.DataFrame, matches.sort_values(by='date', ascending=False))  # type: ignore[call-overload]
         
-        return matches.head(limit)
+        return cast(pd.DataFrame, matches.head(limit))
     
     def get_team_stats(self, team_name: str, last_n_matches: int = 10) -> Dict[str, Any]:
         """
@@ -188,8 +188,8 @@ class MatchDataLoader:
         for _, match in matches.iterrows():
             is_home = team_name.lower() in str(match.get('home_team', '')).lower()
             
-            home_score = match.get('home_score', 0)
-            away_score = match.get('away_score', 0)
+            home_score = int(match.get('home_score', 0) or 0)
+            away_score = int(match.get('away_score', 0) or 0)
             
             if is_home:
                 stats['goals_scored'] += home_score
@@ -248,12 +248,12 @@ class MatchDataLoader:
         
         # Sort by date and limit
         if 'date' in matches.columns:
-            matches = matches.sort_values('date', ascending=False)
+            matches = cast(pd.DataFrame, matches.sort_values(by='date', ascending=False))  # type: ignore[call-overload]
         
         if limit:
-            matches = matches.head(limit)
+            matches = cast(pd.DataFrame, matches.head(limit))
         
-        return matches
+        return cast(pd.DataFrame, matches)
     
     def search_matches(
         self,
@@ -286,9 +286,9 @@ class MatchDataLoader:
         
         # Sort by date and limit
         if 'date' in matches.columns:
-            matches = matches.sort_values('date', ascending=False)
+            matches = cast(pd.DataFrame, matches.sort_values(by='date', ascending=False))  # type: ignore[call-overload]
         
-        return matches.head(limit)
+        return cast(pd.DataFrame, matches.head(limit))
     
     def get_dataset_info(self) -> Dict[str, Any]:
         """

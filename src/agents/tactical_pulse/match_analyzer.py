@@ -163,8 +163,8 @@ class MatchAnalyzer:
         for _, match in matches.iterrows():
             home = match.get('home_team', '')
             away = match.get('away_team', '')
-            home_score = match.get('home_score', 0)
-            away_score = match.get('away_score', 0)
+            home_score = float(match.get('home_score', 0) or 0)
+            away_score = float(match.get('away_score', 0) or 0)
             
             # Skip if scores are NaN
             if pd.isna(home_score) or pd.isna(away_score):
@@ -315,8 +315,8 @@ class MatchAnalyzer:
         teams = set()
         
         for _, match in matches.iterrows():
-            home_score = match.get('home_score', 0)
-            away_score = match.get('away_score', 0)
+            home_score = float(match.get('home_score', 0) or 0)
+            away_score = float(match.get('away_score', 0) or 0)
             
             if not pd.isna(home_score) and not pd.isna(away_score):
                 total_goals += home_score + away_score

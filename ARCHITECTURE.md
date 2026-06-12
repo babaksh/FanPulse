@@ -85,9 +85,17 @@ FanPulse/
 │   ├── test_complete_system.py        # System validation (8 tests)
 │   └── README.md
 │
-├── data/                              # Data Files
-│   ├── raw_documents/                 # 7 FIFA/IFAB PDFs (original)
-│   └── processed_documents/           # 7 FIFA/IFAB documents (Markdown)
+├── data/                              # Data Files (58.5 MB - included in repo)
+│   ├── raw_documents/                 # 7 FIFA/IFAB PDFs (~15 MB)
+│   ├── processed_documents/           # 7 FIFA/IFAB Markdown files (~5 MB)
+│   ├── vector_stores/                 # FAISS index (~20 MB)
+│   │   └── var_lens/
+│   │       ├── index.faiss            # 658 vectors
+│   │       └── index.pkl              # Metadata
+│   ├── match_data/                    # Match datasets (~15 MB)
+│   │   ├── results.csv                # 49,329 historical matches (1872-2024)
+│   │   └── tactical_stats.csv         # 20 WC 2022 matches (49 columns)
+│   └── temp_chunks/                   # Temporary PDF chunks (~3 MB)
 │
 ├── README.md                          # Main documentation
 ├── ARCHITECTURE.md                    # This file
@@ -97,23 +105,11 @@ FanPulse/
 └── .gitignore                         # Git ignore rules
 ```
 
-**What's NOT in GitHub (generated locally):**
-
-```
-data/
-├── vector_stores/                     # FAISS index (built locally)
-│   └── var_lens_faiss/
-│       ├── index.faiss                # 658 vectors
-│       └── index.pkl                  # Metadata
-└── match_data/                        # CSV files (fetched locally)
-    ├── results.csv                    # 49,329 historical matches
-    └── tactical_stats.csv             # 20 WC 2022 matches (49 columns)
-```
-
-**Why not in GitHub?**
-- **Vector stores**: Can be rebuilt using `scripts/build_var_lens_vectorstore.py`
-- **Match data**: Can be fetched using `scripts/fetch_match_data.py` (requires API key)
-- **Large files**: Keep repository size manageable
+**All data files are included in the repository for:**
+- ✅ **Immediate Testing**: No setup or API keys required
+- ✅ **Reproducibility**: Exact same data for all users
+- ✅ **Transparency**: Judges can see the actual datasets used
+- ✅ **Convenience**: Clone and run immediately
 
 ---
 

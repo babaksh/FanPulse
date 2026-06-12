@@ -177,11 +177,15 @@ FanPulse/
 │   ├── test_complete_system.py    # System validation (8 tests)
 │   └── README.md
 │
-├── data/                          # Data files
-│   ├── raw_documents/             # 7 FIFA/IFAB PDFs (original)
-│   ├── processed_documents/       # 7 FIFA/IFAB documents (Markdown)
-│   ├── vector_stores/             # FAISS index (built locally, not in repo)
-│   └── match_data/                # CSV files (fetched locally, not in repo)
+├── data/                          # Data files (58.5 MB total - included in repo)
+│   ├── raw_documents/             # 7 FIFA/IFAB PDFs (~15 MB)
+│   ├── processed_documents/       # 7 FIFA/IFAB Markdown files (~5 MB)
+│   ├── vector_stores/             # FAISS index - 658 vectors (~20 MB)
+│   │   └── var_lens/              # VAR-Lens vector store
+│   ├── match_data/                # Match datasets (~15 MB)
+│   │   ├── results.csv            # 49,329 historical matches (1872-2024)
+│   │   └── tactical_stats.csv     # 20 WC 2022 matches (49 columns)
+│   └── temp_chunks/               # Temporary PDF chunks (~3 MB)
 │
 ├── README.md                      # This file
 ├── ARCHITECTURE.md                # System architecture
@@ -190,7 +194,7 @@ FanPulse/
 └── requirements.txt               # Python dependencies
 ```
 
-**Note:** Large data files (`data/match_data/*.csv`, `data/vector_stores/`) are not included in the repository. They can be generated locally using the provided scripts.
+**Note:** All data files are included in the repository (58.5 MB total) for immediate testing and reproducibility. No API keys or data fetching required!
 
 ---
 

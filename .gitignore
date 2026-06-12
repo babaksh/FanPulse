@@ -72,11 +72,10 @@ secrets/
 hands-on-labs/
 notebooks/
 
-# Large data files
-data/match_data/*.csv
-
-# Vector stores (can be rebuilt)
-data/vector_stores/
+# Data files are now included in repository for reproducibility (58.5 MB total)
+# Uncomment below lines if you want to exclude them:
+# data/match_data/*.csv
+# data/vector_stores/
 
 # Logs
 *.log

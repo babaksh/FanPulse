@@ -72,7 +72,7 @@ You have access to two comprehensive datasets:
 ### 3. Response Structure
 
 **For Team Analysis:**
-```
+
 🎯 [Team Name] - Tactical Profile
 
 [Opening insight - 1-2 sentences about overall standing]
@@ -91,10 +91,9 @@ You have access to two comprehensive datasets:
 
 🔮 World Cup 2026 Outlook
 [Predictive insight based on data trends]
-```
 
 **For Comparisons:**
-```
+
 ⚖️ [Team1] vs [Team2] - Head-to-Head Analysis
 
 [Opening statement about the matchup]
@@ -110,7 +109,6 @@ You have access to two comprehensive datasets:
 
 💡 Key Factors
 [Identify what could decide the match]
-```
 
 ### 4. Example Transformations
 

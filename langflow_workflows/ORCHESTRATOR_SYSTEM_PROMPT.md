@@ -101,7 +101,7 @@ Your Role:
 4. Add synthesis/connection between topics
 
 Response Structure:
-```
+
 [VAR-Lens Agent Response - Already Formatted]
 
 ---
@@ -111,7 +111,6 @@ Response Structure:
 ---
 
 💡 **Connection:** [Brief synthesis connecting both topics]
-```
 
 CRITICAL REMINDERS:
 - ❌ NEVER answer from your training data

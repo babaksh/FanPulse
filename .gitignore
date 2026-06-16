@@ -134,5 +134,17 @@ scripts/test_orchestrator.py
 scripts/demo_scenarios.py
 scripts/list_tactical_columns.py
 scripts/add_tactical_data_manual.py
+scripts/update_live_matches.py
 
 # Made with Bob
+langflow_Components_Docs/
+
+.files
+.bob/
+.chainlit
+.vscode/
+langflow_components/README.md
+langflow_workflows/README.md
+langflow_workflows/DATA_SCHEMA_GUIDE_V2.md
+langflow_workflows/DATA_SCHEMA_GUIDE_V3.md
+langflow_workflows/COMPLETE_WORKFLOW_SETUP.md

@@ -2,12 +2,11 @@
 
 **AI-Powered Football Analysis for FIFA World Cup 2026**
 
-FanPulse helps fans understand VAR decisions and tactical changes during matches using explainable AI. Built with IBM Granite, Docling, LangFlow, and IBM Bob for the IBM Skills Build AI Builders Challenge (June 2026).
+FanPulse is a multi-agent AI system that helps football fans understand VAR decisions and analyze team performance using explainable AI. Built with IBM Granite, Docling, and LangFlow for the IBM Skills Build AI Builders Challenge (June 2026).
 
-[![IBM Granite](https://img.shields.io/badge/IBM-Granite_4.1_8B-blue)](https://www.ibm.com/granite)
+[![IBM Granite](https://img.shields.io/badge/IBM-Granite_3.1_8B-blue)](https://www.ibm.com/granite)
 [![Docling](https://img.shields.io/badge/IBM-Docling-green)](https://github.com/DS4SD/docling)
-[![Langflow](https://img.shields.io/badge/Langflow-Orchestration-purple)](https://www.langflow.org/)
-[![IBM Bob](https://img.shields.io/badge/IBM-Bob_AI_Assistant-orange)](https://www.ibm.com/bob)
+[![Langflow](https://img.shields.io/badge/Langflow-Multi--Agent-purple)](https://www.langflow.org/)
 [![Python](https://img.shields.io/badge/Python-3.11+-yellow)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -15,41 +14,98 @@ FanPulse helps fans understand VAR decisions and tactical changes during matches
 
 ## 🎯 What is FanPulse?
 
-Two specialized AI agents working together to enhance the football viewing experience:
+A **multi-agent AI system** with three specialized components working together:
+
+### 🎭 FanPulse Orchestrator
+Intelligent coordinator that routes questions to the right agent automatically.
+- 🧠 Analyzes user intent (VAR rules vs tactical analysis)
+- 🔀 Routes to appropriate specialized agent
+- ⚡ Executes agents in parallel when needed
+- 🎨 Synthesizes results into unified responses
 
 ### 🔍 VAR-Lens Agent
 Explains Video Assistant Referee (VAR) decisions using official FIFA rules.
-- 📚 658-vector knowledge base from 7 FIFA/IFAB documents
-- 🤖 Powered by IBM Granite 4.1 8B via Ollama
-- 📖 Clear explanations with source citations
-- 🔄 RAG (Retrieval Augmented Generation) pipeline
+- 📚 **658-vector knowledge base** from 7 FIFA/IFAB documents
+- 🤖 Powered by **IBM Granite** (local or cloud)
+- 📖 Clear explanations with **source citations**
+- 🔄 **RAG pipeline** with FAISS vector store
+- 🎯 **Match-specific decisions** database for real incidents
 
 ### ⚽ Tactical Pulse Agent  
-Analyzes team performance and tactical changes with real match data.
-- 📊 49,329 historical matches + 20 World Cup 2022 matches
-- 🎯 49 tactical columns: formations, possession, shots, passes, xG
-- 🤖 AI-powered insights using IBM Granite
-- 📈 Match predictions and team analysis
+Analyzes team performance and provides tactical insights with real match data.
+- 📊 **49,000+ historical matches** (1872-2026)
+- 🏆 **65 World Cup 2022 matches** with detailed tactical data
+- 🎯 Advanced metrics: possession, xG, shots, passes, formations
+- 🤖 **AI-powered insights** using **IBM Granite**
 
-### 🎭 Smart Orchestrator
-Routes your questions to the right agent automatically using keyword matching and LLM classification.
+---
+
+## 🏗️ System Architecture
+
+FanPulse follows the **Tool-Agent separation pattern** - an industry-standard architecture:
+
+```
+User Question
+    ↓
+┌─────────────────────────────────────────┐
+│  Orchestrator (LLM + Routing Logic)     │
+│  - Analyzes intent                      │
+│  - Selects appropriate agent(s)         │
+│  - Coordinates execution                │
+└─────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────┐
+│  Agents (LLM + System Prompts)          │
+│  ├─ VAR-Lens: Rules interpretation     │
+│  └─ Tactical Pulse: Performance analysis│
+└─────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────┐
+│  Tools (Pure Functions → JSON)          │
+│  - query_fifa_documents                 │
+│  - query_referee_decisions              │
+│  - analyze_team                         │
+│  - compare_teams                        │
+│  - get_tactical_data                    │
+│  - get_team_stats                       │
+│  - query_csv                            │
+└─────────────────────────────────────────┘
+    ↓
+Formatted Response → User
+```
+
+### Key Architecture Principles
+
+1. **Separation of Concerns**: Tools return raw JSON data, agents interpret and format
+2. **Reusability**: Same tools can be used by multiple agents
+3. **Testability**: Tools are pure functions with predictable outputs
+4. **Flexibility**: Same data, different formatting per agent
+5. **Maintainability**: Clear separation between data retrieval and presentation
+
+This architecture follows **LangChain best practices** and is similar to **OpenAI Function Calling** and **Anthropic Tool Use** patterns.
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Prerequisites
-```bash
-# Python 3.11+
-python --version
+### 1. Install Prerequisites
 
-# Install Ollama
+**Python 3.11+**
+```bash
+python --version
+```
+
+**Ollama (for local IBM Granite)**
+```bash
 # Windows: Download from https://ollama.com
 # Mac: brew install ollama
 # Linux: curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull IBM Granite model (5.3 GB)
+ollama pull granite4.1:8b
 ```
 
-### 2. Install Dependencies
+**IBM Tools**
 ```bash
 # Clone repository
 git clone https://github.com/babaksh/FanPulse.git
@@ -59,264 +115,329 @@ cd FanPulse
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install packages
+# Install IBM Docling and other dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Setup IBM Granite
-```bash
-# Pull Granite model (5.3 GB)
-ollama pull granite4.1:8b
+### 2. Install LangFlow Desktop
 
-# Verify installation
-ollama list
+Download and install LangFlow Desktop from [langflow.org](https://www.langflow.org/)
+
+### 3. Setup in LangFlow
+
+1. **Open LangFlow Desktop**
+
+2. **Import Workflow**
+   - Click "Import" or "New Flow"
+   - Select: `langflow_workflows/FanPulse Multi-Agent.json`
+
+3. **Configure IBM Granite Model**
+   - Open each agent component (Orchestrator, VAR-Lens, Tactical Pulse)
+   - In "Language Model" field, select your IBM Granite deployment:
+     - **Local**: Select "Ollama" → "granite4.1:8b"
+     - **Cloud**: Configure IBM Granite Cloud API credentials
+
+4. **Data Setup** (Choose one option)
+
+   **Option A: Use Pre-built Data** (Recommended - Ready to use!)
+   
+   All data is included in the repository:
+   - ✅ `data/vector_stores/` - VAR-Lens FAISS index (658 vectors)
+   - ✅ `data/match_data/` - Historical matches & tactical stats
+   - ✅ `data/referee_decisions/` - Match-specific incidents
+   
+   No additional setup needed - just import and run!
+
+   **Option B: Rebuild from Source** (Optional)
+   ```bash
+   # Rebuild VAR-Lens vector store from FIFA documents
+   python scripts/var_lens_setup/build_var_lens_vectorstore.py
+   ```
+
+5. **Run the Workflow**
+   - Click "Run" or "Play" button in LangFlow
+   - Start asking questions!
+
+**Note**: All model configuration, agent setup, and orchestration is done within LangFlow Desktop. No manual CLI setup required.
+
+---
+
+## 💻 Usage Examples
+
+### VAR Decision Explanation
+```
+Query: "What is the offside rule?"
+Agent: VAR-Lens
+Output: Detailed FIFA Law 11 explanation with source citations
 ```
 
-### 4. Build Knowledge Base
-```bash
-# Build VAR-Lens vector store (658 vectors from FIFA documents)
-python scripts/build_var_lens_vectorstore.py
+### Tactical Analysis
+```
+Query: "Analyze Brazil's performance"
+Agent: Tactical Pulse
+Output: 
+- Win rate, goals, form analysis
+- AI insights on playing style
+- Strengths and weaknesses
 ```
 
-### 5. Test System
-```bash
-# Run complete system test (should show 8/8 passing)
-python scripts/test_complete_system.py
+### Match-Specific Incident
+```
+Query: "What happened at minute 67 in Brazil vs Argentina?"
+Agent: VAR-Lens (uses both tools)
+Output:
+- Specific referee decision details
+- Official FIFA rule explanation
+- Combined analysis
+```
+
+### Match Prediction
+```
+Query: "Predict Argentina vs France"
+Agent: Tactical Pulse
+Output:
+- Head-to-head comparison
+- Tactical matchup analysis
+- Performance-based prediction
 ```
 
 ---
 
-## 💻 Usage
-
-### Option 1: LangFlow (Visual Workflows) - Recommended
-
-```bash
-# Start LangFlow
-langflow run
-
-# Open browser: http://localhost:7860
-# Import: langflow_workflows/fanpulse_main_flow.json
-```
-
-**Try these queries:**
-- "What is the offside rule?" → VAR-Lens explains with FIFA sources
-- "Analyze Qatar's tactical approach" → Tactical Pulse with formation (5-3-2), possession (46%), shots (7.5)
-- "Predict Qatar vs Ecuador" → Match preview with tactical matchup
-
-📖 **Complete Guide:** [`langflow_workflows/LANGFLOW_GUIDE.md`](langflow_workflows/LANGFLOW_GUIDE.md)
-
-### Option 2: Python API
-
-```python
-from src.orchestrator import FanPulseOrchestrator
-
-# Initialize
-orchestrator = FanPulseOrchestrator()
-
-# Ask a question
-result = orchestrator.process_query("What is VAR?")
-print(result['answer'])
-```
-
----
-
-## 📊 Key Features
-
-### Real Tactical Data Integration
-- **49 columns** of tactical statistics from World Cup 2022
-- Formations (4-3-3, 5-3-2, 4-4-2, etc.)
-- Possession percentages
-- Shot patterns (total, on target, inside/outside box)
-- Pass accuracy and completion rates
-- Defensive metrics (tackles, interceptions, blocks)
-- Set pieces & discipline (corners, fouls, cards)
-- Expected Goals (xG) and advanced metrics
-
-### Intelligent Query Routing
-- Keyword matching for fast classification
-- LLM-based intent classification for complex queries
-- Automatic agent selection
-- Unified response formatting
-
-### Dynamic Data Ingestion
-- Add new FIFA documents on-the-fly
-- Fetch live match data from API-Football
-- Real-time knowledge base updates
-- Automatic duplicate detection
-
----
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
 FanPulse/
-├── src/                           # Source code
-│   ├── agents/
-│   │   ├── var_lens/              # VAR decision explanations
-│   │   │   ├── rag_engine.py      # RAG pipeline with FAISS
-│   │   │   └── llm_providers.py   # LLM abstraction layer
-│   │   └── tactical_pulse/        # Match analysis
-│   │       ├── data_loader.py     # Match data loading
-│   │       ├── match_analyzer.py  # Team analysis & predictions
-│   │       └── metrics_calculator.py  # Statistical calculations
-│   └── orchestrator/              # Query routing & coordination
-│       ├── fanpulse_orchestrator.py   # Main orchestrator
-│       ├── query_router.py        # Smart routing logic
-│       └── response_handler.py    # Response formatting
+├── langflow_components/              # LangFlow custom components
+│   ├── fanpulse_orchestrator.py      # Main orchestrator agent
+│   ├── var_lens_agent.py             # VAR rules expert agent
+│   ├── tactical_pulse_agent.py       # Tactical analysis agent
+│   ├── query_fifa_docs_tool.py       # FIFA documents RAG tool
+│   ├── query_referee_decisions_tool.py  # Match incidents tool
+│   ├── analyze_team_tool.py          # Team analysis tool
+│   ├── compare_teams_tool.py         # Head-to-head comparison tool
+│   ├── get_tactical_data_tool.py     # Tournament tactical data tool
+│   ├── get_team_stats_tool.py        # Quick stats tool
+│   └── query_csv_tool.py             # Custom CSV queries tool
 │
-├── langflow_workflows/            # Visual workflow definitions
-│   ├── fanpulse_main_flow.json    # Main orchestrator workflow
-│   ├── var_lens_flow.json         # VAR-Lens workflow
-│   ├── tactical_pulse_flow.json   # Tactical Pulse workflow
-│   ├── LANGFLOW_GUIDE.md          # Complete guide (545 lines)
-│   └── README.md
+├── langflow_workflows/               # Workflow definitions & prompts
+│   ├── FanPulse Multi-Agent.json     # Complete multi-agent workflow
+│   ├── ORCHESTRATOR_SYSTEM_PROMPT.md # Orchestrator instructions
+│   ├── VAR_LENS_SYSTEM_PROMPT.md     # VAR-Lens agent instructions
+│   ├── TACTICAL_PULSE_SYSTEM_PROMPT.md  # Tactical Pulse instructions
+│   ├── COMPLETE_WORKFLOW_SETUP.md    # Setup guide
+│   ├── DATA_SCHEMA_GUIDE_V3.md       # Data structure reference
+│   └── DATA_SCHEMA_GUIDE_V2.md       # Legacy data guide
 │
-├── scripts/                       # Utility scripts
-│   ├── build_var_lens_vectorstore.py  # Build FAISS vector store
-│   ├── fetch_match_data.py        # Unified data fetching from API-Football
-│   ├── test_complete_system.py    # System validation (8 tests)
-│   └── README.md
+├── scripts/                          # Utility scripts
+│   ├── var_lens_setup/               # VAR-Lens setup scripts
+│   │   ├── build_var_lens_vectorstore.py  # Build FAISS vector store
+│   │   ├── process_documents.py      # Process PDFs with Docling
+│   │   ├── add_referee_decision.py   # Add match incidents
+│   │   └── README.md                 # Setup documentation
+│   └── update_live_matches_v2.py     # Live match data updater
 │
-├── data/                          # Data files (58.5 MB total - included in repo)
-│   ├── raw_documents/             # 7 FIFA/IFAB PDFs (~15 MB)
-│   ├── processed_documents/       # 7 FIFA/IFAB Markdown files (~5 MB)
-│   ├── vector_stores/             # FAISS index - 658 vectors (~20 MB)
-│   │   └── var_lens/              # VAR-Lens vector store
-│   ├── match_data/                # Match datasets (~15 MB)
-│   │   ├── results.csv            # 49,329 historical matches (1872-2024)
-│   │   └── tactical_stats.csv     # 20 WC 2022 matches (49 columns)
-│   └── temp_chunks/               # Temporary PDF chunks (~3 MB)
+├── data/                             # Data files
+│   ├── raw_documents/                # 7 FIFA/IFAB PDFs
+│   ├── processed_documents/          # 7 Markdown files (Docling output)
+│   ├── vector_stores/                # FAISS index
+│   │   └── var_lens/                 # 658 vectors, 1.01 MB
+│   ├── match_data/                   # Match datasets
+│   │   ├── results.csv               # 49,000+ historical matches
+│   │   └── tactical_stats.csv        # 65 WC 2022 matches with tactics
+│   ├── referee_decisions/            # Match-specific referee decisions
+│   │   ├── WC2026_2026_06_15_Brazil_Argentina.json
+│   │   └── README.md
+│   ├── data_schema.json              # Complete data structure
+│   └── cache/                        # Cached data (soccerdata)
 │
-├── README.md                      # This file
-├── ARCHITECTURE.md                # System architecture
-├── LICENSE                        # MIT License
-├── NOTICE                         # Third-party notices
-└── requirements.txt               # Python dependencies
+├── README.md                         # This file
+├── LICENSE                           # MIT License
+└── requirements.txt                  # Python dependencies
 ```
-
-**Note:** All data files are included in the repository (58.5 MB total) for immediate testing and reproducibility. No API keys or data fetching required!
 
 ---
 
 ## 🔧 IBM Technologies Used
 
-### ✅ IBM Granite 4.1 8B (Required)
-- **Primary LLM** for both agents via Ollama
+### ✅ IBM Granite (Required)
+- **Primary LLM** for all agents
 - Generates explanations and tactical insights
 - Powers orchestrator's intent classification
-- Temperature: 0.3 (VAR-Lens) / 0.7 (Tactical Pulse)
+- Temperature: 0.2 (precise tool calling)
 
-### ✅ Docling (Required)
+**Deployment Options:**
+- **Local**: IBM Granite 4.1 8B via Ollama (tested ✅)
+- **Cloud**: IBM Granite Cloud API (tested ✅)
+
+**Usage in Components:**
+```python
+# All agents use Granite via LangFlow's model configuration
+# Supports both local (Ollama) and cloud (IBM API) deployment
+# Temperature: 0.2 for precise tool calling
+# Max tokens: 1500 (VAR-Lens), 2000 (Tactical Pulse), 2500 (Orchestrator)
+```
+
+### ✅ IBM Docling (Required)
 - **Document Processing**: Converted 7 FIFA/IFAB PDFs to Markdown
-- Processed 450 KB of official regulations
+- Processed official regulations and protocols
 - Enabled efficient RAG pipeline with clean text extraction
 - Preserved document structure and metadata
 
+**Processed Documents:**
+1. Laws of the Game 2026/27
+2. Video Assistant Referee (VAR) Protocol
+3. Changes to the Laws of the Game 2026/27
+4. FIFA World Cup 2026 Regulations
+5. Off-field Treatment and Assessment Protocol
+6. Throw-in and Goal-kick Countdown Protocol
+7. Time-limited Substitution Protocol
+
+**Processing Script:**
+```bash
+python scripts/var_lens_setup/process_documents.py
+```
+
 ### ✅ LangFlow (Required)
-- **Visual Orchestration**: 3 complete workflow templates
+- **Visual Orchestration**: Complete multi-agent workflow
 - No-code deployment option for demos
 - Agent coordination and query routing
 - Real-time testing and debugging
 
-### ✅ IBM Bob (Required)
-- **AI Coding Assistant** used throughout development
-- Generated 13,000+ lines of Python code
-- Created comprehensive documentation
-- Assisted with architecture design and debugging
+**Workflow:**
+- Import: `langflow_workflows/FanPulse Multi-Agent.json`
+- 3 agents + 7 tools + system prompts
+- Automatic parallel execution when needed
 
 ---
 
-## 📈 System Validation
+## 🎯 Key Features
 
-```bash
-# Run complete system test
-python scripts/test_complete_system.py
-```
+### 1. Multi-Agent Architecture
+- **Orchestrator**: Routes queries intelligently
+- **VAR-Lens**: Explains rules with official sources
+- **Tactical Pulse**: Analyzes performance with data
 
-**Expected Output:**
-```
-✅ 1/8: Python imports
-✅ 2/8: Data files exist
-✅ 3/8: Ollama connection
-✅ 4/8: Granite model available
-✅ 5/8: VAR-Lens agent
-✅ 6/8: Tactical Pulse agent
-✅ 7/8: Orchestrator
-✅ 8/8: Tactical Data Integration
+### 2. Dual Data Sources (VAR-Lens)
+- **General Rules**: 658 vectors from FIFA/IFAB documents
+- **Match Incidents**: Referee decisions database for specific matches
 
-All tests passed! ✅
-```
+### 3. Comprehensive Tactical Data
+- **Historical**: 49,000+ matches (1872-2026)
+- **Tournament**: 65 WC 2022 matches with detailed tactics
+- **Metrics**: Possession, xG, shots, passes, formations
 
----
+### 4. Explainable AI
+- **Source Citations**: Every answer references official documents
+- **Transparent Reasoning**: Clear explanation of analysis
+- **Human-Centered**: Accessible language for all fans
 
-## 🎬 Demo Scenarios
-
-### Scenario 1: VAR Decision Explanation
-```
-Query: "Why was that goal disallowed for offside?"
-Agent: VAR-Lens
-Output: Detailed FIFA Law 11 explanation with source citations
-```
-
-### Scenario 2: Tactical Analysis
-```
-Query: "Analyze Qatar's tactical approach"
-Agent: Tactical Pulse
-Output: 
-- Formation: 5-3-2
-- Possession: 46%
-- Shots: 7.5 per game
-- AI insights on defensive strategy
-```
-
-### Scenario 3: Match Prediction
-```
-Query: "Predict Qatar vs Ecuador"
-Agent: Tactical Pulse
-Output:
-- Score prediction with probabilities
-- Tactical matchup analysis
-- Formation battle breakdown
-- Key player insights
-```
+### 5. Tool-Agent Separation
+- **Tools**: Pure functions returning JSON data
+- **Agents**: Interpret data and format responses
+- **Benefits**: Reusable, testable, maintainable
 
 ---
 
-## 🛠️ Advanced Features
+## 📊 Data Sources
 
-### Fetch New Match Data
+### VAR-Lens Data
+1. **FIFA/IFAB Documents** (658 vectors)
+   - Laws of the Game 2026/27
+   - VAR Protocol (IFAB)
+   - FIFA World Cup 2026 Regulations
+   - Changes to Laws 2026/27
+   - Treatment protocols (3 documents)
+
+2. **Referee Decisions Database**
+   - Match-specific incidents
+   - VAR review details
+   - Decision reasoning
+   - Example: `data/referee_decisions/WC2026_2026_06_15_Brazil_Argentina.json`
+
+### Tactical Pulse Data
+1. **results.csv** (~49,000 matches)
+   - Date, teams, scores
+   - Tournament, venue
+   - Historical trends (1872-2026)
+
+2. **tactical_stats.csv** (65 WC 2022 matches)
+   - Possession, shots, passes
+   - Expected Goals (xG)
+   - Formations, defensive metrics
+   - Prefix system: WC2022_*, WC2026_*
+
+3. **data_schema.json**
+   - Complete data structure
+   - Column descriptions
+   - Data types and formats
+
+---
+
+## 🧪 Testing
+
+### Build Vector Store
 ```bash
-# Fetch World Cup 2022 matches
-python scripts/fetch_match_data.py --world-cup-2022 --key-matches
-
-# Fetch specific match
-python scripts/fetch_match_data.py --fixture-id 855737
-
-# Fetch national team matches
-python scripts/fetch_match_data.py --team brazil --last 3
+python scripts/var_lens_setup/build_var_lens_vectorstore.py
 ```
 
-**Note:** Requires API-Football API key in `.env` file:
+### Process Documents
 ```bash
-API_FOOTBALL_KEY=your_api_key_here
+python scripts/var_lens_setup/process_documents.py
 ```
 
-### Add New FIFA Documents
-```python
-from src.agents.var_lens import VARLensRAG
-
-rag = VARLensRAG()
-rag.add_documents(["path/to/new/document.pdf"])
-rag.rebuild_index()
+### Add Referee Decision
+```bash
+python scripts/var_lens_setup/add_referee_decision.py
 ```
 
 ---
 
 ## 📚 Documentation
 
-- **LangFlow Guide:** [`langflow_workflows/LANGFLOW_GUIDE.md`](langflow_workflows/LANGFLOW_GUIDE.md) - Complete workflow guide (545 lines)
-- **Scripts Guide:** [`scripts/README.md`](scripts/README.md) - All utility scripts
-- **Architecture:** [`ARCHITECTURE.md`](ARCHITECTURE.md) - System design and data flow
+### Setup Guides
+- [`scripts/var_lens_setup/README.md`](scripts/var_lens_setup/README.md) - VAR-Lens setup
+- [`langflow_workflows/COMPLETE_WORKFLOW_SETUP.md`](langflow_workflows/COMPLETE_WORKFLOW_SETUP.md) - Workflow setup
+
+### System Prompts
+- [`langflow_workflows/ORCHESTRATOR_SYSTEM_PROMPT.md`](langflow_workflows/ORCHESTRATOR_SYSTEM_PROMPT.md) - Orchestrator instructions
+- [`langflow_workflows/VAR_LENS_SYSTEM_PROMPT.md`](langflow_workflows/VAR_LENS_SYSTEM_PROMPT.md) - VAR-Lens instructions
+- [`langflow_workflows/TACTICAL_PULSE_SYSTEM_PROMPT.md`](langflow_workflows/TACTICAL_PULSE_SYSTEM_PROMPT.md) - Tactical Pulse instructions
+
+### Data References
+- [`data/data_schema.json`](data/data_schema.json) - Complete data structure
+- [`langflow_workflows/DATA_SCHEMA_GUIDE_V3.md`](langflow_workflows/DATA_SCHEMA_GUIDE_V3.md) - Data guide
+- [`data/referee_decisions/README.md`](data/referee_decisions/README.md) - Referee decisions format
+
+---
+
+## 🎯 Challenge Alignment
+
+### Technical Execution ✅
+- Effective use of **IBM Granite** for all agents (local & cloud)
+- **Docling** for document processing (7 PDFs → Markdown)
+- **LangFlow** for visual multi-agent orchestration
+- Functional and well-structured solution
+- Complete testing and validation
+
+### Innovation ✅
+- **Multi-agent architecture** with intelligent routing
+- **Tool-Agent separation** following industry best practices
+- **Dual data sources** for VAR-Lens (general + specific)
+- **RAG pipeline** with 658-vector knowledge base
+- **Real tactical data** integration (65 WC 2022 matches)
+- **Explainable AI** with source citations
+
+### Challenge Fit ✅
+- **VAR transparency**: Explains referee decisions with FIFA rules
+- **Tactical understanding**: Analyzes team performance and strategies
+- **Fan engagement**: Makes complex football concepts accessible
+- **Real-world application**: Ready for World Cup 2026
+
+### Implementation & Feasibility ✅
+- **Flexible Deployment**: Works with local Ollama or IBM Granite Cloud
+- **Scalable**: Modular architecture for easy expansion
+- **Reproducible**: All data and code included
+- **Production-ready**: Comprehensive documentation
 
 ---
 
@@ -336,10 +457,19 @@ MIT License - see [`LICENSE`](LICENSE) file for details.
 
 - **Challenge:** IBM Skills Build AI Builders Challenge (June 2026)
 - **Theme:** FIFA World Cup 2026 - AI for Fan Understanding
-- **Technologies:** IBM Granite, Docling, LangFlow, IBM Bob
+- **Technologies:** IBM Granite, Docling, LangFlow
 - **Submission Deadline:** June 30, 2026, 11:59 PM ET
 - **GitHub:** https://github.com/babaksh/FanPulse
 
+### Judging Criteria Alignment
+
+| Criterion | Implementation | Evidence |
+|-----------|----------------|----------|
+| **Technical Execution** | IBM Granite + Docling + LangFlow | Multi-agent system, local & cloud ready |
+| **Innovation** | Tool-Agent separation + Dual data sources | 658 vectors + match incidents database |
+| **Challenge Fit** | VAR transparency + Tactical insights | Real FIFA rules + WC 2022 data |
+| **Feasibility** | Local deployment, modular design | Complete documentation, reproducible |
+
 ---
 
-**Made with ❤️ using IBM Bob** 🤖
+**Made with ❤️ for FIFA World Cup 2026** ⚽🤖

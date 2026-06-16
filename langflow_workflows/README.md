@@ -1,171 +1,153 @@
-# FanPulse LangFlow Workflows
+# LangFlow Workflows - FanPulse
 
-This directory contains LangFlow workflow definitions for the FanPulse system.
+## 📁 ساختار فایل‌ها
 
-## 📁 Files
+### 1. Flow File (JSON)
 
-### Main Workflows
-- **`fanpulse_main_flow.json`** - Main orchestrator workflow that routes queries to appropriate agents
-- **`var_lens_flow.json`** - VAR-Lens agent workflow for FIFA rules and VAR decisions
-- **`tactical_pulse_flow.json`** - Tactical Pulse agent workflow for match analysis and predictions
+#### `FanPulse Multi-Agent.json` ⭐ **CURRENT FLOW**
+- **معماری**: 3-Agent با Tool Calling
+- **Components**: Orchestrator + VAR-Lens + Tactical Pulse
+- **وضعیت**: ✅ آماده برای استفاده
+- **استفاده**: Import به LangFlow UI
 
-### Documentation
-- **`README.md`** - This file (quick overview)
-- **`LANGFLOW_GUIDE.md`** - Complete guide with import instructions, configuration, testing, and demo scenarios
+---
 
-## 🚀 Quick Start
+### 2. System Prompts (3 files)
 
-### 1. Start LangFlow
+- **`ORCHESTRATOR_SYSTEM_PROMPT.md`** - Orchestrator Agent prompt
+- **`TACTICAL_PULSE_SYSTEM_PROMPT.md`** - Tactical Pulse Agent prompt
+- **`VAR_LENS_SYSTEM_PROMPT.md`** - VAR-Lens Agent prompt
+
+---
+
+### 3. Data Schema & Guides (3 files)
+
+- **`DATA_SCHEMA_GUIDE_V2.md`** - Complete data schema (World Cup 2022 + 2026)
+- **`MATCH_ID_PREFIX_GUIDE.md`** - Match ID prefix system (17 tournaments)
+- **`MULTI_TOURNAMENT_GUIDE.md`** - Multi-tournament support guide
+
+---
+
+### 4. Architecture & Analysis (1 file)
+
+- **`PROMPT_ARCHITECTURE_ANALYSIS.md`** - Prompt architecture analysis & recommendations
+
+---
+
+### 5. Setup Guide (1 file)
+
+- **`COMPLETE_WORKFLOW_SETUP.md`** - راهنمای جامع ساخت Flow در LangFlow (717 خط)
+  - Import کامپوننت‌ها
+  - ساخت Flow
+  - اتصالات صحیح
+  - Agent as Tool Setup
+  - تست و عیب‌یابی
+  - آماده‌سازی Demo
+
+---
+
+## 🚀 شروع سریع
+
+### مرحله 1: Import کامپوننت‌ها
+```bash
+cd d:/MyPythonProjects/FanPulse
+cp langflow_components/*.py ~/.langflow/components/
+```
+
+### مرحله 2: راه‌اندازی LangFlow
 ```bash
 langflow run
 ```
 
-### 2. Open LangFlow UI
-Navigate to: `http://localhost:7860`
+### مرحله 3: Import Flow
+1. باز کردن LangFlow UI: `http://localhost:7860`
+2. کلیک روی "New Flow"
+3. کلیک روی "Import"
+4. انتخاب `FanPulse Multi-Agent.json`
 
-### 3. Import Workflow
-1. Click "Import" button (top right)
-2. Select one of the JSON files from this directory
-3. The workflow will load with all components configured
+### مرحله 4: راهنمای کامل
+برای راهنمای قدم به قدم، مراجعه کنید به:
+📄 **[`COMPLETE_WORKFLOW_SETUP.md`](./COMPLETE_WORKFLOW_SETUP.md)**
 
-## 📊 Workflow Overview
+---
 
-### Main Flow Architecture
+## 📊 معماری
+
 ```
-User Query
-    ↓
-[Query Router]
-    ↓
-┌───────┴────────┐
-│                │
-VAR-Lens    Tactical Pulse
-Agent          Agent
-│                │
-└───────┬────────┘
-    ↓
-[Response Handler]
-    ↓
-Unified Response
-```
-
-### VAR-Lens Flow
-```
-User Question
-    ↓
-[Document Loader] → FIFA Rules (Markdown)
-    ↓
-[Text Splitter] → Chunks
-    ↓
-[Embeddings] → Vectors
-    ↓
-[FAISS Store] → Vector Database
-    ↓
-[Retriever] ← User Query
-    ↓
-[Prompt Template] → Context + Question
-    ↓
-[LLM (Granite)] → Answer
-    ↓
-Response with Sources
+┌──────────────┐
+│  Chat Input  │
+└──────┬───────┘
+       │
+       ▼
+┌─────────────────────────────────────────┐
+│        FanPulse Orchestrator            │
+│         (با Tool Calling)               │
+└─────────────────────────────────────────┘
+       ▲                    ▲
+       │                    │
+┌──────┴────────┐    ┌──────┴──────────┐
+│  VAR-Lens     │    │ Tactical Pulse  │
+│  Agent        │    │ Agent           │
+└───────────────┘    └─────────────────┘
+       ▲                    ▲
+       │                    │
+┌──────┴────────┐    ┌──────┴──────────┐
+│ FIFA Docs     │    │ 5 Tactical      │
+│ Tool          │    │ Tools           │
+└───────────────┘    └─────────────────┘
 ```
 
-### Tactical Pulse Flow
+---
+
+## 🎯 ویژگی‌های کلیدی
+
+- ✅ **3-Agent Architecture** با Tool Calling واقعی
+- ✅ **LLM-based Routing** با IBM Granite 3.1 8B
+- ✅ **Parallel Execution** برای سوالات پیچیده
+- ✅ **FIFA Rules RAG** با 658 vectors
+- ✅ **World Cup 2022 + 2026 Data** با 45K+ matches
+- ✅ **Native Streaming** در LangFlow
+
+---
+
+## 📝 نکات مهم
+
+### برای Demo Video:
+1. **نشان دادن 3-Agent Architecture**: Orchestrator + VAR-Lens + Tactical Pulse
+2. **Tool Calling**: نمایش در logs
+3. **Parallel Execution**: نمایش همزمان بودن اجرای Agents
+4. **Synthesis Quality**: کیفیت ترکیب پاسخ‌ها
+
+### سوالات نمونه:
 ```
-User Query
-    ↓
-[Query Parser] → Extract team names
-    ↓
-[Data Loader] → Match Database (49K+ matches)
-    ↓
-[Tactical Data Loader] → Tactical Stats (20 World Cup matches)
-    ↓
-[Metrics Calculator] → Statistics + Tactical Data
-    ↓
-[LLM (Granite)] → AI Insights with Tactical Analysis
-    ↓
-Analysis + Predictions with Formation/Possession/Shots
-```
+VAR-Lens:
+- "What is the offside rule?"
+- "Explain VAR protocol"
 
-## 🔧 Configuration
+Tactical Pulse:
+- "Analyze Argentina's performance in World Cup 2022"
+- "Compare Brazil and France"
 
-### Required Environment Variables
-```bash
-# LLM Configuration
-OLLAMA_BASE_URL=http://localhost:11434
-MODEL_NAME=granite4.1:8b
-
-# Data Paths
-VECTOR_STORE_PATH=data/vector_stores/var_lens_faiss
-MATCH_DATA_PATH=data/match_data/results.csv
-TACTICAL_DATA_PATH=data/match_data/tactical_stats.csv
-DOCS_PATH=data/processed_documents
-```
-
-### LangFlow Settings
-- **LLM Provider**: Ollama
-- **Model**: IBM Granite 4.1 8B
-- **Embedding Model**: sentence-transformers/all-MiniLM-L6-v2
-- **Vector Store**: FAISS
-- **Chunk Size**: 1000
-- **Chunk Overlap**: 200
-
-## 📝 Usage Examples
-
-### Example 1: VAR Decision Query
-```
-Input: "What is the offside rule in soccer?"
-Flow: Main → VAR-Lens
-Output: Detailed explanation with FIFA rule references
+Multiple Intents:
+- "Explain offside rule and predict Brazil vs Argentina"
 ```
 
-### Example 2: Team Analysis with Tactical Data
-```
-Input: "Analyze Qatar's recent performance"
-Flow: Main → Tactical Pulse
-Output: Statistics, form, tactical data (formation, possession, shots), and AI insights
+---
 
-Sample Output:
-- Win Rate: 20%
-- Formation: 5-3-2 (defensive)
-- Possession: 46% (balanced)
-- Shots: 7.5 per match
-- AI Analysis: "Qatar uses a defensive 5-3-2 formation..."
-```
+## 🔗 لینک‌های مفید
 
-### Example 3: Match Prediction with Tactical Preview
-```
-Input: "Predict Qatar vs Ecuador"
-Flow: Main → Tactical Pulse
-Output: Win probabilities, tactical matchup, and AI match preview
+- **مستندات LangFlow**: https://docs.langflow.org/agents
+- **GitHub Repository**: https://github.com/babaksh/FanPulse
+- **IBM Challenge**: https://ibmskillsbuildchallenge-hub.bemyapp.com
 
-Sample Output:
-- Predicted Score: 0-2
-- Formations: Qatar 5-3-2 vs Ecuador 4-4-2
-- Tactical Battle: Defensive vs Balanced
-- AI Preview: "Qatar's defensive setup will face Ecuador's balanced approach..."
-```
+---
 
-## 📚 Complete Documentation
+## 📅 Timeline
 
-For detailed instructions on:
-- Importing workflows into LangFlow
-- Configuration and setup
-- Testing scenarios
-- Demo workflows
-- Real-time match scenarios
-- Tactical data integration
-- Troubleshooting
+- **Deadline**: June 30, 2026, 11:59 PM ET
+- **Days Remaining**: 15 days
+- **Current Phase**: LangFlow Setup & Testing
 
-**See:** [`LANGFLOW_GUIDE.md`](LANGFLOW_GUIDE.md) - Complete 545-line guide with everything you need
+---
 
-## 🔗 Related Documentation
-
-- **Architecture**: `ARCHITECTURE.md`
-- **Setup Guide**: `README.md`
-- **Scripts Guide**: `scripts/README.md`
-
-## 📞 Support
-
-For issues or questions:
-- GitHub: https://github.com/babaksh/FanPulse
-- Complete Guide: [`LANGFLOW_GUIDE.md`](LANGFLOW_GUIDE.md)
+**Built for IBM Skills Build AI Builders Challenge 2026**

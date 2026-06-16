@@ -1,0 +1,425 @@
+{
+  "_agent_reading_guide": {
+    "purpose": "Canonical schema reference for FanPulse football data - READ THIS BEFORE ANY QUERY",
+    "core_rules": [
+      "Before any query, filter, or calculation, read this schema to understand data structure and availability",
+      "results.csv covers ALL international matches (1872-2026, ~45,000 matches) - use for historical analysis",
+      "tactical_stats.csv covers ONLY major tournaments (WC2022_*, WC2026_*) - use for tactical details",
+      "Check match_id prefix to determine tactical data availability (WC2022_* or WC2026_* = available)",
+      "Use query_csv tool for custom queries outside the 4 specialized tools",
+      "Never fabricate data - if tactical stats unavailable, acknowledge limitation clearly"
+    ],
+    "decision_tree": {
+      "historical_records": "Use results.csv",
+      "tactical_details": "Check prefix → WC2022_*/WC2026_* → Use tactical_stats.csv, else results.csv only",
+      "custom_query": "Use query_csv tool with appropriate table"
+    }
+  },
+  
+  "results.csv": {
+    "path": "data/match_data/results.csv",
+    "primary_date_column": "date",
+    "grain": "One row per international match",
+    "table_role": "Primary source for all historical match results and team performance analysis",
+    "coverage": {
+      "time_range": "1872-2026 (154 years)",
+      "total_matches": "~45,000 international matches",
+      "match_types": "ALL competitions (World Cups, Euros, Copa América, friendlies, qualifiers, etc.)",
+      "update_frequency": "Daily (live matches added in real-time)"
+    },
+    "columns": {
+      "date": {
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "desc": "Match date",
+        "example": "2022-12-18",
+        "use_for": "Time-based filtering, recent form calculation, historical trends"
+      },
+      "home_team": {
+        "type": "string",
+        "desc": "Home team name",
+        "example": "Argentina",
+        "use_for": "Team filtering, head-to-head analysis"
+      },
+      "away_team": {
+        "type": "string",
+        "desc": "Away team name",
+        "example": "France",
+        "use_for": "Team filtering, head-to-head analysis"
+      },
+      "home_score": {
+        "type": "integer",
+        "desc": "Goals scored by home team",
+        "example": "3",
+        "use_for": "Goal statistics, win/loss determination, scoring trends"
+      },
+      "away_score": {
+        "type": "integer",
+        "desc": "Goals scored by away team",
+        "example": "3",
+        "use_for": "Goal statistics, win/loss determination, scoring trends"
+      },
+      "tournament": {
+        "type": "string",
+        "desc": "Competition name",
+        "example": "FIFA World Cup",
+        "use_for": "Tournament filtering, competition-specific analysis"
+      },
+      "city": {
+        "type": "string",
+        "desc": "Match venue city",
+        "example": "Lusail",
+        "use_for": "Venue analysis, geographic patterns"
+      },
+      "country": {
+        "type": "string",
+        "desc": "Host country",
+        "example": "Qatar",
+        "use_for": "Home advantage analysis, tournament host patterns"
+      },
+      "neutral": {
+        "type": "boolean",
+        "values": ["TRUE", "FALSE"],
+        "desc": "Neutral venue flag",
+        "example": "TRUE",
+        "use_for": "Home advantage analysis, venue context"
+      }
+    },
+    "use_cases": [
+      "Historical head-to-head records (all time periods)",
+      "Win rates and goal statistics",
+      "Recent form calculation (last 5-10 matches)",
+      "Tournament participation history",
+      "Long-term performance trends"
+    ],
+    "limitations": [
+      "NO tactical details (possession, shots, xG, passes)",
+      "NO formations or tactical systems",
+      "NO player-level data",
+      "NO referee information",
+      "NO venue capacity or attendance"
+    ],
+    "query_examples": {
+      "team_all_matches": "Filter by home_team='Germany' OR away_team='Germany'",
+      "recent_form": "Filter by date >= '2024-01-01' AND team",
+      "head_to_head": "Filter by (home_team='A' AND away_team='B') OR (home_team='B' AND away_team='A')",
+      "tournament_specific": "Filter by tournament='FIFA World Cup'"
+    }
+  },
+  
+  "tactical_stats.csv": {
+    "path": "data/match_data/tactical_stats.csv",
+    "primary_key": "match_id",
+    "grain": "One row per major tournament match with detailed tactical statistics",
+    "table_role": "Enhancement source for tactical analysis - ONLY major tournaments",
+    "coverage": {
+      "time_range": "2022-onwards",
+      "total_matches": "~200+ matches (growing)",
+      "match_types": "ONLY major tournaments (World Cup, Euro, Copa América)",
+      "update_frequency": "Daily during tournaments"
+    },
+    "match_id_prefixes": {
+      "WC2022_*": {
+        "status": "✅ Complete",
+        "matches": 64,
+        "desc": "FIFA World Cup 2022 (Qatar)",
+        "example": "WC2022_18_DEC_2022_ARGENTINA_FRANCE"
+      },
+      "WC2026_*": {
+        "status": "🔄 Ongoing",
+        "matches": "48+",
+        "desc": "FIFA World Cup 2026 (USA/Canada/Mexico)",
+        "example": "WC2026_2026-06-12_BRAZIL_COSTA_RICA"
+      },
+      "EURO2024_*": {
+        "status": "🔜 Can be added",
+        "desc": "UEFA Euro 2024",
+        "example": "EURO2024_14_JUL_2024_SPAIN_ENGLAND"
+      },
+      "COPA2024_*": {
+        "status": "🔜 Can be added",
+        "desc": "Copa América 2024"
+      }
+    },
+    "columns": {
+      "match_id": {
+        "type": "string",
+        "format": "{PREFIX}_{DATE}_{HOME}_{AWAY}",
+        "desc": "Unique match identifier with tournament prefix",
+        "example": "WC2022_18_DEC_2022_ARGENTINA_FRANCE",
+        "use_for": "Match lookup, tournament filtering via prefix"
+      },
+      "date": {
+        "type": "date",
+        "desc": "Match date",
+        "example": "2022-12-18"
+      },
+      "home_team": {
+        "type": "string",
+        "desc": "Home team name",
+        "example": "Argentina"
+      },
+      "away_team": {
+        "type": "string",
+        "desc": "Away team name",
+        "example": "France"
+      },
+      "home_score": {
+        "type": "integer",
+        "desc": "Goals by home team",
+        "example": "3"
+      },
+      "away_score": {
+        "type": "integer",
+        "desc": "Goals by away team",
+        "example": "3"
+      },
+      "home_formation": {
+        "type": "string",
+        "desc": "Home team formation",
+        "example": "4-3-3",
+        "use_for": "Tactical system analysis"
+      },
+      "away_formation": {
+        "type": "string",
+        "desc": "Away team formation",
+        "example": "4-2-3-1",
+        "use_for": "Tactical system analysis"
+      },
+      "home_possession": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Home team possession percentage",
+        "example": "52.3",
+        "use_for": "Possession-based analysis, control metrics"
+      },
+      "away_possession": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Away team possession percentage",
+        "example": "47.7",
+        "use_for": "Possession-based analysis, control metrics"
+      },
+      "home_shots": {
+        "type": "integer",
+        "desc": "Total shots by home team",
+        "example": "15",
+        "use_for": "Attacking intensity analysis"
+      },
+      "away_shots": {
+        "type": "integer",
+        "desc": "Total shots by away team",
+        "example": "12",
+        "use_for": "Attacking intensity analysis"
+      },
+      "home_shots_on_target": {
+        "type": "integer",
+        "desc": "Shots on target by home team",
+        "example": "7",
+        "use_for": "Shot accuracy, finishing quality"
+      },
+      "away_shots_on_target": {
+        "type": "integer",
+        "desc": "Shots on target by away team",
+        "example": "5",
+        "use_for": "Shot accuracy, finishing quality"
+      },
+      "home_xg": {
+        "type": "float",
+        "desc": "Expected goals (xG) for home team",
+        "example": "1.8",
+        "use_for": "Chance quality analysis, performance vs expectation"
+      },
+      "away_xg": {
+        "type": "float",
+        "desc": "Expected goals (xG) for away team",
+        "example": "1.2",
+        "use_for": "Chance quality analysis, performance vs expectation"
+      },
+      "home_passes": {
+        "type": "integer",
+        "desc": "Total passes by home team",
+        "example": "542",
+        "use_for": "Passing volume analysis"
+      },
+      "away_passes": {
+        "type": "integer",
+        "desc": "Total passes by away team",
+        "example": "478",
+        "use_for": "Passing volume analysis"
+      },
+      "home_pass_accuracy": {
+        "type": "float",
+        "unit": "percentage",
+        "desc": "Pass accuracy percentage for home team",
+        "example": "87.5",
+        "use_for": "Passing quality, ball retention"
+      },
+      "away_pass_accuracy": {
+        "type": "float",
+        "unit": "percentage",
+        "desc": "Pass accuracy percentage for away team",
+        "example": "84.2",
+        "use_for": "Passing quality, ball retention"
+      },
+      "home_tackles": {
+        "type": "integer",
+        "desc": "Tackles by home team",
+        "example": "18",
+        "use_for": "Defensive activity analysis"
+      },
+      "away_tackles": {
+        "type": "integer",
+        "desc": "Tackles by away team",
+        "example": "22",
+        "use_for": "Defensive activity analysis"
+      },
+      "home_interceptions": {
+        "type": "integer",
+        "desc": "Interceptions by home team",
+        "example": "14",
+        "use_for": "Defensive positioning, pressing effectiveness"
+      },
+      "away_interceptions": {
+        "type": "integer",
+        "desc": "Interceptions by away team",
+        "example": "16",
+        "use_for": "Defensive positioning, pressing effectiveness"
+      },
+      "home_corners": {
+        "type": "integer",
+        "desc": "Corner kicks for home team",
+        "example": "6",
+        "use_for": "Attacking pressure, set-piece opportunities"
+      },
+      "away_corners": {
+        "type": "integer",
+        "desc": "Corner kicks for away team",
+        "example": "4",
+        "use_for": "Attacking pressure, set-piece opportunities"
+      },
+      "home_fouls": {
+        "type": "integer",
+        "desc": "Fouls committed by home team",
+        "example": "12",
+        "use_for": "Discipline analysis, playing style"
+      },
+      "away_fouls": {
+        "type": "integer",
+        "desc": "Fouls committed by away team",
+        "example": "15",
+        "use_for": "Discipline analysis, playing style"
+      },
+      "home_yellow_cards": {
+        "type": "integer",
+        "desc": "Yellow cards for home team",
+        "example": "2",
+        "use_for": "Discipline analysis"
+      },
+      "away_yellow_cards": {
+        "type": "integer",
+        "desc": "Yellow cards for away team",
+        "example": "3",
+        "use_for": "Discipline analysis"
+      },
+      "home_red_cards": {
+        "type": "integer",
+        "desc": "Red cards for home team",
+        "example": "0",
+        "use_for": "Discipline analysis, match context"
+      },
+      "away_red_cards": {
+        "type": "integer",
+        "desc": "Red cards for away team",
+        "example": "0",
+        "use_for": "Discipline analysis, match context"
+      },
+      "home_goalkeeper_saves": {
+        "type": "integer",
+        "desc": "Saves by home goalkeeper",
+        "example": "3",
+        "use_for": "Goalkeeper performance"
+      },
+      "away_goalkeeper_saves": {
+        "type": "integer",
+        "desc": "Saves by away goalkeeper",
+        "example": "5",
+        "use_for": "Goalkeeper performance"
+      },
+      "referee": {
+        "type": "string",
+        "desc": "Match referee name",
+        "example": "Szymon Marciniak",
+        "use_for": "Referee analysis"
+      },
+      "venue": {
+        "type": "string",
+        "desc": "Stadium name",
+        "example": "Lusail Stadium",
+        "use_for": "Venue analysis"
+      },
+      "attendance": {
+        "type": "integer",
+        "desc": "Crowd size",
+        "example": "88966",
+        "use_for": "Attendance analysis, atmosphere context"
+      }
+    },
+    "use_cases": [
+      "Tactical analysis (formations, possession, pressing)",
+      "Advanced metrics (xG, shot accuracy, pass completion)",
+      "Tournament-specific performance comparison",
+      "Playing style identification",
+      "Tactical matchup analysis"
+    ],
+    "limitations": [
+      "ONLY major tournaments (no friendlies, no qualifiers)",
+      "Limited historical coverage (2022 onwards)",
+      "NOT all teams have data (only tournament participants)",
+      "NO player-level statistics (team aggregates only)"
+    ],
+    "query_examples": {
+      "wc2022_matches": "Filter by match_id LIKE 'WC2022_%'",
+      "wc2026_matches": "Filter by match_id LIKE 'WC2026_%'",
+      "high_possession": "Filter by home_possession > 60 OR away_possession > 60",
+      "team_tactical": "Filter by (home_team='Germany' OR away_team='Germany') AND match_id LIKE 'WC2022_%'"
+    }
+  },
+  
+  "common_mistakes_to_avoid": {
+    "mistake_1": {
+      "wrong": "Assuming tactical data exists for all matches",
+      "right": "Check match_id prefix - only WC2022_* and WC2026_* have tactical data"
+    },
+    "mistake_2": {
+      "wrong": "Confusing 'World Cup 2022' with 'all 2022 matches'",
+      "right": "WC2022_* = only World Cup tournament matches, not friendlies or qualifiers in 2022"
+    },
+    "mistake_3": {
+      "wrong": "Fabricating possession/xG when tactical_stats.csv doesn't have the match",
+      "right": "Acknowledge limitation: 'Tactical statistics not available for this match'"
+    },
+    "mistake_4": {
+      "wrong": "Using results.csv for tactical details",
+      "right": "results.csv has NO tactical columns - use tactical_stats.csv with prefix check"
+    }
+  },
+  
+  "best_practices": {
+    "do": [
+      "Always check match_id prefix before claiming tactical data exists",
+      "Acknowledge limitations when tactical data is not available",
+      "Cite data sources clearly (results.csv vs tactical_stats.csv)",
+      "Use results.csv as primary source for all historical analysis",
+      "Enhance with tactical_stats.csv only when prefix matches WC2022_* or WC2026_*"
+    ],
+    "dont": [
+      "Don't fabricate tactical statistics",
+      "Don't assume all tournaments have tactical data",
+      "Don't confuse tournament matches with all matches in that year",
+      "Don't use results.csv for tactical queries"
+    ]
+  }
+}

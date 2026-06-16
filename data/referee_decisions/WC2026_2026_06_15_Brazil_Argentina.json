@@ -1,0 +1,57 @@
+{
+  "match_id": "WC2026_2026_06_15_Brazil_Argentina",
+  "match_info": {
+    "home_team": "Brazil",
+    "away_team": "Argentina",
+    "date": "2026-06-15",
+    "tournament": "FIFA World Cup 2026",
+    "venue": "MetLife Stadium",
+    "city": "New York"
+  },
+  "events": [
+    {
+      "minute": 23,
+      "type": "penalty_given",
+      "description": "Penalty awarded to Brazil after VAR review",
+      "timestamp": "2026-06-15T15:23:00",
+      "var_decision": {
+        "reason": "handball",
+        "review_duration": "1:45",
+        "referee": "Pierluigi Collina",
+        "details": "Otamendi's arm was in unnatural position when blocking Vinicius Jr's shot. Clear handball inside the penalty area.",
+        "camera_angles": ["main", "behind_goal", "tactical"],
+        "final_decision": "penalty_awarded"
+      }
+    },
+    {
+      "minute": 67,
+      "type": "goal_disallowed",
+      "description": "Neymar goal cancelled for offside",
+      "timestamp": "2026-06-15T16:07:00",
+      "var_decision": {
+        "reason": "offside",
+        "review_duration": "2:15",
+        "referee": "Pierluigi Collina",
+        "details": "Neymar was 0.5 meters ahead of the last defender (Romero) when Casemiro played the through ball. Semi-automated offside technology confirmed the decision.",
+        "camera_angles": ["main", "behind_goal", "var_line", "tactical"],
+        "final_decision": "goal_cancelled",
+        "technology_used": "semi-automated offside"
+      }
+    },
+    {
+      "minute": 82,
+      "type": "red_card",
+      "description": "Direct red card for Casemiro after VAR review",
+      "timestamp": "2026-06-15T16:22:00",
+      "var_decision": {
+        "reason": "serious_foul_play",
+        "review_duration": "3:20",
+        "referee": "Pierluigi Collina",
+        "details": "Casemiro's challenge on Messi was deemed serious foul play. Studs-up tackle with excessive force, endangering opponent's safety. Initially yellow card, upgraded to red after VAR review.",
+        "camera_angles": ["main", "side", "behind", "close_up"],
+        "final_decision": "red_card_direct",
+        "initial_decision": "yellow_card"
+      }
+    }
+  ]
+}

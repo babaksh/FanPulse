@@ -1,10 +1,9 @@
 """
-VAR-Lens RAG Engine
-===================
+VAR-Lens RAG Engine & Vector Store Builder
+===========================================
 
-This module implements the core RAG (Retrieval Augmented Generation) engine
-for the VAR-Lens agent. It processes FIFA documents and provides accurate
-answers to VAR-related questions.
+This module implements the complete RAG (Retrieval Augmented Generation) engine
+for the VAR-Lens agent, including vector store building functionality.
 
 Components:
 - Document Loading: Loads processed Markdown files
@@ -12,9 +11,19 @@ Components:
 - Embeddings: Converts text to vectors using HuggingFace
 - Vector Store: FAISS for efficient similarity search
 - RAG Chain: Combines retrieval with LLM generation
+
+Usage as Script:
+    python scripts/var_lens_setup/build_var_lens_vectorstore.py [--rebuild]
+
+Usage as Module:
+    from build_var_lens_vectorstore import VARLensRAG
+    rag = VARLensRAG()
+    rag.setup()
 """
 
 import os
+import sys
+import argparse
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import logging
@@ -29,8 +38,6 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
-
-from .llm_providers import LLMFactory
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -242,64 +249,20 @@ Answer:"""
             input_variables=["context", "question"]
         )
     
-    def create_llm(
-        self,
-        provider: str = "openai",
-        model_name: Optional[str] = None,
-        temperature: float = 0.7,
-        max_tokens: int = 1000,
-        api_key: Optional[str] = None,
-        **kwargs
-    ):
-        """
-        Create an LLM instance using the LLM Factory.
-        
-        Args:
-            provider: LLM provider (ibm_granite, openai, huggingface, etc.)
-            model_name: Specific model to use
-            temperature: Sampling temperature
-            max_tokens: Maximum tokens in response
-            api_key: API key for the provider
-            **kwargs: Additional provider-specific parameters
-            
-        Returns:
-            LLM instance
-        """
-        logger.info(f"Creating LLM with provider: {provider}")
-        
-        try:
-            llm = LLMFactory.create_llm(
-                provider=provider,
-                model_name=model_name,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                api_key=api_key,
-                **kwargs
-            )
-            logger.info(f"LLM created successfully: {provider}")
-            return llm
-        except Exception as e:
-            logger.error(f"Failed to create LLM: {e}")
-            raise
     
-    def create_qa_chain(
-        self,
-        llm: Optional[Any] = None,
-        provider: str = "openai",
-        model_name: Optional[str] = None,
-        **llm_kwargs
-    ):
+    def create_qa_chain(self, llm: Any):
         """
         Create the QA chain combining retrieval and generation.
         
         Args:
-            llm: Pre-configured language model (if None, creates one using provider)
-            provider: LLM provider to use if llm is None
-            model_name: Model name to use if llm is None
-            **llm_kwargs: Additional arguments for LLM creation
+            llm: Pre-configured language model from LangFlow
         """
         if self.vector_store is None:
             logger.error("Vector store not initialized. Call create_vector_store() or load_vector_store() first.")
+            return
+        
+        if llm is None:
+            logger.error("LLM is required. LangFlow should provide the LLM instance.")
             return
         
         logger.info("Creating QA chain...")
@@ -313,22 +276,7 @@ Answer:"""
         # Create prompt
         prompt = self.create_prompt_template()
         
-        # Create or use provided LLM
-        if llm is None:
-            logger.info(f"No LLM provided, creating one with provider: {provider}")
-            try:
-                llm = self.create_llm(
-                    provider=provider,
-                    model_name=model_name,
-                    **llm_kwargs
-                )
-            except Exception as e:
-                logger.error(f"Failed to create LLM: {e}")
-                logger.warning("QA chain created but needs LLM to function.")
-                return
-        
         # Create QA chain using LCEL (LangChain Expression Language)
-        # This is the modern way to build chains in LangChain
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)
         
@@ -735,36 +683,54 @@ Answer:"""
 
 def main():
     """
-    Main function for testing the RAG engine.
+    Main function to build vector store (when run as script).
     """
-    print("=" * 60)
-    print("VAR-Lens RAG Engine - Setup and Test")
-    print("=" * 60)
+    parser = argparse.ArgumentParser(
+        description="Build VAR-Lens vector store from processed documents"
+    )
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Force rebuild even if vector store exists"
+    )
     
-    # Initialize
+    args = parser.parse_args()
+    
+    print("=" * 70)
+    print("VAR-Lens Vector Store Builder")
+    print("=" * 70)
+    print()
+    
+    # Initialize RAG engine
+    print("Initializing VAR-Lens RAG engine...")
     rag = VARLensRAG()
     
-    # Setup (build or load vector store)
-    rag.setup(force_rebuild=False)
+    # Setup (build or load)
+    print()
+    if args.rebuild:
+        print("Force rebuild requested...")
     
-    # Print stats
-    print("\nSystem Statistics:")
-    print("-" * 60)
+    rag.setup(force_rebuild=args.rebuild)
+    
+    # Print statistics
+    print()
+    print("=" * 70)
+    print("Vector Store Statistics")
+    print("=" * 70)
+    
     stats = rag.get_stats()
     for key, value in stats.items():
-        print(f"{key}: {value}")
+        print(f"  {key:.<50} {value}")
     
-    print("\n" + "=" * 60)
-    print("Setup complete! Vector store is ready.")
-    print("=" * 60)
-    
-    # Note about LLM
-    print("\nNote: To use the QA chain, you need to provide an LLM.")
-    print("Example with OpenAI:")
-    print("  from langchain_openai import ChatOpenAI")
-    print("  llm = ChatOpenAI(model='gpt-3.5-turbo')")
-    print("  rag.create_qa_chain(llm)")
-    print("  result = rag.query('What is offside?')")
+    print()
+    print("=" * 70)
+    print("[SUCCESS] Vector store is ready!")
+    print("=" * 70)
+    print()
+    print("Next steps:")
+    print("  1. Use in LangFlow workflows")
+    print("  2. Query with: rag.query('What is offside?')")
+    print()
 
 
 if __name__ == "__main__":

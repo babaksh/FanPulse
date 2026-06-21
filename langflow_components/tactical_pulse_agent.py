@@ -31,7 +31,7 @@ class TacticalPulseAgent(ToolCallingAgentComponent):
     
     Data Sources:
     - results.csv: All international matches (1872-2026, ~49,000 matches)
-    - tactical_stats.csv: Major tournaments with prefix system (WC2022_*, WC2026_*, etc.)
+    - tactical_stats.csv: Major tournaments with prefix system (WC_2022*, WC_2026*, etc.)
     
     Available Tools (5):
     1. analyze_team: Returns JSON with comprehensive team analysis (overall + tournament data)
@@ -72,7 +72,7 @@ class TacticalPulseAgent(ToolCallingAgentComponent):
             name="system_prompt",
             display_name="System Prompt",
             info="System prompt to guide the agent's behavior. Connect TACTICAL_PULSE_SYSTEM_PROMPT.md for detailed instructions.",
-            value="You are Tactical Pulse, an expert football analyst for FIFA World Cup 2026. Tools return JSON data - your job is to analyze, interpret, and provide insights (not just report numbers). Data: results.csv (1872-2026) + tactical_stats.csv (WC2022/2026 with prefix). Tools: analyze_team, get_team_stats, compare_teams, get_tactical_data, query_csv. Write like a professional analyst, not a robot.",
+            value="You are Tactical Pulse, an expert football analyst for FIFA World Cup 2026. Tools return JSON data - your job is to analyze, interpret, and provide insights (not just report numbers). Data: results.csv (1872-2026) + tactical_stats.csv (WC_2022/WC_2026 with prefix). Tools: analyze_team, get_team_stats, compare_teams, get_tactical_data, query_csv. Write like a professional analyst, not a robot.",
             advanced=False,
         ),
         MessageTextInput(
@@ -234,15 +234,15 @@ class TacticalPulseAgent(ToolCallingAgentComponent):
             tool_description=(
                 f"{agent_description} "
                 "Expert football analyst that interprets JSON data from tools and provides tactical insights. "
-                "Data: results.csv (1872-2026) + tactical_stats.csv (WC2022/2026 prefix system). "
+                "Data: results.csv (1872-2026) + tactical_stats.csv (WC_2022/WC_2026 prefix system). "
                 "Tools return JSON for analysis, not formatted reports."
             ),
             callbacks=self.get_langchain_callbacks(),
-        ),
+        )
         
         if hasattr(self, "tools_metadata"):
             tools = component_toolkit(
-                component=self, 
+                component=self,
                 metadata=self.tools_metadata
             ).update_tools_metadata(tools=tools)
 

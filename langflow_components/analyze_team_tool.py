@@ -30,7 +30,7 @@ class AnalyzeTeamTool(Component):
         super().__init__(**kwargs)
         self.project_root = Path('d:/MyPythonProjects/FanPulse')
         self.results_csv = self.project_root / "data" / "match_data" / "results.csv"
-        self.tactical_csv = self.project_root / "data" / "match_data" / "tactical_stats.csv"
+        self.tactical_csv = self.project_root / "data" / "match_data" / "tactical_data.csv"
     
     def build_tool(self) -> Tool:
         """Build the team analysis tool"""
@@ -39,10 +39,10 @@ class AnalyzeTeamTool(Component):
             """Get comprehensive analysis of a team's performance.
             
             Args:
-                team_name: Team name (e.g., "Argentina", "Brazil")
+                team_name: Team name (e.g., "Argentina", "Brazil", "Iran")
                 
             Returns:
-                Analysis from results.csv (1872-2026) and tactical_stats.csv (tournament matches with prefix)
+                Analysis from results.csv (1872-2026) and tactical_data.csv (WhoScored scraped matches)
             """
             try:
                 self.log(f"Analyzing team: {team_name}")
@@ -126,9 +126,8 @@ class AnalyzeTeamTool(Component):
                 
                 form_score = (form_string.count('W') * 3 + form_string.count('D')) / 30 * 100
                 
-                # Try to load tactical data
-                wc2022_data = None
-                wc2026_data = None
+                # Try to load tactical data from tactical_data.csv
+                tactical_data_by_tournament = {}
                 
                 if self.tactical_csv.exists():
                     tactical_df = pd.read_csv(self.tactical_csv)
@@ -140,89 +139,70 @@ class AnalyzeTeamTool(Component):
                         (tactical_df['away_team'].str.contains(team_name, case=False, na=False))
                     ].copy()
                     
-                    # Separate by tournament
-                    wc2022_matches = team_tactical[team_tactical['match_id'].str.startswith('WC2022_', na=False)]
-                    wc2026_matches = team_tactical[team_tactical['match_id'].str.startswith('WC2026_', na=False)]
-                    
-                    # Calculate WC2022 stats
-                    if not wc2022_matches.empty:
-                        home_matches = wc2022_matches[wc2022_matches['home_team'].str.contains(team_name, case=False, na=False)]
-                        away_matches = wc2022_matches[wc2022_matches['away_team'].str.contains(team_name, case=False, na=False)]
+                    if not team_tactical.empty:
+                        # Group by tournament
+                        tournaments = team_tactical['tournament'].unique()
                         
-                        wc2022_wins = 0
-                        for _, m in home_matches.iterrows():
-                            if m['home_score'] > m['away_score']:
-                                wc2022_wins += 1
-                        for _, m in away_matches.iterrows():
-                            if m['away_score'] > m['home_score']:
-                                wc2022_wins += 1
-                        
-                        poss_vals = []
-                        xg_vals = []
-                        shots_vals = []
-                        for _, m in home_matches.iterrows():
-                            if pd.notna(m['home_possession']): poss_vals.append(m['home_possession'])
-                            if pd.notna(m['home_xg']): xg_vals.append(m['home_xg'])
-                            if pd.notna(m['home_shots']): shots_vals.append(m['home_shots'])
-                        for _, m in away_matches.iterrows():
-                            if pd.notna(m['away_possession']): poss_vals.append(m['away_possession'])
-                            if pd.notna(m['away_xg']): xg_vals.append(m['away_xg'])
-                            if pd.notna(m['away_shots']): shots_vals.append(m['away_shots'])
-                        
-                        home_poss = sum(poss_vals) / len(poss_vals) if poss_vals else 0
-                        home_xg = sum(xg_vals) / len(xg_vals) if xg_vals else 0
-                        home_shots = sum(shots_vals) / len(shots_vals) if shots_vals else 0
-                        away_poss = 0
-                        away_xg = 0
-                        away_shots = 0
-                        
-                        wc2022_data = {
-                            'matches': len(wc2022_matches),
-                            'win_rate': (wc2022_wins / len(wc2022_matches) * 100) if len(wc2022_matches) > 0 else 0,
-                            'avg_possession': (home_poss + away_poss) / 2 if len(wc2022_matches) > 0 else 0,
-                            'avg_xg': (home_xg + away_xg) / 2 if len(wc2022_matches) > 0 else 0,
-                            'avg_shots': (home_shots + away_shots) / 2 if len(wc2022_matches) > 0 else 0,
-                        }
-                    
-                    # Calculate WC2026 stats
-                    if not wc2026_matches.empty:
-                        home_matches = wc2026_matches[wc2026_matches['home_team'].str.contains(team_name, case=False, na=False)]
-                        away_matches = wc2026_matches[wc2026_matches['away_team'].str.contains(team_name, case=False, na=False)]
-                        
-                        wc2026_wins = 0
-                        for _, m in home_matches.iterrows():
-                            if m['home_score'] > m['away_score']:
-                                wc2026_wins += 1
-                        for _, m in away_matches.iterrows():
-                            if m['away_score'] > m['home_score']:
-                                wc2026_wins += 1
-                        
-                        poss_vals = []
-                        xg_vals = []
-                        shots_vals = []
-                        for _, m in home_matches.iterrows():
-                            if pd.notna(m['home_possession']): poss_vals.append(m['home_possession'])
-                            if pd.notna(m['home_xg']): xg_vals.append(m['home_xg'])
-                            if pd.notna(m['home_shots']): shots_vals.append(m['home_shots'])
-                        for _, m in away_matches.iterrows():
-                            if pd.notna(m['away_possession']): poss_vals.append(m['away_possession'])
-                            if pd.notna(m['away_xg']): xg_vals.append(m['away_xg'])
-                            if pd.notna(m['away_shots']): shots_vals.append(m['away_shots'])
-                        
-                        home_poss = sum(poss_vals) / len(poss_vals) if poss_vals else 0
-                        home_xg = sum(xg_vals) / len(xg_vals) if xg_vals else 0
-                        home_shots = sum(shots_vals) / len(shots_vals) if shots_vals else 0
-                        away_poss = 0
-                        away_xg = 0
-                        away_shots = 0
-                        
-                        wc2026_data = {
-                            'matches': len(wc2026_matches),
-                            'win_rate': (wc2026_wins / len(wc2026_matches) * 100) if len(wc2026_matches) > 0 else 0,
-                            'avg_possession': (home_poss + away_poss) / 2 if len(wc2026_matches) > 0 else 0,
-                            'avg_xg': (home_xg + away_xg) / 2 if len(wc2026_matches) > 0 else 0,
-                            'avg_shots': (home_shots + away_shots) / 2 if len(wc2026_matches) > 0 else 0,
-                        }
+                        for tournament in tournaments:
+                            tournament_matches = team_tactical[team_tactical['tournament'] == tournament]
+                            home_matches = tournament_matches[tournament_matches['home_team'].str.contains(team_name, case=False, na=False)]
+                            away_matches = tournament_matches[tournament_matches['away_team'].str.contains(team_name, case=False, na=False)]
+                            
+                            # Calculate wins
+                            tournament_wins = 0
+                            for _, m in home_matches.iterrows():
+                                if m['home_score'] > m['away_score']:
+                                    tournament_wins += 1
+                            for _, m in away_matches.iterrows():
+                                if m['away_score'] > m['home_score']:
+                                    tournament_wins += 1
+                            
+                            # Collect tactical metrics
+                            poss_vals = []
+                            shots_vals = []
+                            shot_acc_vals = []
+                            passes_vals = []
+                            pass_acc_vals = []
+                            key_passes_vals = []
+                            attacking_int_vals = []
+                            defensive_int_vals = []
+                            
+                            for _, m in home_matches.iterrows():
+                                if pd.notna(m['home_possession']): poss_vals.append(m['home_possession'])
+                                if pd.notna(m['home_shots_total']): shots_vals.append(m['home_shots_total'])
+                                if pd.notna(m['home_shot_accuracy']): shot_acc_vals.append(m['home_shot_accuracy'])
+                                if pd.notna(m['home_passes_total']): passes_vals.append(m['home_passes_total'])
+                                if pd.notna(m['home_pass_accuracy']): pass_acc_vals.append(m['home_pass_accuracy'])
+                                if pd.notna(m['home_key_passes']): key_passes_vals.append(m['home_key_passes'])
+                                if pd.notna(m['home_attacking_intensity']): attacking_int_vals.append(m['home_attacking_intensity'])
+                                if pd.notna(m['home_defensive_intensity']): defensive_int_vals.append(m['home_defensive_intensity'])
+                            
+                            for _, m in away_matches.iterrows():
+                                if pd.notna(m['away_possession']): poss_vals.append(m['away_possession'])
+                                if pd.notna(m['away_shots_total']): shots_vals.append(m['away_shots_total'])
+                                if pd.notna(m['away_shot_accuracy']): shot_acc_vals.append(m['away_shot_accuracy'])
+                                if pd.notna(m['away_passes_total']): passes_vals.append(m['away_passes_total'])
+                                if pd.notna(m['away_pass_accuracy']): pass_acc_vals.append(m['away_pass_accuracy'])
+                                if pd.notna(m['away_key_passes']): key_passes_vals.append(m['away_key_passes'])
+                                if pd.notna(m['away_attacking_intensity']): attacking_int_vals.append(m['away_attacking_intensity'])
+                                if pd.notna(m['away_defensive_intensity']): defensive_int_vals.append(m['away_defensive_intensity'])
+                            
+                            # Calculate averages
+                            def safe_avg(vals):
+                                return round(sum(vals) / len(vals), 1) if vals else 0
+                            
+                            tactical_data_by_tournament[tournament] = {
+                                'matches': len(tournament_matches),
+                                'win_rate': round((tournament_wins / len(tournament_matches) * 100), 1) if len(tournament_matches) > 0 else 0,
+                                'avg_possession': safe_avg(poss_vals),
+                                'avg_shots': safe_avg(shots_vals),
+                                'avg_shot_accuracy': safe_avg(shot_acc_vals),
+                                'avg_passes': safe_avg(passes_vals),
+                                'avg_pass_accuracy': safe_avg(pass_acc_vals),
+                                'avg_key_passes': safe_avg(key_passes_vals),
+                                'avg_attacking_intensity': safe_avg(attacking_int_vals),
+                                'avg_defensive_intensity': safe_avg(defensive_int_vals)
+                            }
                 
                 # Build JSON output for LLM analysis
                 result = {
@@ -241,44 +221,20 @@ class AnalyzeTeamTool(Component):
                     },
                     "recent_form": {
                         "last_10_matches": form_string,
-                        "form_score": round(float(form_score), 1)
+                        "form_score": round(float(form_score), 1),
+                        "interpretation": "Form score out of 100 (W=3pts, D=1pt, L=0pts)"
                     },
-                    "tournament_data": {}
-                }
-                
-                # Add tournament data if available
-                if wc2022_data:
-                    result["tournament_data"]["world_cup_2022"] = {
-                        "matches_played": wc2022_data['matches'],
-                        "win_rate": round(float(wc2022_data['win_rate']), 1),
-                        "avg_possession": round(float(wc2022_data['avg_possession']), 1),
-                        "avg_xg": round(float(wc2022_data['avg_xg']), 2) if wc2022_data['avg_xg'] > 0 else None,
-                        "avg_shots": round(float(wc2022_data['avg_shots']), 1)
+                    "tactical_data_by_tournament": tactical_data_by_tournament,
+                    "data_sources": {
+                        "historical_results": "results.csv (1872-2026, ~49,000 matches)",
+                        "tactical_data_available": bool(tactical_data_by_tournament),
+                        "tactical_data_source": "tactical_data.csv (WhoScored scraped matches)",
+                        "tournaments_with_tactical_data": list(tactical_data_by_tournament.keys())
                     }
-                
-                if wc2026_data:
-                    result["tournament_data"]["world_cup_2026"] = {
-                        "matches_played": wc2026_data['matches'],
-                        "win_rate": round(float(wc2026_data['win_rate']), 1),
-                        "avg_possession": round(float(wc2026_data['avg_possession']), 1),
-                        "avg_xg": round(float(wc2026_data['avg_xg']), 2) if wc2026_data['avg_xg'] > 0 else None,
-                        "avg_shots": round(float(wc2026_data['avg_shots']), 1)
-                    }
-                
-                # Add data source info
-                result["data_sources"] = {
-                    "historical_results": "results.csv (1872-2026, ~49,000 matches)",
-                    "tactical_data_available": bool(wc2022_data or wc2026_data),
-                    "tournaments_with_tactical_data": []
                 }
-                
-                if wc2022_data:
-                    result["data_sources"]["tournaments_with_tactical_data"].append("World Cup 2022")
-                if wc2026_data:
-                    result["data_sources"]["tournaments_with_tactical_data"].append("World Cup 2026")
                 
                 self.log(f"Successfully analyzed {team_name}")
-                self.status = f"Analyzed {team_name}"
+                self.status = f"Analyzed {team_name}: {total_matches} matches"
                 
                 return json.dumps(result, indent=2)
             
@@ -293,9 +249,10 @@ class AnalyzeTeamTool(Component):
             name="analyze_team",
             description=(
                 "Get comprehensive team performance data in JSON format. Returns overall statistics (matches, wins, goals), "
-                "recent form (last 10 matches), and tournament tactical data (possession, xG, shots) for major tournaments "
-                "(World Cup 2022/2026, etc.). Data from results.csv (1872-2026) and tactical_stats.csv (tournament matches). "
-                "Use when you need detailed team analysis data for interpretation."
+                "recent form (last 10 matches with W/D/L), and detailed tactical data by tournament (possession, shots, "
+                "shot accuracy, passes, pass accuracy, key passes, attacking intensity, defensive intensity). "
+                "Data from results.csv (1872-2026, all matches) and tactical_data.csv (WhoScored scraped matches with 41 metrics). "
+                "Use when you need complete team analysis with both historical and tactical insights."
             )
         )
 

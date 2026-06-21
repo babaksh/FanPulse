@@ -36,7 +36,7 @@ def add_referee_decision(
     Add a referee decision with optional VAR review details.
     
     Args:
-        match_id: Match identifier (e.g., "WC2026_2026_06_15_Brazil_Argentina")
+        match_id: Match identifier (e.g., "WC_2026-06-15_BRAZIL_ARGENTINA")
         minute: Minute of the decision
         event_type: Type of decision (goal_disallowed, penalty_given, red_card, etc.)
         description: Brief description of the decision
@@ -92,7 +92,7 @@ def interactive_add():
     print()
     
     # Get match ID
-    print("📋 Match ID (e.g., WC2026_2026_06_15_Brazil_Argentina):")
+    print("📋 Match ID (e.g., WC_2026-06-15_BRAZIL_ARGENTINA):")
     match_id = input("> ").strip()
     
     if not match_id:
@@ -212,7 +212,7 @@ from scripts.var_lens_setup.add_referee_decision import add_referee_decision
 
 # Add a goal disallowed for offside
 add_referee_decision(
-    match_id="WC2026_2026_06_15_Brazil_Argentina",
+    match_id="WC_2026-06-15_BRAZIL_ARGENTINA",
     minute=67,
     event_type="goal_disallowed",
     description="Neymar goal cancelled for offside",

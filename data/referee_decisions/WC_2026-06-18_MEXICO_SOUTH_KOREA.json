@@ -1,0 +1,23 @@
+{
+  "match_id": "WC_2026-06-18_MEXICO_SOUTH_KOREA",
+  "match_info": {
+    "home_team": "Mexico",
+    "away_team": "South Korea",
+    "date": "2026-06-18",
+    "tournament": "FIFA World Cup, Group A",
+    "venue": "Estadio Akron",
+    "city": "Guadalajara"
+  },
+  "var_protocol_note": "This file contains only VAR-reviewable decisions according to FIFA/IFAB protocol: Goals, Penalties, Red Cards, and Mistaken Identity. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 50,
+      "type": "goal",
+      "description": "Goal by Luis Romo",
+      "player": "Luis Romo",
+      "player_id": 1172773,
+      "is_home": true,
+      "goal_type": "regular"
+    }
+  ]
+}

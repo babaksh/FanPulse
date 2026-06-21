@@ -1,0 +1,32 @@
+{
+  "match_id": "WC_2026-06-15_SAUDI_ARABIA_URUGUAY",
+  "match_info": {
+    "home_team": "Saudi Arabia",
+    "away_team": "Uruguay",
+    "date": "2026-06-15",
+    "tournament": "FIFA World Cup, Group H",
+    "venue": "Hard Rock Stadium",
+    "city": "Miami Gardens"
+  },
+  "var_protocol_note": "This file contains only VAR-reviewable decisions according to FIFA/IFAB protocol: Goals, Penalties, Red Cards, and Mistaken Identity. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 80,
+      "type": "goal",
+      "description": "Goal by Maximiliano Araújo",
+      "player": "Maximiliano Araújo",
+      "player_id": 929193,
+      "is_home": false,
+      "goal_type": "regular"
+    },
+    {
+      "minute": 41,
+      "type": "goal",
+      "description": "Goal by Abdulelah Al-Amri",
+      "player": "Abdulelah Al-Amri",
+      "player_id": 881831,
+      "is_home": true,
+      "goal_type": "regular"
+    }
+  ]
+}

@@ -1,0 +1,657 @@
+{
+  "_agent_reading_guide": {
+    "purpose": "Canonical schema reference for FanPulse football data - READ THIS BEFORE ANY QUERY",
+    "core_rules": [
+      "Before any query, filter, or calculation, read this schema to understand data structure and availability",
+      "results.csv covers ALL international matches (1872-2026, ~49,000 matches) - use for historical analysis",
+      "tactical_data.csv covers matches with detailed tactical statistics from WhoScored - use for in-depth tactical analysis",
+      "Check match_id prefix to determine data availability and tournament type",
+      "Use query_csv tool for custom queries outside the 4 specialized tools",
+      "Never fabricate data - if tactical stats unavailable, acknowledge limitation clearly"
+    ],
+    "decision_tree": {
+      "historical_records": "Use results.csv",
+      "tactical_details": "Use tactical_data.csv (check if match exists first)",
+      "custom_query": "Use query_csv tool with appropriate table"
+    }
+  },
+  
+  "results.csv": {
+    "path": "data/match_data/results.csv",
+    "primary_date_column": "date",
+    "grain": "One row per international match",
+    "table_role": "Primary source for all historical match results and team performance analysis",
+    "coverage": {
+      "time_range": "1872-2026 (154 years)",
+      "total_matches": "~49,000 international matches",
+      "match_types": "ALL competitions (World Cups, Euros, Copa América, friendlies, qualifiers, etc.)",
+      "update_frequency": "Daily (live matches added in real-time)"
+    },
+    "match_id_prefixes": {
+      "purpose": "Match IDs use prefixes to identify the competition type. Understanding these prefixes is crucial for filtering and analyzing specific tournaments.",
+      "format": "{PREFIX}_{YEAR}-{MONTH}-{DAY}_{HOME_TEAM}_{AWAY_TEAM}",
+      "format_rules": [
+        "PREFIX: Competition identifier (e.g., WC, EURO, COPA) followed by underscore",
+        "DATE: YYYY-MM-DD format with hyphens",
+        "TEAMS: UPPERCASE with underscores replacing spaces (e.g., SOUTH_KOREA, UNITED_STATES)"
+      ],
+      "usage_guide": {
+        "filter_world_cup": "Use match_id LIKE 'WC_%' to get all World Cup matches",
+        "filter_friendlies": "Use match_id LIKE 'FRIENDLY_%' to get all friendly matches",
+        "filter_specific_year": "Use match_id LIKE 'WC_2026%' to get World Cup 2026 matches",
+        "identify_competition": "Extract prefix from match_id to determine competition type"
+      },
+      "prefixes": {
+        "WC_": {
+          "tournament": "FIFA World Cup",
+          "matches": 1036,
+          "example": "WC_2026-06-15_BRAZIL_ARGENTINA",
+          "desc": "FIFA World Cup matches (all editions)"
+        },
+        "FRIENDLY_": {
+          "tournament": "Friendly",
+          "matches": 18257,
+          "example": "FRIENDLY_2024-03-21_BRAZIL_SPAIN",
+          "desc": "International friendly matches"
+        },
+        "OTHER_": {
+          "tournament": "Various qualifiers and other competitions",
+          "matches": 20307,
+          "example": "OTHER_2023-11-16_ARGENTINA_URUGUAY",
+          "desc": "World Cup qualifiers and other competitions"
+        },
+        "EUROQ_": {
+          "tournament": "UEFA Euro qualification",
+          "matches": 2824,
+          "example": "EUROQ_2023-09-09_FRANCE_GERMANY",
+          "desc": "UEFA European Championship qualification matches"
+        },
+        "AFCONQ_": {
+          "tournament": "African Cup of Nations qualification",
+          "matches": 2327,
+          "example": "AFCONQ_2023-06-19_EGYPT_GHANA",
+          "desc": "Africa Cup of Nations qualification matches"
+        },
+        "COPA_": {
+          "tournament": "Copa América",
+          "matches": 869,
+          "example": "COPA_2024-07-14_ARGENTINA_COLOMBIA",
+          "desc": "Copa América tournament matches"
+        },
+        "AFCON_": {
+          "tournament": "African Cup of Nations",
+          "matches": 845,
+          "example": "AFCON_2024-02-11_IVORY_COAST_NIGERIA",
+          "desc": "Africa Cup of Nations tournament matches"
+        },
+        "AFCQ_": {
+          "tournament": "AFC Asian Cup qualification",
+          "matches": 829,
+          "example": "AFCQ_2023-11-21_JAPAN_SOUTH_KOREA",
+          "desc": "AFC Asian Cup qualification matches"
+        },
+        "UNL_": {
+          "tournament": "UEFA Nations League",
+          "matches": 658,
+          "example": "UNL_2024-10-14_SPAIN_DENMARK",
+          "desc": "UEFA Nations League matches"
+        },
+        "AFC_": {
+          "tournament": "AFC Asian Cup",
+          "matches": 421,
+          "example": "AFC_2024-02-10_QATAR_JORDAN",
+          "desc": "AFC Asian Cup tournament matches"
+        },
+        "GOLD_": {
+          "tournament": "Gold Cup",
+          "matches": 420,
+          "example": "GOLD_2023-07-16_MEXICO_PANAMA",
+          "desc": "CONCACAF Gold Cup matches"
+        },
+        "EURO_": {
+          "tournament": "UEFA Euro",
+          "matches": 388,
+          "example": "EURO_2024-07-14_SPAIN_ENGLAND",
+          "desc": "UEFA European Championship tournament matches"
+        },
+        "CONFED_": {
+          "tournament": "Confederations Cup",
+          "matches": 140,
+          "example": "CONFED_2017-07-02_GERMANY_CHILE",
+          "desc": "FIFA Confederations Cup matches (discontinued)"
+        },
+        "COPAQ_": {
+          "tournament": "Copa América qualification",
+          "matches": 8,
+          "example": "COPAQ_2015-03-27_BRAZIL_CHILE",
+          "desc": "Copa América qualification matches (rare)"
+        }
+      }
+    },
+    "columns": {
+      "date": {
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "desc": "Match date",
+        "example": "2022-12-18",
+        "use_for": "Time-based filtering, recent form calculation, historical trends"
+      },
+      "home_team": {
+        "type": "string",
+        "desc": "Home team name",
+        "example": "Argentina",
+        "use_for": "Team filtering, head-to-head analysis"
+      },
+      "away_team": {
+        "type": "string",
+        "desc": "Away team name",
+        "example": "France",
+        "use_for": "Team filtering, head-to-head analysis"
+      },
+      "home_score": {
+        "type": "integer",
+        "desc": "Goals scored by home team",
+        "example": "3",
+        "use_for": "Goal statistics, win/loss determination, scoring trends"
+      },
+      "away_score": {
+        "type": "integer",
+        "desc": "Goals scored by away team",
+        "example": "3",
+        "use_for": "Goal statistics, win/loss determination, scoring trends"
+      },
+      "tournament": {
+        "type": "string",
+        "desc": "Competition name",
+        "example": "FIFA World Cup",
+        "use_for": "Tournament filtering, competition-specific analysis"
+      },
+      "city": {
+        "type": "string",
+        "desc": "Match venue city",
+        "example": "Lusail",
+        "use_for": "Venue analysis, geographic patterns"
+      },
+      "country": {
+        "type": "string",
+        "desc": "Host country",
+        "example": "Qatar",
+        "use_for": "Home advantage analysis, tournament host patterns"
+      },
+      "neutral": {
+        "type": "boolean",
+        "values": ["TRUE", "FALSE"],
+        "desc": "Neutral venue flag",
+        "example": "TRUE",
+        "use_for": "Home advantage analysis, venue context"
+      }
+    },
+    "use_cases": [
+      "Historical head-to-head records (all time periods)",
+      "Win rates and goal statistics",
+      "Recent form calculation (last 5-10 matches)",
+      "Tournament participation history",
+      "Long-term performance trends"
+    ],
+    "limitations": [
+      "NO tactical details (possession, shots, passes, formations)",
+      "NO formations or tactical systems",
+      "NO player-level data",
+      "NO referee information",
+      "NO venue capacity or attendance"
+    ],
+    "query_examples": {
+      "team_all_matches": "Filter by home_team='Germany' OR away_team='Germany'",
+      "recent_form": "Filter by date >= '2024-01-01' AND team",
+      "head_to_head": "Filter by (home_team='A' AND away_team='B') OR (home_team='B' AND away_team='A')",
+      "tournament_specific": "Filter by tournament='FIFA World Cup'"
+    }
+  },
+  
+  "tactical_data.csv": {
+    "path": "data/match_data/tactical_data.csv",
+    "primary_key": "match_id",
+    "grain": "One row per match with detailed tactical statistics from WhoScored",
+    "table_role": "Primary source for in-depth tactical analysis with 41 metrics per match",
+    "coverage": {
+      "time_range": "2026-onwards (expandable to any match with WhoScored data)",
+      "total_matches": "6 matches (as of June 2026, growing)",
+      "match_types": "Any competition where WhoScored data is available",
+      "update_frequency": "Manual addition via scraping script",
+      "data_source": "WhoScored.com via Playwright scraper"
+    },
+    "match_id_format": {
+      "format": "{PREFIX}{YEAR}_{YYYY-MM-DD}_{HOME_TEAM}_{AWAY_TEAM}",
+      "example": "WC_2026_2026-06-13_BRAZIL_MOROCCO",
+      "components": {
+        "prefix": "Tournament identifier (WC_, EURO_, COPA_, etc.)",
+        "year": "Tournament year (e.g., 2026)",
+        "date": "Match date in YYYY-MM-DD format",
+        "teams": "UPPERCASE team names with underscores"
+      }
+    },
+    "columns": {
+      "match_id": {
+        "type": "string",
+        "format": "{PREFIX}{YEAR}_{YYYY-MM-DD}_{HOME_TEAM}_{AWAY_TEAM}",
+        "desc": "Unique match identifier combining tournament, date, and teams",
+        "example": "WC_2026_2026-06-13_BRAZIL_MOROCCO",
+        "use_for": "Match lookup, joining with results.csv, tournament filtering"
+      },
+      "date": {
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "desc": "Match date",
+        "example": "2026-06-13",
+        "use_for": "Time-based filtering, chronological analysis"
+      },
+      "home_team": {
+        "type": "string",
+        "desc": "Home team name",
+        "example": "Brazil",
+        "use_for": "Team filtering, head-to-head analysis"
+      },
+      "away_team": {
+        "type": "string",
+        "desc": "Away team name",
+        "example": "Morocco",
+        "use_for": "Team filtering, head-to-head analysis"
+      },
+      "home_score": {
+        "type": "integer",
+        "desc": "Goals scored by home team",
+        "example": "1",
+        "use_for": "Match result analysis, goal statistics"
+      },
+      "away_score": {
+        "type": "integer",
+        "desc": "Goals scored by away team",
+        "example": "1",
+        "use_for": "Match result analysis, goal statistics"
+      },
+      "tournament": {
+        "type": "string",
+        "desc": "Full tournament name",
+        "example": "FIFA World Cup",
+        "use_for": "Tournament filtering, competition-specific analysis"
+      },
+      "home_formation": {
+        "type": "string",
+        "format": "X-X-X or X-X-X-X (with dashes)",
+        "desc": "Home team's tactical formation",
+        "example": "4-2-3-1",
+        "use_for": "Tactical system analysis, formation matchup studies",
+        "common_values": ["4-4-2", "4-3-3", "4-2-3-1", "3-4-2-1", "5-3-2", "4-1-4-1"]
+      },
+      "away_formation": {
+        "type": "string",
+        "format": "X-X-X or X-X-X-X (with dashes)",
+        "desc": "Away team's tactical formation",
+        "example": "4-2-3-1",
+        "use_for": "Tactical system analysis, formation matchup studies",
+        "common_values": ["4-4-2", "4-3-3", "4-2-3-1", "3-4-2-1", "5-3-2", "4-1-4-1"]
+      },
+      "home_avg_age": {
+        "type": "float",
+        "unit": "years",
+        "desc": "Average age of home team's starting XI",
+        "example": "28.6",
+        "use_for": "Team experience analysis, age-based performance correlation"
+      },
+      "away_avg_age": {
+        "type": "float",
+        "unit": "years",
+        "desc": "Average age of away team's starting XI",
+        "example": "26.2",
+        "use_for": "Team experience analysis, age-based performance correlation"
+      },
+      "home_possession": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Average possession percentage for home team across all match minutes",
+        "example": "6.4",
+        "calculation": "Average of minute-by-minute possession values",
+        "use_for": "Ball control analysis, possession-based playing style identification"
+      },
+      "away_possession": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Average possession percentage for away team across all match minutes",
+        "example": "6.0",
+        "calculation": "Average of minute-by-minute possession values",
+        "use_for": "Ball control analysis, possession-based playing style identification"
+      },
+      "home_shots_total": {
+        "type": "integer",
+        "desc": "Total shots attempted by home team (on target + off target + blocked)",
+        "example": "12",
+        "calculation": "Sum of all shot attempts from minute-by-minute data",
+        "use_for": "Attacking volume analysis, shot frequency comparison"
+      },
+      "away_shots_total": {
+        "type": "integer",
+        "desc": "Total shots attempted by away team (on target + off target + blocked)",
+        "example": "14",
+        "calculation": "Sum of all shot attempts from minute-by-minute data",
+        "use_for": "Attacking volume analysis, shot frequency comparison"
+      },
+      "home_shots_on_target": {
+        "type": "integer",
+        "desc": "Shots on target by home team (shots that would score without goalkeeper intervention)",
+        "example": "5",
+        "calculation": "Sum of on-target shots from minute-by-minute data",
+        "use_for": "Shot quality analysis, finishing accuracy assessment"
+      },
+      "away_shots_on_target": {
+        "type": "integer",
+        "desc": "Shots on target by away team (shots that would score without goalkeeper intervention)",
+        "example": "3",
+        "calculation": "Sum of on-target shots from minute-by-minute data",
+        "use_for": "Shot quality analysis, finishing accuracy assessment"
+      },
+      "home_shots_blocked": {
+        "type": "integer",
+        "desc": "Shots blocked by opposition defenders before reaching goalkeeper",
+        "example": "3",
+        "calculation": "Sum of blocked shots from minute-by-minute data",
+        "use_for": "Defensive effectiveness, shot prevention analysis"
+      },
+      "away_shots_blocked": {
+        "type": "integer",
+        "desc": "Shots blocked by opposition defenders before reaching goalkeeper",
+        "example": "6",
+        "calculation": "Sum of blocked shots from minute-by-minute data",
+        "use_for": "Defensive effectiveness, shot prevention analysis"
+      },
+      "home_shot_accuracy": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Percentage of shots that were on target",
+        "example": "41.7",
+        "calculation": "(home_shots_on_target / home_shots_total) * 100",
+        "use_for": "Finishing quality, shot precision analysis, attacking efficiency"
+      },
+      "away_shot_accuracy": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Percentage of shots that were on target",
+        "example": "21.4",
+        "calculation": "(away_shots_on_target / away_shots_total) * 100",
+        "use_for": "Finishing quality, shot precision analysis, attacking efficiency"
+      },
+      "home_passes_total": {
+        "type": "integer",
+        "desc": "Total passes attempted by home team (successful + unsuccessful)",
+        "example": "514",
+        "calculation": "Sum of all pass attempts from minute-by-minute data",
+        "use_for": "Passing volume analysis, possession style identification"
+      },
+      "away_passes_total": {
+        "type": "integer",
+        "desc": "Total passes attempted by away team (successful + unsuccessful)",
+        "example": "486",
+        "calculation": "Sum of all pass attempts from minute-by-minute data",
+        "use_for": "Passing volume analysis, possession style identification"
+      },
+      "home_pass_accuracy": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Percentage of passes that were completed successfully",
+        "example": "87.4",
+        "calculation": "(home_passes_accurate / home_passes_total) * 100",
+        "use_for": "Passing quality, ball retention, technical ability assessment"
+      },
+      "away_pass_accuracy": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Percentage of passes that were completed successfully",
+        "example": "86.2",
+        "calculation": "(away_passes_accurate / away_passes_total) * 100",
+        "use_for": "Passing quality, ball retention, technical ability assessment"
+      },
+      "home_key_passes": {
+        "type": "integer",
+        "desc": "Passes that directly lead to a shot attempt (assists + shot-creating passes)",
+        "example": "10",
+        "calculation": "Sum of key passes from minute-by-minute data",
+        "use_for": "Chance creation analysis, attacking creativity assessment"
+      },
+      "away_key_passes": {
+        "type": "integer",
+        "desc": "Passes that directly lead to a shot attempt (assists + shot-creating passes)",
+        "example": "10",
+        "calculation": "Sum of key passes from minute-by-minute data",
+        "use_for": "Chance creation analysis, attacking creativity assessment"
+      },
+      "home_tackles_won": {
+        "type": "integer",
+        "desc": "Successful tackles by home team (regained possession)",
+        "example": "23",
+        "calculation": "Sum of successful tackles from minute-by-minute data",
+        "use_for": "Defensive activity, ball-winning ability, pressing effectiveness"
+      },
+      "away_tackles_won": {
+        "type": "integer",
+        "desc": "Successful tackles by away team (regained possession)",
+        "example": "26",
+        "calculation": "Sum of successful tackles from minute-by-minute data",
+        "use_for": "Defensive activity, ball-winning ability, pressing effectiveness"
+      },
+      "home_tackle_success": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Percentage of tackles that were successful",
+        "example": "59.0",
+        "calculation": "(home_tackles_won / home_tackles_total) * 100",
+        "use_for": "Defensive efficiency, tackling quality assessment"
+      },
+      "away_tackle_success": {
+        "type": "float",
+        "unit": "percentage",
+        "range": "0-100",
+        "desc": "Percentage of tackles that were successful",
+        "example": "83.9",
+        "calculation": "(away_tackles_won / away_tackles_total) * 100",
+        "use_for": "Defensive efficiency, tackling quality assessment"
+      },
+      "home_interceptions": {
+        "type": "integer",
+        "desc": "Passes intercepted by home team (reading the game, positioning)",
+        "example": "5",
+        "calculation": "Sum of interceptions from minute-by-minute data",
+        "use_for": "Defensive positioning, anticipation, pressing effectiveness"
+      },
+      "away_interceptions": {
+        "type": "integer",
+        "desc": "Passes intercepted by away team (reading the game, positioning)",
+        "example": "5",
+        "calculation": "Sum of interceptions from minute-by-minute data",
+        "use_for": "Defensive positioning, anticipation, pressing effectiveness"
+      },
+      "home_clearances": {
+        "type": "integer",
+        "desc": "Defensive clearances by home team (removing danger)",
+        "example": "23",
+        "calculation": "Sum of clearances from minute-by-minute data",
+        "use_for": "Defensive pressure analysis, last-ditch defending"
+      },
+      "away_clearances": {
+        "type": "integer",
+        "desc": "Defensive clearances by away team (removing danger)",
+        "example": "17",
+        "calculation": "Sum of clearances from minute-by-minute data",
+        "use_for": "Defensive pressure analysis, last-ditch defending"
+      },
+      "home_aerials_won": {
+        "type": "integer",
+        "desc": "Aerial duels won by home team",
+        "example": "12",
+        "calculation": "Sum of aerial duels won from minute-by-minute data",
+        "use_for": "Physical dominance, set-piece effectiveness, long-ball strategy"
+      },
+      "away_aerials_won": {
+        "type": "integer",
+        "desc": "Aerial duels won by away team",
+        "example": "4",
+        "calculation": "Sum of aerial duels won from minute-by-minute data",
+        "use_for": "Physical dominance, set-piece effectiveness, long-ball strategy"
+      },
+      "home_attacking_intensity": {
+        "type": "integer",
+        "desc": "Combined attacking threat metric",
+        "example": "22",
+        "calculation": "home_shots_total + home_key_passes",
+        "use_for": "Overall attacking pressure, offensive output measurement",
+        "interpretation": "Higher values indicate more attacking threat and chance creation"
+      },
+      "away_attacking_intensity": {
+        "type": "integer",
+        "desc": "Combined attacking threat metric",
+        "example": "24",
+        "calculation": "away_shots_total + away_key_passes",
+        "use_for": "Overall attacking pressure, offensive output measurement",
+        "interpretation": "Higher values indicate more attacking threat and chance creation"
+      },
+      "home_defensive_intensity": {
+        "type": "integer",
+        "desc": "Combined defensive activity metric",
+        "example": "51",
+        "calculation": "home_tackles_won + home_interceptions + home_clearances",
+        "use_for": "Overall defensive workload, defensive pressure measurement",
+        "interpretation": "Higher values indicate more defensive activity (could mean under pressure or aggressive defending)"
+      },
+      "away_defensive_intensity": {
+        "type": "integer",
+        "desc": "Combined defensive activity metric",
+        "example": "48",
+        "calculation": "away_tackles_won + away_interceptions + away_clearances",
+        "use_for": "Overall defensive workload, defensive pressure measurement",
+        "interpretation": "Higher values indicate more defensive activity (could mean under pressure or aggressive defending)"
+      }
+    },
+    "calculated_metrics": {
+      "shot_accuracy": {
+        "formula": "(shots_on_target / shots_total) * 100",
+        "purpose": "Measures finishing quality and shot precision",
+        "interpretation": {
+          "high": ">40% - Excellent finishing, clinical in front of goal",
+          "medium": "25-40% - Average finishing quality",
+          "low": "<25% - Poor finishing, wasteful shooting"
+        }
+      },
+      "pass_accuracy": {
+        "formula": "(passes_accurate / passes_total) * 100",
+        "purpose": "Measures passing quality and ball retention",
+        "interpretation": {
+          "high": ">85% - Excellent ball control, possession-based style",
+          "medium": "75-85% - Good passing, balanced approach",
+          "low": "<75% - Risky passing, direct style or under pressure"
+        }
+      },
+      "tackle_success": {
+        "formula": "(tackles_won / tackles_total) * 100",
+        "purpose": "Measures defensive efficiency in 1v1 situations",
+        "interpretation": {
+          "high": ">70% - Excellent tackling, strong defensive duels",
+          "medium": "50-70% - Average defensive success",
+          "low": "<50% - Weak tackling, losing defensive duels"
+        }
+      },
+      "attacking_intensity": {
+        "formula": "shots_total + key_passes",
+        "purpose": "Measures overall attacking threat and chance creation",
+        "interpretation": {
+          "high": ">30 - Very attacking, creating many chances",
+          "medium": "20-30 - Balanced attacking output",
+          "low": "<20 - Limited attacking threat"
+        }
+      },
+      "defensive_intensity": {
+        "formula": "tackles_won + interceptions + clearances",
+        "purpose": "Measures overall defensive workload and activity",
+        "interpretation": {
+          "high": ">50 - Heavy defensive work (under pressure or aggressive pressing)",
+          "medium": "30-50 - Moderate defensive activity",
+          "low": "<30 - Light defensive work (dominating possession)"
+        }
+      }
+    },
+    "use_cases": [
+      "In-depth tactical analysis (formations, possession, pressing)",
+      "Shot quality and finishing efficiency assessment",
+      "Passing patterns and ball retention analysis",
+      "Defensive effectiveness and workload measurement",
+      "Playing style identification (possession vs direct, attacking vs defensive)",
+      "Formation matchup analysis",
+      "Team intensity and tempo comparison",
+      "Age-based performance correlation studies"
+    ],
+    "limitations": [
+      "Limited historical coverage (only matches manually added via scraper)",
+      "Requires WhoScored data availability for each match",
+      "NO player-level statistics (team aggregates only)",
+      "NO xG (expected goals) data",
+      "NO referee, venue, or attendance information",
+      "NO corner kicks, fouls, or card statistics"
+    ],
+    "query_examples": {
+      "high_possession_teams": "Filter by home_possession > 60 OR away_possession > 60",
+      "efficient_finishers": "Filter by home_shot_accuracy > 40 OR away_shot_accuracy > 40",
+      "formation_analysis": "Filter by home_formation='4-3-3' to analyze 4-3-3 performance",
+      "defensive_workload": "Filter by home_defensive_intensity > 50 to find teams under pressure",
+      "attacking_teams": "Filter by home_attacking_intensity > 30 for high-attacking matches",
+      "world_cup_2026": "Filter by match_id LIKE 'WC_2026%' for World Cup 2026 matches"
+    },
+    "data_quality": {
+      "source": "WhoScored.com (professional football statistics provider)",
+      "accuracy": "High - minute-by-minute data aggregated from official match statistics",
+      "completeness": "All 41 metrics available for every match in the dataset",
+      "update_method": "Manual scraping via Playwright automation script"
+    }
+  },
+  
+  "common_mistakes_to_avoid": {
+    "mistake_1": {
+      "wrong": "Assuming tactical_data.csv has all matches from results.csv",
+      "right": "tactical_data.csv only contains manually scraped matches - check if match exists first"
+    },
+    "mistake_2": {
+      "wrong": "Using results.csv for tactical details like possession or formations",
+      "right": "results.csv has NO tactical columns - use tactical_data.csv for tactical analysis"
+    },
+    "mistake_3": {
+      "wrong": "Fabricating tactical statistics when match not in tactical_data.csv",
+      "right": "Acknowledge limitation: 'Tactical statistics not available for this match'"
+    },
+    "mistake_4": {
+      "wrong": "Confusing calculated metrics (shot_accuracy, attacking_intensity) with raw data",
+      "right": "Understand which metrics are calculated and their formulas for proper interpretation"
+    }
+  },
+  
+  "best_practices": {
+    "do": [
+      "Always check if match exists in tactical_data.csv before claiming tactical data availability",
+      "Use results.csv for historical analysis and broad match coverage",
+      "Use tactical_data.csv for in-depth tactical analysis when available",
+      "Understand calculated metrics formulas for accurate interpretation",
+      "Cite data sources clearly (results.csv vs tactical_data.csv)",
+      "Consider both raw metrics and calculated metrics for comprehensive analysis",
+      "Use match_id to join results.csv and tactical_data.csv when needed"
+    ],
+    "dont": [
+      "Don't fabricate tactical statistics",
+      "Don't assume all matches have tactical data",
+      "Don't confuse possession percentage with possession minutes",
+      "Don't ignore calculated metrics - they provide valuable insights",
+      "Don't use results.csv for tactical queries"
+    ]
+  }
+}

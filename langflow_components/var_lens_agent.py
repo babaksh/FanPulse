@@ -30,10 +30,10 @@ class VARLensAgent(ToolCallingAgentComponent):
     
     Data Source:
     - FAISS Vector Store: 658 rule vectors from 7 official FIFA/IFAB documents
-      * Laws of the Game 2026/27
+      * Laws of the Game 2026-27
       * VAR Protocol (IFAB)
       * FIFA World Cup 2026 Regulations
-      * Changes to Laws 2026/27
+      * Changes to Laws 2026-27
       * Off-field treatment protocol
       * Time-limited substitution protocol
       * Throw-in and goal-kick countdown protocol
@@ -57,7 +57,7 @@ class VARLensAgent(ToolCallingAgentComponent):
         ModelInput(
             name="model",
             display_name="Language Model",
-            info="Select Ollama Granite 3.1 8B for VAR analysis",
+            info="Select Ollama Granite 4.1 8B for VAR analysis",
             real_time_refresh=True,
             required=True,
         ),

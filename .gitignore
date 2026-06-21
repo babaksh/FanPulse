@@ -148,3 +148,9 @@ langflow_workflows/README.md
 langflow_workflows/DATA_SCHEMA_GUIDE_V2.md
 langflow_workflows/DATA_SCHEMA_GUIDE_V3.md
 langflow_workflows/COMPLETE_WORKFLOW_SETUP.md
+scripts/update_results_from_tactical.py
+scripts/create_tactical_csv_from_whoscored.py
+scripts/scrape_whoscored_network.py
+data/whoscored_json
+scripts/sofascore_var_extractor.py
+data/sofascore_json

@@ -148,6 +148,10 @@ class FanPulseOrchestrator(ToolCallingAgentComponent):
         from langchain_core.tools import StructuredTool
         
         # Validate model selection
+        if not self.model:
+            msg = "No language model selected. Please select Ollama Granite 4.1 8B from the Language Model dropdown."
+            raise ValueError(msg)
+            
         selected_model = self._resolve_selected_model()
         try:
             from langchain_core.language_models import BaseLanguageModel

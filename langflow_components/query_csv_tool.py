@@ -30,9 +30,9 @@ class QueryCSVTool(Component):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.project_root = Path('d:/MyPythonProjects/FanPulse')
-        self.schema_path = self.project_root / "data" / "data_schema.json"
+        self.schema_path = self.project_root / "data" / "match_data" / "data_schema.json"
         self.results_csv = self.project_root / "data" / "match_data" / "results.csv"
-        self.tactical_csv = self.project_root / "data" / "match_data" / "tactical_stats.csv"
+        self.tactical_csv = self.project_root / "data" / "match_data" / "tactical_data.csv"
         self.schema = None
     
     def _load_schema(self):
@@ -60,10 +60,10 @@ class QueryCSVTool(Component):
         ) -> str:
             """Query CSV data with filters.
             
-            IMPORTANT: This tool reads data/data_schema.json to understand data structure.
+            IMPORTANT: This tool reads data/match_data/data_schema.json to understand data structure.
             
             Args:
-                table: Table name - "results" or "tactical_stats"
+                table: Table name - "results" or "tactical_data"
                 team_filter: Team name to filter (searches both home and away)
                 date_from: Start date (YYYY-MM-DD format)
                 date_to: End date (YYYY-MM-DD format)
@@ -81,8 +81,8 @@ class QueryCSVTool(Component):
                 schema = self._load_schema()
                 
                 # Validate table
-                if table not in ["results", "tactical_stats"]:
-                    return f"❌ Invalid table: {table}. Must be 'results' or 'tactical_stats'"
+                if table not in ["results", "tactical_data"]:
+                    return f"❌ Invalid table: {table}. Must be 'results' or 'tactical_data'"
                 
                 # Select CSV file
                 csv_path = self.results_csv if table == "results" else self.tactical_csv
@@ -156,9 +156,10 @@ class QueryCSVTool(Component):
                 # Select key columns for display
                 if table == "results":
                     display_cols = ['date', 'home_team', 'away_team', 'home_score', 'away_score', 'tournament']
-                else:  # tactical_stats
-                    display_cols = ['match_id', 'date', 'home_team', 'away_team', 'home_score', 'away_score', 
-                                   'home_possession', 'away_possession', 'home_xg', 'away_xg']
+                else:  # tactical_data
+                    display_cols = ['match_id', 'date', 'home_team', 'away_team', 'home_score', 'away_score',
+                                   'home_possession', 'away_possession', 'home_shots_total', 'away_shots_total',
+                                   'home_shot_accuracy', 'away_shot_accuracy']
                 
                 # Filter to existing columns
                 display_cols = [col for col in display_cols if col in filtered_df.columns]
@@ -206,8 +207,8 @@ class QueryCSVTool(Component):
             description=(
                 "Query CSV data with filters. "
                 "Use this tool for custom queries outside the 4 specialized tools. "
-                "Reads data/data_schema.json for schema awareness. "
-                "Tables: 'results' (all matches 1872-2026) or 'tactical_stats' (tournament prefix system). "
+                "Reads data/match_data/data_schema.json for schema awareness. "
+                "Tables: 'results' (all matches 1872-2026) or 'tactical_data' (WhoScored scraped matches with 41 metrics). "
                 "Supports team, date, and tournament filtering."
             )
         )

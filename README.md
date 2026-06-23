@@ -13,7 +13,7 @@ An intelligent multi-agent system that demystifies VAR decisions and provides ta
 
 ---
 
-## 🎯 The Problem We're Solving
+## 🎯 The Problem I'm Solving
 
 ### VAR Confusion & Tactical Complexity
 
@@ -39,7 +39,7 @@ Football fans worldwide face two major challenges during FIFA World Cup 2026:
 
 ---
 
-## 💡 Our AI Solution
+## 💡 My AI Solution
 
 ### FanPulse: Three Specialized AI Agents Working Together
 
@@ -71,7 +71,7 @@ Your tactical analyst providing performance insights:
 
 ---
 
-## 🚀 Our Technical Approach
+## 🚀 My Technical Approach
 
 ### Multi-Agent Architecture with Tool-Agent Separation
 
@@ -620,4 +620,4 @@ MIT License - see [`LICENSE`](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ for FIFA World Cup 2026** ⚽🤖
+**Made with ❤️ for IBM AI Builders Challenge**

@@ -253,8 +253,7 @@ class GetTacticalDataTool(Component):
                     },
                     "recent_matches": recent_matches,
                     "data_source": {
-                        "file": "tactical_data.csv",
-                        "type": "WhoScored scraped data",
+                        "type": "Tournament Tactical Database (WhoScored)",
                         "total_columns": 41,
                         "includes_calculated_metrics": True
                     }

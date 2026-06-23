@@ -37,10 +37,10 @@
         "player": "Themba Zwane",
         "player_id": 559504,
         "is_home": false,
-        "confirmed": false,
         "final_decision": "red_card",
         "reason": "Violent conduct",
-        "initial_decision": "no_card"
+        "initial_decision": "no_card",
+        "outcome": "card_upgraded"
       }
     },
     {

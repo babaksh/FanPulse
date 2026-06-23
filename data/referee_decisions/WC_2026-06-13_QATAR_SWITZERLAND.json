@@ -39,7 +39,8 @@
         "player": "Remo Freuler",
         "player_id": 115516,
         "is_home": false,
-        "confirmed": true
+        "outcome": "penalty_awarded",
+        "note": "VAR review: Following a foul on Remo Freuler in the penalty area, a penalty was officially awarded after a VAR review and converted by Breel Embolo."
       }
     }
   ]

@@ -130,7 +130,7 @@ class VARLensAgent(ToolCallingAgentComponent):
             model=self.model,
             user_id=self.user_id,
             max_tokens=max_tokens,
-            temperature=0.2,  # Low temperature for precise tool calling
+            temperature=0.3,  # Low temperature for precise tool calling
         )
 
     async def get_agent_requirements(self):
@@ -202,10 +202,16 @@ class VARLensAgent(ToolCallingAgentComponent):
 
     async def get_memory_data(self):
         """Retrieve chat history from memory, avoiding message duplication."""
+        import uuid
+        
+        # Create unique session_id for this agent to completely isolate its memory
+        # This prevents chat history contamination when multiple agents are called
+        unique_session_id = f"{self.graph.session_id}_var_lens_{uuid.uuid4().hex[:8]}"
+        
         messages = (
             await MemoryComponent(**self.get_base_args())
             .set(
-                session_id=self.graph.session_id,
+                session_id=unique_session_id,  # Use unique session_id for complete isolation
                 context_id=self.context_id,
                 order="Ascending",
                 n_messages=self.n_messages,
@@ -215,8 +221,8 @@ class VARLensAgent(ToolCallingAgentComponent):
         
         # Filter out current input message to avoid duplication
         return [
-            message 
-            for message in messages 
+            message
+            for message in messages
             if getattr(message, "id", None) != getattr(self.input_value, "id", None)
         ]
 

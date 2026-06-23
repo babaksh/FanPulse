@@ -1,0 +1,76 @@
+{
+  "match_id": "WC_2026-06-21_URUGUAY_CABO_VERDE",
+  "match_info": {
+    "home_team": "Uruguay",
+    "away_team": "Cabo Verde",
+    "date": "2026-06-21",
+    "tournament": "FIFA World Cup, Group H",
+    "venue": "Hard Rock Stadium",
+    "city": "Miami Gardens"
+  },
+  "var_protocol_note": "This file contains only VAR-reviewable decisions according to FIFA/IFAB protocol: Goals, Penalties, Red Cards, and Mistaken Identity. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 90,
+      "type": "var_review",
+      "description": "VAR review for review",
+      "var_decision": {
+        "review_type": "review",
+        "player": "Agustín Canobbio",
+        "player_id": 846413,
+        "is_home": true,
+        "outcome": "reviewed",
+        "note": "VAR review: Late-game incident involving Agustín Canobbio was reviewed by the VAR system, and the original refereeing decision was upheld."
+      }
+    },
+    {
+      "minute": 69,
+      "type": "var_review",
+      "description": "VAR review for goalNotAwarded",
+      "var_decision": {
+        "review_type": "goalNotAwarded",
+        "player": "Maximiliano Araújo",
+        "player_id": 929193,
+        "is_home": true,
+        "outcome": "goal_not_awarded",
+        "note": "VAR review: A potential goal scored by Maximiliano Araújo was reviewed by VAR and officially not awarded."
+      }
+    },
+    {
+      "minute": 61,
+      "type": "goal",
+      "description": "Goal by Hélio Varela",
+      "player": "Hélio Varela",
+      "player_id": 1094395,
+      "is_home": false,
+      "goal_type": "regular"
+    },
+    {
+      "minute": 45,
+      "type": "goal",
+      "description": "Goal by Agustín Canobbio",
+      "player": "Agustín Canobbio",
+      "player_id": 846413,
+      "is_home": true,
+      "goal_type": "regular"
+    },
+    {
+      "minute": 44,
+      "type": "goal",
+      "description": "Goal by Maximiliano Araújo",
+      "player": "Maximiliano Araújo",
+      "player_id": 929193,
+      "is_home": true,
+      "goal_type": "regular"
+    },
+    {
+      "minute": 21,
+      "type": "goal",
+      "description": "Goal by Kevin Lenini",
+      "player": "Kevin Lenini",
+      "player_id": 906838,
+      "is_home": false,
+      "goal_type": "regular"
+    }
+  ]
+}

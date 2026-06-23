@@ -141,7 +141,7 @@ class CompareTeamsTool(Component):
                             "goal_difference": int(team2_gd)
                         }
                     },
-                    "data_source": "results.csv (1872-2026, ~49,000 matches)"
+                    "data_source": "Historical Match Database (1872-2026, ~49,000 matches)"
                 }
                 
                 # Add head-to-head data if available

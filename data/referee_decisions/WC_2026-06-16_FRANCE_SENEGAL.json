@@ -55,7 +55,8 @@
         "player": "Kylian Mbappé",
         "player_id": 826643,
         "is_home": true,
-        "confirmed": true
+        "outcome": "penalty_not_awarded",
+        "note": "VAR review: Kylian Mbappé's fall in the penalty box was reviewed, and the referee's initial decision of 'penalty not awarded' was confirmed."
       }
     }
   ]

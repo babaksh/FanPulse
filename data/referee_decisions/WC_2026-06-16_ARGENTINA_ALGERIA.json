@@ -46,7 +46,8 @@
         "player": "Farès Chaïbi",
         "player_id": 1192318,
         "is_home": false,
-        "confirmed": false
+        "outcome": "goal_confirmed",
+        "note": "VAR review: Farès Chaïbi's goal was checked and officially confirmed by the VAR room, ruling out any offside or foul in the buildup."
       }
     }
   ]

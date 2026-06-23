@@ -28,10 +28,10 @@
         "player": "Miguel Almirón",
         "player_id": 333373,
         "is_home": false,
-        "confirmed": true,
         "final_decision": "red_card",
         "reason": "Argument",
-        "initial_decision": "no_card"
+        "initial_decision": "no_card",
+        "outcome": "card_upgraded"
       }
     },
     {

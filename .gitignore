@@ -154,3 +154,4 @@ scripts/scrape_whoscored_network.py
 data/whoscored_json
 scripts/sofascore_var_extractor.py
 data/sofascore_json
+scripts/update_var_notes_from_doc.py

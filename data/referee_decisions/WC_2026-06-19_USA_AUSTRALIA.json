@@ -19,7 +19,8 @@
         "player": "Jordan Bos",
         "player_id": 1144138,
         "is_home": false,
-        "confirmed": false
+        "outcome": "reviewed",
+        "note": "VAR review: The match incident involving Jordan Bos was reviewed by the VAR team, and play resumed without any change to the decision."
       }
     },
     {
@@ -31,7 +32,8 @@
         "player": "Alexander Freeman",
         "player_id": 1184541,
         "is_home": true,
-        "confirmed": false
+        "outcome": "goal_not_awarded",
+        "note": "VAR review: Alexander Freeman's goal in the 43rd minute was reviewed and officially not awarded due to a prior infringement."
       }
     },
     {

@@ -55,10 +55,10 @@
         "player": "Assim Madibo",
         "player_id": 796500,
         "is_home": false,
-        "confirmed": false,
         "final_decision": "red_card",
         "reason": "Foul",
-        "initial_decision": "no_card"
+        "initial_decision": "no_card",
+        "outcome": "card_upgraded"
       }
     },
     {
@@ -79,10 +79,10 @@
         "player": "Homam Al-Amin",
         "player_id": 933433,
         "is_home": false,
-        "confirmed": false,
         "final_decision": "red_card",
         "reason": "Professional foul last man",
-        "initial_decision": "no_card"
+        "initial_decision": "no_card",
+        "outcome": "card_upgraded"
       }
     },
     {
@@ -94,7 +94,8 @@
         "player": "Tajon Buchanan",
         "player_id": 973290,
         "is_home": true,
-        "confirmed": false
+        "outcome": "penalty_awarded",
+        "note": "VAR review: Following a review for a foul on Tajon Buchanan, a penalty was awarded, and Homam Al-Amin's sanction was upgraded to a direct red card for denying an obvious goal-scoring opportunity."
       }
     },
     {

@@ -30,7 +30,8 @@
         "player": "Marko Arnautović",
         "player_id": 21927,
         "is_home": true,
-        "confirmed": false
+        "outcome": "penalty_not_awarded",
+        "note": "VAR review: A potential penalty incident involving Marko Arnautović was reviewed, and the initial decision of 'penalty not awarded' was upheld."
       }
     },
     {
@@ -51,7 +52,8 @@
         "player": "Marko Arnautović",
         "player_id": 21927,
         "is_home": true,
-        "confirmed": false
+        "outcome": "goal_confirmed",
+        "note": "VAR review: Marko Arnautović's goal was reviewed and successfully confirmed by the video assistant referee."
       }
     },
     {

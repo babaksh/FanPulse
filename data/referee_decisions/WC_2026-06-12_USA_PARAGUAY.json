@@ -37,7 +37,8 @@
         "player": "Tim Ream",
         "player_id": 118179,
         "is_home": true,
-        "confirmed": false
+        "outcome": "identity_corrected",
+        "note": "VAR review: Mistaken identity corrected; the referee's initial disciplinary action was reallocated and officially recorded for Tim Ream."
       }
     },
     {

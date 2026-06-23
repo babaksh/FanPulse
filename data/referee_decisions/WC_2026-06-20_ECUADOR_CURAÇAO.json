@@ -19,7 +19,8 @@
         "player": "Gonzalo Plata",
         "player_id": 937937,
         "is_home": true,
-        "confirmed": false
+        "outcome": "reviewed",
+        "note": "VAR review: A second potential incident involving Gonzalo Plata was reviewed, and no clear and obvious error was found."
       }
     },
     {
@@ -31,7 +32,8 @@
         "player": "Gonzalo Plata",
         "player_id": 937937,
         "is_home": true,
-        "confirmed": false
+        "outcome": "reviewed",
+        "note": "VAR review: The first reviewed incident involving Gonzalo Plata was checked by the VAR room, validating the referee's call."
       }
     }
   ]

@@ -64,7 +64,8 @@
         "player": "Petar Musa",
         "player_id": 827668,
         "is_home": false,
-        "confirmed": false
+        "outcome": "reviewed",
+        "note": "VAR review: The play involving Petar Musa was fully reviewed by the VAR system, confirming the match officials' on-field decisions."
       }
     },
     {
@@ -87,7 +88,8 @@
         "player": "Harry Kane",
         "player_id": 108579,
         "is_home": true,
-        "confirmed": false
+        "outcome": "reviewed",
+        "note": "VAR review: A potential penalty incident involving Harry Kane was reviewed by the VAR team, and play continued with the original call."
       }
     }
   ]

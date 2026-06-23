@@ -226,9 +226,9 @@ class AnalyzeTeamTool(Component):
                     },
                     "tactical_data_by_tournament": tactical_data_by_tournament,
                     "data_sources": {
-                        "historical_results": "results.csv (1872-2026, ~49,000 matches)",
+                        "historical_results": "Historical Match Database (1872-2026, ~49,000 matches)",
                         "tactical_data_available": bool(tactical_data_by_tournament),
-                        "tactical_data_source": "tactical_data.csv (WhoScored scraped matches)",
+                        "tactical_data_source": "Tournament Tactical Database (WhoScored)",
                         "tournaments_with_tactical_data": list(tactical_data_by_tournament.keys())
                     }
                 }

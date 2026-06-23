@@ -37,7 +37,8 @@
         "player": "Charles De Ketelaere",
         "player_id": 960441,
         "is_home": true,
-        "confirmed": false
+        "outcome": "reviewed",
+        "note": "VAR review: The incident involving Charles De Ketelaere was reviewed by the VAR team, and the referee's initial call was confirmed."
       }
     }
   ]

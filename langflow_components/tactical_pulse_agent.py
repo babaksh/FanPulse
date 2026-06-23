@@ -35,7 +35,7 @@ class TacticalPulseAgent(ToolCallingAgentComponent):
     
     Available Tools (5):
     1. analyze_team: Returns JSON with comprehensive team analysis (overall + tournament data)
-    2. get_team_stats: Returns JSON with quick statistics (matches, wins, goals, form)
+    2. get_team_data: Returns JSON with quick statistics (matches, wins, goals, form)
     3. compare_teams: Returns JSON with head-to-head comparison
     4. get_tactical_data: Returns JSON with tournament tactical stats (possession, xG, shots)
     5. query_csv: Custom queries for specific data needs
@@ -131,7 +131,7 @@ class TacticalPulseAgent(ToolCallingAgentComponent):
             model=self.model,
             user_id=self.user_id,
             max_tokens=max_tokens,
-            temperature=0.2,  # Low temperature for precise tool calling
+            temperature=0.3,  # Low temperature for precise tool calling
         )
 
     async def get_agent_requirements(self):
@@ -206,10 +206,16 @@ class TacticalPulseAgent(ToolCallingAgentComponent):
 
     async def get_memory_data(self):
         """Retrieve chat history from memory, avoiding message duplication."""
+        import uuid
+        
+        # Create unique session_id for this agent to completely isolate its memory
+        # This prevents chat history contamination when multiple agents are called
+        unique_session_id = f"{self.graph.session_id}_tactical_pulse_{uuid.uuid4().hex[:8]}"
+        
         messages = (
             await MemoryComponent(**self.get_base_args())
             .set(
-                session_id=self.graph.session_id,
+                session_id=unique_session_id,  # Use unique session_id for complete isolation
                 context_id=self.context_id,
                 order="Ascending",
                 n_messages=self.n_messages,
@@ -219,8 +225,8 @@ class TacticalPulseAgent(ToolCallingAgentComponent):
         
         # Filter out current input message to avoid duplication
         return [
-            message 
-            for message in messages 
+            message
+            for message in messages
             if getattr(message, "id", None) != getattr(self.input_value, "id", None)
         ]
 

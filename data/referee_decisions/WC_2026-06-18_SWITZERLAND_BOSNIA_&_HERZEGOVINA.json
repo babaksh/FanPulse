@@ -73,7 +73,8 @@
         "player": "Dan Ndoye",
         "player_id": 944327,
         "is_home": true,
-        "confirmed": false
+        "outcome": "reviewed",
+        "note": "VAR review: The potential incident involving Dan Ndoye was reviewed by the VAR officials, and the referee's decision remained unchanged."
       }
     }
   ]

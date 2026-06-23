@@ -28,7 +28,8 @@
         "player": "Mattias Svanberg",
         "player_id": 796987,
         "is_home": true,
-        "confirmed": false
+        "outcome": "goal_not_awarded",
+        "note": "VAR review: Mattias Svanberg's goal in the 84th minute was disallowed and not awarded following a video review due to an infringement in the buildup."
       }
     },
     {

@@ -1,7 +1,7 @@
 """
 FanPulse Orchestrator Agent
 Intelligent coordinator for VAR-Lens and Tactical Pulse agents
-Handles single and multiple intent queries with automatic parallel execution
+Handles single and multiple intent queries with sequential execution
 """
 
 from __future__ import annotations
@@ -33,12 +33,12 @@ class FanPulseOrchestrator(ToolCallingAgentComponent):
     This agent:
     - Analyzes user questions (single or multiple intents)
     - Routes to appropriate specialized agents (VAR-Lens, Tactical Pulse)
-    - Executes agents in parallel when needed
+    - Executes agents sequentially (one at a time)
     - Synthesizes results into unified responses
     """
     
     display_name: str = "FanPulse Orchestrator"
-    description: str = "Intelligent coordinator for VAR-Lens and Tactical Pulse agents Handles single and multiple intent queries with automatic parallel execution"
+    description: str = "Intelligent coordinator for VAR-Lens and Tactical Pulse agents. Handles single and multiple intent queries with sequential execution."
     documentation: str = "https://github.com/babaksh/FanPulse"
     icon = "network"
     beta = False
@@ -218,7 +218,7 @@ class FanPulseOrchestrator(ToolCallingAgentComponent):
             # The agent will automatically:
             # 1. Analyze the question
             # 2. Decide which tool(s) to call
-            # 3. Execute tools in parallel if multiple are needed
+            # 3. Execute tools (parallel)
             # 4. Synthesize the results
             agent = self.create_agent_runnable()
             result = await self.run_agent(agent)
@@ -298,7 +298,7 @@ class FanPulseOrchestrator(ToolCallingAgentComponent):
             tool_description=(
                 f"{agent_description} "
                 "Intelligent coordinator for World Cup 2026 questions. "
-                "Handles VAR rules and tactical analysis with automatic parallel execution."
+                "Handles VAR rules and tactical analysis with sequential execution."
             ),
             callbacks=self.get_langchain_callbacks(),
         )

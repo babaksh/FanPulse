@@ -163,7 +163,7 @@ class GetTeamStatsTool(Component):
                         "form_score": round(float(form_score), 0),
                         "results": last_5_results
                     },
-                    "data_source": "results.csv (1872-2026, ~49,000 matches)"
+                    "data_source": "Historical Match Database (1872-2026, ~49,000 matches)"
                 }
                 
                 self.log(f"Successfully retrieved stats for {team_name}")

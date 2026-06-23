@@ -47,15 +47,22 @@ class QueryRefereeDecisionsTool(Component):
         """Build the match events query tool"""
         
         def query_referee_decisions(
-            match_id: str,
+            match_id: Optional[str] = None,
+            home_team: Optional[str] = None,
+            away_team: Optional[str] = None,
             minute: Optional[int] = None,
             decision_type: Optional[str] = None,
             var_only: bool = False
         ) -> str:
             """Query referee decisions and VAR reviews from a specific match.
             
+            You can search by EITHER match_id OR team names (home_team + away_team).
+            If team names are provided, the tool will find the most recent match between those teams.
+            
             Args:
-                match_id: Match identifier (e.g., "WC_2026-06-15_BRAZIL_ARGENTINA")
+                match_id: Match identifier (e.g., "WC_2026-06-15_BRAZIL_ARGENTINA"). Optional if team names provided.
+                home_team: Home team name (e.g., "Belgium"). Use with away_team to search by teams.
+                away_team: Away team name (e.g., "Iran"). Use with home_team to search by teams.
                 minute: Specific minute to query (optional, returns all decisions if not provided)
                 decision_type: Filter by type: "yellow_card", "red_card", "penalty", "goal_disallowed" (optional)
                 var_only: If True, only return decisions that involved VAR review (optional)
@@ -66,8 +73,80 @@ class QueryRefereeDecisionsTool(Component):
                 - VAR details (if applicable): review_type, initial_decision, final_decision, confirmed
                 - Player info: player_id, is_home
                 - Match context: teams, date, tournament, venue
+                
+            Examples:
+                - query_referee_decisions(match_id="WC_2026-06-21_BELGIUM_IRAN")
+                - query_referee_decisions(home_team="Belgium", away_team="Iran")
+                - query_referee_decisions(home_team="Belgium", away_team="Iran", var_only=True)
             """
             try:
+                # If team names provided, search for match_id
+                if home_team and away_team and not match_id:
+                    self.log(f"Searching for match: {home_team} vs {away_team}")
+                    self.status = f"Searching for {home_team} vs {away_team}..."
+                    
+                    # Get all match files
+                    all_events = list(self.events_path.glob("*.json"))
+                    
+                    if not all_events:
+                        return json.dumps({
+                            "home_team": home_team,
+                            "away_team": away_team,
+                            "decisions_found": 0,
+                            "message": "No VAR-reviewable decisions database found.",
+                            "note": "This database contains only VAR-reviewable decisions: Goals, Penalties, Red Cards, and Mistaken Identity."
+                        }, indent=2)
+                    
+                    # Search for matching teams (case-insensitive, normalize names)
+                    def normalize_name(name: str) -> str:
+                        """Normalize team name for comparison"""
+                        return name.upper().replace("_", " ").replace("&", "AND").strip()
+                    
+                    home_norm = normalize_name(home_team)
+                    away_norm = normalize_name(away_team)
+                    
+                    # Find all matches with these teams
+                    matching_files = []
+                    for event_file in all_events:
+                        try:
+                            with open(event_file, 'r', encoding='utf-8') as f:
+                                data = json.load(f)
+                                match_home = normalize_name(data.get("match_info", {}).get("home_team", ""))
+                                match_away = normalize_name(data.get("match_info", {}).get("away_team", ""))
+                                
+                                # Check both home/away and away/home combinations
+                                if (home_norm == match_home and away_norm == match_away) or \
+                                   (home_norm == match_away and away_norm == match_home):
+                                    matching_files.append((event_file, data.get("match_info", {}).get("date", "")))
+                        except:
+                            continue
+                    
+                    if not matching_files:
+                        return json.dumps({
+                            "home_team": home_team,
+                            "away_team": away_team,
+                            "decisions_found": 0,
+                            "message": f"No match found between {home_team} and {away_team}",
+                            "suggestion": "Try checking available matches or use exact match_id",
+                            "total_matches_available": len(all_events)
+                        }, indent=2)
+                    
+                    # Sort by date (most recent first) and use the most recent match
+                    matching_files.sort(key=lambda x: x[1], reverse=True)
+                    event_file = matching_files[0][0]
+                    match_id = event_file.stem
+                    self.log(f"Found match: {match_id}")
+                
+                elif not match_id:
+                    return json.dumps({
+                        "error": "Must provide either match_id OR both home_team and away_team",
+                        "examples": [
+                            "query_referee_decisions(match_id='WC_2026-06-21_BELGIUM_IRAN')",
+                            "query_referee_decisions(home_team='Belgium', away_team='Iran')"
+                        ]
+                    }, indent=2)
+                
+                # Now we have match_id, proceed with normal flow
                 self.log(f"Querying referee decisions: {match_id}" + (f" (minute {minute})" if minute else ""))
                 self.status = f"Searching decisions for {match_id}..."
                 

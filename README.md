@@ -77,13 +77,13 @@ Your tactical analyst providing performance insights:
 
 ```
 ┌─────────────────────────────────────────┐
-│  User: "What are handball rules and    │
+│  User: "What are handball rules and     │
 │         how does Brazil play?"          │
 └─────────────────────────────────────────┘
                     ↓
 ┌─────────────────────────────────────────┐
 │  Orchestrator (IBM Granite)             │
-│  - Detects 2 intents: VAR + Tactical   │
+│  - Detects 2 intents: VAR + Tactical    │
 │  - Routes to both agents in parallel    │
 └─────────────────────────────────────────┘
                     ↓

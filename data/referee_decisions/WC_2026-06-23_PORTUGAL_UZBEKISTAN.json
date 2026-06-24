@@ -1,0 +1,72 @@
+{
+  "match_id": "WC_2026-06-23_PORTUGAL_UZBEKISTAN",
+  "match_info": {
+    "home_team": "Portugal",
+    "away_team": "Uzbekistan",
+    "date": "2026-06-23",
+    "tournament": "FIFA World Cup, Group K",
+    "venue": "NRG Stadium",
+    "city": "Houston"
+  },
+  "var_protocol_note": "This file contains only VAR-reviewable decisions according to FIFA/IFAB protocol: Goals, Penalties, Red Cards, and Mistaken Identity. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 87,
+      "type": "goal",
+      "description": "Goal by Rafael Leão",
+      "player": "Rafael Leão",
+      "player_id": 851284,
+      "is_home": true,
+      "goal_type": "regular"
+    },
+    {
+      "minute": 60,
+      "type": "own_goal",
+      "description": "Own goal by Abduvokhid Nematov",
+      "player": "Abduvokhid Nematov",
+      "player_id": 1000465,
+      "is_home": true,
+      "goal_type": "ownGoal"
+    },
+    {
+      "minute": 39,
+      "type": "goal",
+      "description": "Goal by Cristiano Ronaldo",
+      "player": "Cristiano Ronaldo",
+      "player_id": 750,
+      "is_home": true,
+      "goal_type": "regular"
+    },
+    {
+      "minute": 30,
+      "type": "var_review",
+      "description": "VAR review disallowed goal by Azizjon Ganiev",
+      "var_decision": {
+        "review_type": "goalAwarded",
+        "player": "Azizjon Ganiev",
+        "player_id": 793857,
+        "is_home": false,
+        "outcome": "goal_disallowed",
+        "note": "Azizjon Ganiev's goal was disallowed after VAR review confirmed a foul in the attacking build-up."
+      }
+    },
+    {
+      "minute": 17,
+      "type": "goal",
+      "description": "Goal by Nuno Mendes",
+      "player": "Nuno Mendes",
+      "player_id": 989768,
+      "is_home": true,
+      "goal_type": "regular"
+    },
+    {
+      "minute": 6,
+      "type": "goal",
+      "description": "Goal by Cristiano Ronaldo",
+      "player": "Cristiano Ronaldo",
+      "player_id": 750,
+      "is_home": true,
+      "goal_type": "regular"
+    }
+  ]
+}

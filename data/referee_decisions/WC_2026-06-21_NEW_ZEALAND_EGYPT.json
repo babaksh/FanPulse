@@ -40,14 +40,13 @@
     {
       "minute": 21,
       "type": "var_review",
-      "description": "VAR review for review",
+      "description": "VAR review conducted",
       "var_decision": {
         "review_type": "review",
         "player": "Mostafa Ziko",
         "player_id": 1418782,
         "is_home": false,
-        "outcome": "reviewed",
-        "note": "VAR review: The reviewed play involving Mostafa Ziko was checked by the VAR room, and the on-field decision was confirmed."
+        "outcome": "reviewed"
       }
     },
     {

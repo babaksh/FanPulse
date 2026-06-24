@@ -29,7 +29,8 @@
         "player_id": 812533,
         "is_home": false,
         "outcome": "goal_disallowed",
-        "note": "VAR review: Mehdi Taremi's goal was disallowed following a video review due to an offside or foul in the attacking buildup."
+        "reason": "offside",
+        "note": "VAR review confirmed Mehdi Taremi was offside. The goal was disallowed after the VAR flagged Taremi offside during the attacking buildup from a free-kick routine."
       }
     }
   ]

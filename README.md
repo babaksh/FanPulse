@@ -257,7 +257,7 @@ ollama pull granite4.1:8b
 
 1. **Import Workflow**
    - Open LangFlow Desktop
-   - Import: `langflow_workflows/FanPulse Multi-Agent.json`
+   - Import: `langflow_workflows/FanPulse_Multi-Agent.json`
 
 2. **Update File Paths** ⚠️
    - Open each custom component
@@ -468,7 +468,9 @@ FanPulse/
 ├── langflow_workflows/                    # Workflow definitions & prompts
 │   ├── ORCHESTRATOR_SYSTEM_PROMPT.md      # Orchestrator instructions
 │   ├── VAR_LENS_SYSTEM_PROMPT.md          # VAR-Lens agent instructions
-│   └── TACTICAL_PULSE_SYSTEM_PROMPT.md    # Tactical Pulse instructions
+│   ├── TACTICAL_PULSE_SYSTEM_PROMPT.md    # Tactical Pulse instructions
+│   └── FanPulse_Multi-Agent.json          # LangFlow JSON definition
+│
 │
 ├── scripts/                               # Utility scripts
 │   ├── var_lens_setup/                    # VAR-Lens setup scripts

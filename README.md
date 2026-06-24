@@ -64,8 +64,7 @@ Your personal VAR expert explaining referee decisions:
 #### ⚽ **Tactical Pulse Agent**
 Your tactical analyst providing performance insights:
 - 📊 **49,000+ historical matches** (1872-2026)
-- 🏆 **65 World Cup 2022 matches** with detailed tactical data
-- ⚽ **FIFA World Cup 2026** live tournament data
+- 🏆 **65 World Cup 2026 matches** with detailed tactical data
 - 🎯 Advanced metrics: possession, xG, shots, passes, formations
 - 🤖 AI-powered insights using IBM Granite
 

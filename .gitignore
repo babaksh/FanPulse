@@ -155,4 +155,4 @@ data/whoscored_json
 scripts/sofascore_var_extractor.py
 data/sofascore_json
 scripts/update_var_notes_from_doc.py
-scripts/sofascore_var_extractor.py
+scripts/espn_var_extractor.py

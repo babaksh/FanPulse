@@ -1,0 +1,25 @@
+{
+  "match_id": "WC_2026-06-24_BRAZIL_SCOTLAND",
+  "match_info": {
+    "home_team": "Brazil",
+    "away_team": "Scotland",
+    "date": "2026-06-24",
+    "tournament": "FIFA World Cup"
+  },
+  "var_protocol_note": "This file contains only VAR-reviewable decisions according to FIFA/IFAB protocol: Goals, Penalties, Red Cards, and Mistaken Identity. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 22,
+      "type": "var_review",
+      "description": "VAR - Goal disallowed: Vinicius Junior (foul)",
+      "var_decision": {
+        "review_type": "goalDisallowed",
+        "player": "Vinicius Junior",
+        "player_id": "CbwQ4Mws",
+        "is_home": false,
+        "outcome": "goal_disallowed",
+        "note": "Celebrations are cut short for Brazil as the referee indicates NO GOAL after the VAR review due to a foul in the build-up play."
+      }
+    }
+  ]
+}

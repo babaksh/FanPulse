@@ -1,0 +1,25 @@
+{
+  "match_id": "WC_2026-06-11_CZECHIA_KOREA_REPUBLIC",
+  "match_info": {
+    "home_team": "Czechia",
+    "away_team": "Korea Republic",
+    "date": "2026-06-11",
+    "tournament": "FIFA World Cup"
+  },
+  "var_protocol_note": "This file contains only VAR-reviewable decisions according to FIFA/IFAB protocol: Goals, Penalties, Red Cards, and Mistaken Identity. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 77,
+      "type": "var_review",
+      "description": "VAR - Goal disallowed: Soucek T. (offside)",
+      "var_decision": {
+        "review_type": "goalDisallowed",
+        "player": "Soucek T.",
+        "player_id": "8zWzYFRF",
+        "is_home": false,
+        "outcome": "goal_disallowed",
+        "note": "Celebrations are cut short for Czech Republic as the referee indicates NO GOAL after the VAR review shows it was offside!"
+      }
+    }
+  ]
+}

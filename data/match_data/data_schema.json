@@ -619,15 +619,15 @@
   
   "common_mistakes_to_avoid": {
     "mistake_1": {
-      "wrong": "Assuming tactical_data.csv has all matches from results.csv",
-      "right": "tactical_data.csv only contains manually scraped matches - check if match exists first"
+      "wrong": "Assuming the Tournament Tactical Database has all matches from the Historical Match Database",
+      "right": "The Tournament Tactical Database only contains manually scraped matches - check if match exists first"
     },
     "mistake_2": {
-      "wrong": "Using results.csv for tactical details like possession or formations",
-      "right": "results.csv has NO tactical columns - use tactical_data.csv for tactical analysis"
+      "wrong": "Using the Historical Match Database for tactical details like possession or formations",
+      "right": "The Historical Match Database has NO tactical columns - use the Tournament Tactical Database for tactical analysis"
     },
     "mistake_3": {
-      "wrong": "Fabricating tactical statistics when match not in tactical_data.csv",
+      "wrong": "Fabricating tactical statistics when match not in the Tournament Tactical Database",
       "right": "Acknowledge limitation: 'Tactical statistics not available for this match'"
     },
     "mistake_4": {
@@ -638,20 +638,21 @@
   
   "best_practices": {
     "do": [
-      "Always check if match exists in tactical_data.csv before claiming tactical data availability",
-      "Use results.csv for historical analysis and broad match coverage",
-      "Use tactical_data.csv for in-depth tactical analysis when available",
+      "Always check if match exists in the Tournament Tactical Database before claiming tactical data availability",
+      "Use the Historical Match Database for historical analysis and broad match coverage",
+      "Use the Tournament Tactical Database for in-depth tactical analysis when available",
       "Understand calculated metrics formulas for accurate interpretation",
-      "Cite data sources clearly (results.csv vs tactical_data.csv)",
+      "Cite data sources using their public names: 'Tournament Tactical Database' or 'Historical Match Database' — never expose internal file names",
       "Consider both raw metrics and calculated metrics for comprehensive analysis",
-      "Use match_id to join results.csv and tactical_data.csv when needed"
+      "Use match_id to cross-reference between the two databases when needed"
     ],
     "dont": [
       "Don't fabricate tactical statistics",
       "Don't assume all matches have tactical data",
       "Don't confuse possession percentage with possession minutes",
       "Don't ignore calculated metrics - they provide valuable insights",
-      "Don't use results.csv for tactical queries"
+      "Don't use the Historical Match Database for tactical queries",
+      "Don't expose internal file names (results.csv, tactical_data.csv), column names, or tool names in responses to users"
     ]
   }
 }

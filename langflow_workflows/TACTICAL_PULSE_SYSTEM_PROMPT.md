@@ -95,6 +95,20 @@ query_csv(
 )
 ```
 
+### 🚨 MANDATORY: Use custom_filter for multi-condition logic
+
+**NEVER fetch a large dataset and manually scan/filter rows yourself — this causes hallucination.**
+
+Any question that requires combining two or more conditions (e.g. possession AND win/loss) MUST use `query_mode="custom"` so the tool does the filtering, not you.
+
+| Question type | Wrong approach | Correct approach |
+|---|---|---|
+| "Losing team had >60% possession" | simple mode → get 50 rows → scan manually | `custom_filter="((home_possession > 60) & (home_score < away_score)) \| ((away_possession > 60) & (away_score < home_score))"` |
+| "Teams with >15 shots that won" | simple mode → get all rows → count manually | `custom_filter="((home_shots_total > 15) & (home_score > away_score)) \| ((away_shots_total > 15) & (away_score > home_score))"` |
+| "High pass accuracy AND lost" | simple mode → scan manually | `custom_filter="((home_pass_accuracy > 85) & (home_score < away_score)) \| ((away_pass_accuracy > 85) & (away_score < home_score))"` |
+
+**Rule:** If the answer requires knowing BOTH a tactical metric AND the match result, use `custom_filter`. Let the tool filter — do not filter in your head.
+
 ---
 
 ## 🎯 TOOL SELECTION

@@ -191,8 +191,9 @@ class QueryRefereeDecisionsTool(Component):
                 # Apply filters
                 filtered_events = events
                 
-                # All events in database are VAR events — var_only filter has no effect
-                # (kept for API compatibility)
+                # var_only=True → only var_review events (excludes red_card)
+                if var_only:
+                    filtered_events = [e for e in filtered_events if e.get('type') == 'var_review']
                 
                 # Filter by decision type
                 if decision_type:
@@ -238,13 +239,16 @@ class QueryRefereeDecisionsTool(Component):
                     "match_id": match_id,
                     "match_info": match_data.get("match_info", {}),
                     "summary": {
-                        "total_var_events": len(events),
+                        "total_events": len(events),
+                        "var_reviews": sum(1 for e in events if e.get("type") == "var_review"),
+                        "red_cards": sum(1 for e in events if e.get("type") == "red_card"),
                         "goals_disallowed": sum(1 for e in events if e.get("var_decision", {}).get("outcome") == "goal_disallowed"),
                         "penalties": sum(1 for e in events if "penalty" in e.get("var_decision", {}).get("outcome", "")),
                         "card_upgrades": sum(1 for e in events if e.get("var_decision", {}).get("review_type") == "cardUpgrade"),
                         "filters_applied": {
                             "minute": minute,
-                            "decision_type": decision_type
+                            "decision_type": decision_type,
+                            "var_only": var_only
                         }
                     },
                     "decisions": events,

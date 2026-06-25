@@ -20,6 +20,17 @@
         "outcome": "goal_disallowed",
         "note": "The goal by Iran won't count as it has been disallowed due to offside on the advice of the video assistant referee!"
       }
+    },
+    {
+      "minute": 66,
+      "type": "red_card",
+      "var_reviewed": false,
+      "description": "Red card: Ngoy N. (holding)",
+      "player": "Ngoy N.",
+      "player_id": "x6Zak7to",
+      "is_home": true,
+      "reason": "holding",
+      "note": "Dario Herrera shows a red card with no hesitation. Nathan Ngoy (Belgium) can have an early bath and think about his challenge."
     }
   ]
 }

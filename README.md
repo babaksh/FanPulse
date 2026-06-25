@@ -72,6 +72,8 @@ Your tactical analyst providing performance insights:
 
 ## 🚀 My Technical Approach
 
+![FanPulse Multi-Agent Workflow](langflow_workflows/fanpluse_workflow.jpg)
+
 ### Multi-Agent Architecture with Tool-Agent Separation
 
 ```

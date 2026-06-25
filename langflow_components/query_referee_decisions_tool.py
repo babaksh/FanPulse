@@ -167,18 +167,15 @@ class QueryRefereeDecisionsTool(Component):
                         return json.dumps({
                             "match_id": match_id,
                             "decisions_found": 0,
-                            "message": "No VAR-reviewable decisions database found. Use scripts/sofascore_var_extractor.py to extract data from SofaScore.",
+                            "message": "No VAR-reviewable decisions available.",
                             "note": "This database contains only VAR-reviewable decisions: Goals, Penalties, Red Cards, and Mistaken Identity."
                         }, indent=2)
-                    
-                    # Suggest available matches
-                    available_matches = [f.stem for f in all_events]
+
                     return json.dumps({
                         "match_id": match_id,
                         "decisions_found": 0,
-                        "message": f"No decisions found for match: {match_id}",
-                        "available_matches": available_matches[:5],
-                        "total_matches_with_decisions": len(available_matches)
+                        "message": f"No VAR decisions found for match: {match_id}",
+                        "total_matches_with_decisions": len(all_events)
                     }, indent=2)
                 
                 # Load match events

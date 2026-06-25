@@ -253,7 +253,7 @@ class GetTacticalDataTool(Component):
                     },
                     "recent_matches": recent_matches,
                     "data_source": {
-                        "type": "Tournament Tactical Database (WhoScored)",
+                        "type": "Tournament Tactical Database",
                         "total_columns": 41,
                         "includes_calculated_metrics": True
                     }

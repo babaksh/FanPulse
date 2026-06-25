@@ -78,11 +78,10 @@ class ReadSchemaTool(Component):
                         result += f"- {rule}\n"
                     result += "\n"
                 
-                # Results.csv table
+                # Results table
                 if "results.csv" in schema:
                     results_schema = schema["results.csv"]
-                    result += "## 📊 Table: results.csv\n\n"
-                    result += f"**Path:** {results_schema.get('path', 'N/A')}\n"
+                    result += "## 📊 Table: Historical Match Database\n\n"
                     result += f"**Role:** {results_schema.get('table_role', 'N/A')}\n"
                     result += f"**Coverage:** {results_schema.get('coverage', {}).get('time_range', 'N/A')}\n"
                     result += f"**Total Matches:** {results_schema.get('coverage', {}).get('total_matches', 'N/A')}\n\n"
@@ -93,11 +92,10 @@ class ReadSchemaTool(Component):
                         result += f"(type: {col_info.get('type', 'N/A')})\n"
                     result += "\n"
                 
-                # Tactical_data.csv table
+                # Tactical data table
                 if "tactical_data.csv" in schema:
                     tactical_schema = schema["tactical_data.csv"]
-                    result += "## ⚽ Table: tactical_data.csv\n\n"
-                    result += f"**Path:** {tactical_schema.get('path', 'N/A')}\n"
+                    result += "## ⚽ Table: Tournament Tactical Database\n\n"
                     result += f"**Role:** {tactical_schema.get('table_role', 'N/A')}\n"
                     result += f"**Coverage:** {tactical_schema.get('coverage', {}).get('time_range', 'N/A')}\n"
                     result += f"**Total Matches:** {tactical_schema.get('coverage', {}).get('total_matches', 'N/A')}\n\n"
@@ -183,7 +181,6 @@ class ReadSchemaTool(Component):
                         result += "\n"
                 
                 result += "\n---\n"
-                result += "**Full schema available at:** `data/match_data/data_schema.json`\n"
                 
                 self.log(f"Schema read successfully")
                 self.status = "Schema loaded"

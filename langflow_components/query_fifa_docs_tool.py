@@ -111,18 +111,30 @@ class QueryFIFADocsTool(Component):
                 documents = []
                 seen_sources = set()
                 
+                # Friendly document titles (no file names or extensions)
+                _title_map = {
+                    "Laws of the Game 2026_27": "FIFA/IFAB Laws of the Game 2026/27",
+                    "Changes to the Laws of the Game 2026_27": "Changes to Laws of the Game 2026/27",
+                    "Video Assistant Referee (VAR) protocol _ IFAB": "VAR Protocol (IFAB)",
+                    "FWC26_regulations_EN": "FIFA World Cup 2026 Regulations",
+                    "Off-field treatment and assessment protocol": "Off-field Treatment Protocol",
+                    "Throw-in and goal-kick countdown protocol": "Throw-in & Goal-kick Countdown Protocol",
+                    "Time-limited substitution protocol": "Time-limited Substitution Protocol",
+                }
+
                 for i, doc in enumerate(source_docs, 1):
-                    doc_name = Path(doc.metadata.get('source', 'Unknown')).name
-                    
+                    raw_name = Path(doc.metadata.get('source', 'Unknown')).stem
+                    doc_title = _title_map.get(raw_name, "Official FIFA/IFAB Document")
+
                     documents.append({
                         "rank": i,
                         "content": doc.page_content.strip(),
-                        "source": doc_name,
+                        "source": doc_title,
                         "relevance": "high" if i <= 2 else "medium"
                     })
-                    
-                    seen_sources.add(doc_name)
-                
+
+                    seen_sources.add(doc_title)
+
                 result = {
                     "question": question,
                     "documents_found": len(source_docs),

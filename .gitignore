@@ -159,3 +159,4 @@ scripts/espn_var_extractor.py
 scripts/flashscore_var_extractor.py
 scripts/batch_process_flashscore.py
 data/team_name_aliases.json
+data/flashscore_json

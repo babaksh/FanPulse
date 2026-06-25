@@ -90,9 +90,7 @@ query_referee_decisions(
 - `var_review` — has `var_decision` object with: `review_type`, `player`, `player_id`, `is_home`, `outcome`, `note`
   - `description`: short label (e.g. "VAR - Goal disallowed: Taremi M. (offside)")
   - `note`: full FlashScore commentary (e.g. "The goal by Iran won't count as it has been disallowed due to offside on the advice of the video assistant referee!")
-- `red_card` — has: `player`, `player_id`, `is_home`, `reason`, `note`
-  - `description`: short label (e.g. "Red card: Ngoy N. (holding)")
-  - `note`: full FlashScore commentary with context
+  - **Only VAR-reviewed events are stored** — red cards without VAR review are NOT included
 
 ---
 

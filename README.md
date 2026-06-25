@@ -115,19 +115,15 @@ Your tactical analyst providing performance insights:
 #### 1. **IBM watsonx Code Assistant (Bob)** (Development Tool)
 - AI-powered coding assistant used throughout development
 - Accelerated component creation and debugging
-- Generated boilerplate code for tools and agents
-- Provided code suggestions and best practices
 - Enhanced productivity and code quality
 
 #### 2. **IBM Granite LLM** (Core AI Engine)
 - Powers all 3 agents with natural language understanding
-- Temperature: 0.2 for precise tool calling
-- Supports both local (Ollama) and cloud deployment
+- Supports both local Granite 4.1 8B (Ollama) and cloud deployment
 - Generates human-friendly explanations from structured data
 
 #### 3. **IBM Docling** (Document Processing)
 - Converted 7 FIFA/IFAB PDFs to clean Markdown
-- Preserved structure and metadata
 - Enabled efficient RAG pipeline
 - High-quality text extraction for vector embeddings
 
@@ -135,13 +131,11 @@ Your tactical analyst providing performance insights:
 - FAISS vector store with 658 embeddings
 - Semantic search for relevant FIFA rules
 - Source citation for transparency
-- Real-time document retrieval
 
 #### 5. **LangFlow** (Visual Orchestration)
 - No-code multi-agent workflow
 - Real-time testing and debugging
 - Agent coordination and parallel execution
-- Production-ready deployment
 
 #### 6. **Tool-Agent Separation Pattern**
 ```python
@@ -258,7 +252,7 @@ ollama pull granite4.1:8b
 
 1. **Import Workflow**
    - Open LangFlow Desktop
-   - Import: `langflow_workflows/FanPulse_Multi-Agent.json`
+   - Import: `langflow_workflows/FanPulse_Multi_Agent.json`
 
 2. **Update File Paths** ⚠️
    - Open each custom component

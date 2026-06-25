@@ -54,30 +54,36 @@ class QueryRefereeDecisionsTool(Component):
             decision_type: Optional[str] = None,
             var_only: bool = False
         ) -> str:
-            """Query referee decisions and VAR reviews from a specific match.
+            """Query VAR decisions from World Cup 2026 matches.
             
-            You can search by EITHER match_id OR team names (home_team + away_team).
-            If team names are provided, the tool will find the most recent match between those teams.
+            DATABASE CONTAINS ONLY VAR-reviewed events:
+            - Goals disallowed (offside, foul, handball)
+            - Penalties awarded or not awarded via VAR
+            - Red cards upgraded via VAR (cardUpgrade)
+            - Mistaken identity corrections
+            
+            Every event in the database has a var_decision object. No yellow cards, no non-VAR incidents.
             
             Args:
-                match_id: Match identifier (e.g., "WC_2026-06-15_BRAZIL_ARGENTINA"). Optional if team names provided.
+                match_id: Match identifier (e.g., "WC_2026-06-21_BELGIUM_IRAN"). Optional if team names provided.
                 home_team: Home team name (e.g., "Belgium"). Use with away_team to search by teams.
                 away_team: Away team name (e.g., "Iran"). Use with home_team to search by teams.
-                minute: Specific minute to query (optional, returns all decisions if not provided)
-                decision_type: Filter by type: "yellow_card", "red_card", "penalty", "goal_disallowed" (optional)
-                var_only: If True, only return decisions that involved VAR review (optional)
+                minute: Specific minute to query (optional, returns all events if not provided)
+                decision_type: Filter by event type, e.g. "var_review" (optional)
+                var_only: Kept for compatibility — all events are VAR events, so this has no effect
                 
             Returns:
-                JSON with detailed referee decisions including:
-                - Basic info: minute, type, description, player, reason
-                - VAR details (if applicable): review_type, initial_decision, final_decision, confirmed
-                - Player info: player_id, is_home
-                - Match context: teams, date, tournament, venue
+                JSON with VAR events, each containing:
+                - minute, type, description (short label)
+                - var_decision.review_type: goalDisallowed / penaltyAwarded / penaltyNotAwarded / cardUpgrade / mistakenIdentity
+                - var_decision.outcome: goal_disallowed / penalty_awarded / penalty_not_awarded / card_upgraded / identity_corrected
+                - var_decision.note: full FlashScore commentary — USE THIS to explain what happened
+                - var_decision.player, player_id, is_home
                 
             Examples:
-                - query_referee_decisions(match_id="WC_2026-06-21_BELGIUM_IRAN")
                 - query_referee_decisions(home_team="Belgium", away_team="Iran")
-                - query_referee_decisions(home_team="Belgium", away_team="Iran", var_only=True)
+                - query_referee_decisions(match_id="WC_2026-06-21_BELGIUM_IRAN")
+                - query_referee_decisions(home_team="Belgium", away_team="Iran", minute=25)
             """
             try:
                 # If team names provided, search for match_id
@@ -185,9 +191,8 @@ class QueryRefereeDecisionsTool(Component):
                 # Apply filters
                 filtered_events = events
                 
-                # Filter by VAR only — includes var_review AND red_card (both are VAR-protocol events)
-                if var_only:
-                    filtered_events = [e for e in filtered_events if "var_decision" in e or e.get("type") == "red_card"]
+                # All events in database are VAR events — var_only filter has no effect
+                # (kept for API compatibility)
                 
                 # Filter by decision type
                 if decision_type:
@@ -233,16 +238,13 @@ class QueryRefereeDecisionsTool(Component):
                     "match_id": match_id,
                     "match_info": match_data.get("match_info", {}),
                     "summary": {
-                        "total_decisions": len(events),
-                        "var_reviews": len(var_decisions),
-                        "goals": sum(1 for e in events if e.get("type") in ["goal", "own_goal"]),
-                        "penalties": sum(1 for e in events if e.get("type") == "penalty"),
-                        "yellow_cards": sum(1 for e in events if e.get("type") == "yellow_card"),
-                        "red_cards": sum(1 for e in events if e.get("type") == "red_card"),
+                        "total_var_events": len(events),
+                        "goals_disallowed": sum(1 for e in events if e.get("var_decision", {}).get("outcome") == "goal_disallowed"),
+                        "penalties": sum(1 for e in events if "penalty" in e.get("var_decision", {}).get("outcome", "")),
+                        "card_upgrades": sum(1 for e in events if e.get("var_decision", {}).get("review_type") == "cardUpgrade"),
                         "filters_applied": {
                             "minute": minute,
-                            "decision_type": decision_type,
-                            "var_only": var_only
+                            "decision_type": decision_type
                         }
                     },
                     "decisions": events,

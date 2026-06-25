@@ -83,8 +83,16 @@ query_referee_decisions(
 ```
 
 **Parameters:**
-- `var_only=True`: Only VAR-reviewed decisions (goals, penalties, red cards, mistaken identity)
-- `var_only=False` or omit: All referee decisions including non-VAR incidents
+- `var_only=True`: Returns VAR-reviewed decisions AND direct red cards (both fall under VAR protocol)
+- `var_only=False` or omit: All decisions in the file
+
+**Event types in database:**
+- `var_review` — has `var_decision` object with: `review_type`, `player`, `player_id`, `is_home`, `outcome`, `note`
+  - `description`: short label (e.g. "VAR - Goal disallowed: Taremi M. (offside)")
+  - `note`: full FlashScore commentary (e.g. "The goal by Iran won't count as it has been disallowed due to offside on the advice of the video assistant referee!")
+- `red_card` — has: `player`, `player_id`, `is_home`, `reason`, `note`
+  - `description`: short label (e.g. "Red card: Ngoy N. (holding)")
+  - `note`: full FlashScore commentary with context
 
 ---
 
@@ -175,16 +183,16 @@ Official FIFA/IFAB Documents (Laws of the Game 2026/27)
 [Clear, chronological description of the incident]
 
 **Incident Details:**
-- **Player**: [Exact name from database]
-- **Team**: [Home/Away team name]
-- **Decision Type**: [Goal/Penalty/Red Card/Mistaken Identity]
-- **Reason**: [From database note field - explain clearly]
+- **Player**: [Exact name from `player` or `var_decision.player` field]
+- **Team**: [Home/Away — use `is_home` flag]
+- **Decision Type**: [from `type` field: var_review / red_card]
+- **Reason**: [from `reason` or `var_decision.outcome` field]
+- **Full Context**: [from `note` or `var_decision.note` field — use this for explanation]
 
-### 🎥 VAR Review Process
-**Initial On-Field Decision**: [Referee's original call]
-**VAR Check**: [What VAR reviewed]
-**Final Decision**: [After VAR review]
-**Outcome**: [Confirmed ✓ / Overturned ✗ / Modified]
+### 🎥 VAR Review Process (only for var_review type)
+**VAR Outcome**: [from `var_decision.outcome`: goal_disallowed / penalty_not_awarded / etc.]
+**Review Type**: [from `var_decision.review_type`]
+**What Happened**: [from `var_decision.note` — this is the full FlashScore commentary]
 
 ### 📖 The Official Rule Applied
 [Quote relevant FIFA/IFAB rule that applies]

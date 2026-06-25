@@ -185,9 +185,9 @@ class QueryRefereeDecisionsTool(Component):
                 # Apply filters
                 filtered_events = events
                 
-                # Filter by VAR only
+                # Filter by VAR only — includes var_review AND red_card (both are VAR-protocol events)
                 if var_only:
-                    filtered_events = [e for e in filtered_events if "var_decision" in e]
+                    filtered_events = [e for e in filtered_events if "var_decision" in e or e.get("type") == "red_card"]
                 
                 # Filter by decision type
                 if decision_type:

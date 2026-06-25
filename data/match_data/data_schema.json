@@ -24,7 +24,7 @@
     "coverage": {
       "time_range": "1872-2026 (154 years)",
       "total_matches": "~49,000 international matches",
-      "match_types": "ALL competitions (World Cups, Euros, Copa América, friendlies, qualifiers, etc.)",
+      "match_types": "ALL competitions (World Cups, Euros, Copa America, friendlies, qualifiers, etc.)",
       "update_frequency": "Daily (live matches added in real-time)"
     },
     "match_id_prefixes": {
@@ -73,10 +73,10 @@
           "desc": "Africa Cup of Nations qualification matches"
         },
         "COPA_": {
-          "tournament": "Copa América",
+          "tournament": "Copa America",
           "matches": 869,
           "example": "COPA_2024-07-14_ARGENTINA_COLOMBIA",
-          "desc": "Copa América tournament matches"
+          "desc": "Copa America tournament matches"
         },
         "AFCON_": {
           "tournament": "African Cup of Nations",
@@ -121,10 +121,10 @@
           "desc": "FIFA Confederations Cup matches (discontinued)"
         },
         "COPAQ_": {
-          "tournament": "Copa América qualification",
+          "tournament": "Copa America qualification",
           "matches": 8,
           "example": "COPAQ_2015-03-27_BRAZIL_CHILE",
-          "desc": "Copa América qualification matches (rare)"
+          "desc": "Copa America qualification matches (rare)"
         }
       }
     },
@@ -162,9 +162,10 @@
       },
       "tournament": {
         "type": "string",
-        "desc": "Competition name",
+        "desc": "Competition name — values do NOT include the year (e.g. 'FIFA World Cup', not 'FIFA World Cup 2026'). Use the date column or match_id prefix to filter by year.",
         "example": "FIFA World Cup",
-        "use_for": "Tournament filtering, competition-specific analysis"
+        "use_for": "Tournament filtering, competition-specific analysis",
+        "note": "When using tournament_filter with a year (e.g. 'FIFA World Cup 2026'), the tool automatically splits the year and applies it to the date column."
       },
       "city": {
         "type": "string",
@@ -215,17 +216,16 @@
     "table_role": "Primary source for in-depth tactical analysis with 41 metrics per match",
     "coverage": {
       "time_range": "2026-onwards (expandable to any match with WhoScored data)",
-      "total_matches": "6 matches (as of June 2026, growing)",
+      "total_matches": "50 matches (as of June 2026, growing)",
       "match_types": "Any competition where WhoScored data is available",
       "update_frequency": "Manual addition via scraping script",
       "data_source": "WhoScored.com via Playwright scraper"
     },
     "match_id_format": {
-      "format": "{PREFIX}{YEAR}_{YYYY-MM-DD}_{HOME_TEAM}_{AWAY_TEAM}",
-      "example": "WC_2026_2026-06-13_BRAZIL_MOROCCO",
+      "format": "{PREFIX}_{YYYY-MM-DD}_{HOME_TEAM}_{AWAY_TEAM}",
+      "example": "WC_2026-06-13_BRAZIL_MOROCCO",
       "components": {
         "prefix": "Tournament identifier (WC_, EURO_, COPA_, etc.)",
-        "year": "Tournament year (e.g., 2026)",
         "date": "Match date in YYYY-MM-DD format",
         "teams": "UPPERCASE team names with underscores"
       }
@@ -233,9 +233,9 @@
     "columns": {
       "match_id": {
         "type": "string",
-        "format": "{PREFIX}{YEAR}_{YYYY-MM-DD}_{HOME_TEAM}_{AWAY_TEAM}",
-        "desc": "Unique match identifier combining tournament, date, and teams",
-        "example": "WC_2026_2026-06-13_BRAZIL_MOROCCO",
+        "format": "{PREFIX}_{YYYY-MM-DD}_{HOME_TEAM}_{AWAY_TEAM}",
+        "desc": "Unique match identifier combining tournament prefix, date, and teams",
+        "example": "WC_2026-06-13_BRAZIL_MOROCCO",
         "use_for": "Match lookup, joining with results.csv, tournament filtering"
       },
       "date": {
@@ -310,7 +310,7 @@
         "unit": "percentage",
         "range": "0-100",
         "desc": "Average possession percentage for home team across all match minutes",
-        "example": "6.4",
+        "example": "62.4",
         "calculation": "Average of minute-by-minute possession values",
         "use_for": "Ball control analysis, possession-based playing style identification"
       },
@@ -319,7 +319,7 @@
         "unit": "percentage",
         "range": "0-100",
         "desc": "Average possession percentage for away team across all match minutes",
-        "example": "6.0",
+        "example": "52.1",
         "calculation": "Average of minute-by-minute possession values",
         "use_for": "Ball control analysis, possession-based playing style identification"
       },

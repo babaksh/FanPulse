@@ -188,16 +188,32 @@ class QueryCSVTool(Component):
                     
                     # Tournament filter - smart detection
                     if tournament_filter:
+                        import re as _re
                         is_match_id_prefix = '_' in tournament_filter and any(char.isdigit() for char in tournament_filter)
-                        
+
                         if is_match_id_prefix and 'match_id' in filtered_df.columns:
+                            # e.g. "WC_2026", "EURO_2024" — filter by match_id prefix
                             filtered_df = filtered_df[
                                 filtered_df['match_id'].str.contains(tournament_filter, case=False, na=False)
                             ]
                         elif 'tournament' in filtered_df.columns:
-                            filtered_df = filtered_df[
-                                filtered_df['tournament'].str.contains(tournament_filter, case=False, na=False)
-                            ]
+                            # Check if a 4-digit year is appended to the tournament name
+                            # e.g. "FIFA World Cup 2026" → name="FIFA World Cup", year=2026
+                            year_match = _re.search(r'\b(18|19|20)\d{2}\b', tournament_filter)
+                            if year_match:
+                                year = int(year_match.group())
+                                tournament_name = tournament_filter[:year_match.start()].strip()
+                                filtered_df = filtered_df[
+                                    filtered_df['tournament'].str.contains(tournament_name, case=False, na=False)
+                                ]
+                                # Apply year constraint via date column
+                                filtered_df = filtered_df[
+                                    filtered_df['date'].dt.year == year
+                                ]
+                            else:
+                                filtered_df = filtered_df[
+                                    filtered_df['tournament'].str.contains(tournament_filter, case=False, na=False)
+                                ]
                     
                     # Formation filter (only for tactical_data)
                     if formation_filter and table == "tactical_data":
@@ -248,10 +264,9 @@ class QueryCSVTool(Component):
                 
                 result += f"**Rows Returned:** {len(filtered_df)}\n\n"
                 
-                # Add schema context
+                # Add schema context (no internal file names exposed)
                 if table in schema:
                     table_schema = schema[table]
-                    result += f"**Data Source:** {table_schema.get('table_role', 'N/A')}\n"
                     coverage = table_schema.get('coverage', {})
                     result += f"**Coverage:** {coverage.get('time_range', 'N/A')}, "
                     result += f"{coverage.get('total_matches', 'N/A')} matches\n\n"

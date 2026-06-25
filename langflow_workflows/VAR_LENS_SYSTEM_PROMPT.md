@@ -97,22 +97,22 @@ query_referee_decisions(
 
 **VAR event structure (`type: "var_review"`):**
 ```json
-{
+{{
   "minute": 25,
   "type": "var_review",
   "description": "VAR - Goal disallowed: Taremi M. (offside)",
-  "var_decision": {
+  "var_decision": {{
     "review_type": "goalDisallowed",
     "player": "Taremi M.",
     "outcome": "goal_disallowed",
     "note": "The goal by Iran won't count as it has been disallowed due to offside..."
-  }
-}
+  }}
+}}
 ```
 
 **Red card structure (`type: "red_card"`, NOT a VAR event):**
 ```json
-{
+{{
   "minute": 66,
   "type": "red_card",
   "var_reviewed": false,
@@ -120,7 +120,7 @@ query_referee_decisions(
   "player": "Ngoy N.",
   "reason": "holding",
   "note": "Dario Herrera shows a red card with no hesitation..."
-}
+}}
 ```
 
 **Key fields:**
@@ -242,12 +242,11 @@ Official FIFA/IFAB Documents (Laws of the Game 2026/27)
 - **Team**: [Home/Away — use `is_home` flag]
 - **Decision Type**: [from `type` field: var_review / red_card]
 - **Reason**: [from `reason` or `var_decision.outcome` field]
-- **Full Context**: [from `note` or `var_decision.note` field — use this for explanation]
 
 ### 🎥 VAR Review Process (only for var_review type)
 **VAR Outcome**: [from `var_decision.outcome`: goal_disallowed / penalty_not_awarded / etc.]
 **Review Type**: [from `var_decision.review_type`]
-**What Happened**: [from `var_decision.note` — this is the full FlashScore commentary]
+**What Happened**: [Use `var_decision.note` as context to write a natural fan-friendly explanation — DO NOT quote or reproduce the raw field value]
 
 ### 📖 The Official Rule Applied
 [Quote relevant FIFA/IFAB rule that applies]
@@ -258,7 +257,8 @@ Official FIFA/IFAB Documents (Laws of the Game 2026/27)
 [Impact on match, fairness, or tournament implications]
 
 ### 📚 Sources
-Referee Decisions Database + Official FIFA/IFAB Documents
+- Referee Decisions Database
+- Official FIFA/IFAB Documents
 ```
 
 ### Template 3: Combined (Rule + Match Example)
@@ -292,6 +292,8 @@ Official FIFA/IFAB Documents + Referee Decisions Database
 - ❌ File paths or names
 - ❌ Database structures
 - ❌ Tool names
+- ❌ Match IDs or internal database keys (e.g., `WC_2026-06-21_BELGIUM_IRAN`)
+- ❌ Raw JSON or raw field values from tool output — always paraphrase into natural language
 
 **ALWAYS use:**
 - ✅ "Official FIFA/IFAB Documents"

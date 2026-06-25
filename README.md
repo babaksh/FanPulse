@@ -194,29 +194,6 @@ attacking excellence, with 2,323 goals scored...
 - **After**: Every answer cites official sources and data
 - **Impact**: Trust, transparency, educational value
 
-### Real-World Use Cases
-
-**During a Match:**
-```
-Fan: "Why was that goal disallowed?"
-FanPulse: [Explains offside rule + shows exact incident from database]
-Result: Fan understands decision, continues enjoying match
-```
-
-**Pre-Match Analysis:**
-```
-Fan: "Who will win: Argentina vs France?"
-FanPulse: [Head-to-head stats + tactical matchup analysis]
-Result: Fan has informed prediction, deeper match appreciation
-```
-
-**Learning the Game:**
-```
-Fan: "What is VAR and how does it work?"
-FanPulse: [Official FIFA protocol + real examples]
-Result: Fan becomes more knowledgeable about modern football
-```
-
 ---
 
 ## 🚀 Quick Start
@@ -327,36 +304,35 @@ build-up with creative attacking midfielders...
 ### Real Match Incident
 
 ```
-Q: "What happened at minute 67 in Belgium vs Iran?"
+Q: "What happened at minute 34 in Argentina vs Algeria?"
 
 Agent: VAR-Lens
-Tools: 
-  1. query_referee_decisions(home_team="Belgium", away_team="Iran")
-  2. query_fifa_documents("handball rules")
 
 Response:
-## 🎥 Referee Decision: Belgium vs Iran - Minute 67
+## 🎥 Referee Decision: Argentina vs Algeria - Minute 34
 
 ### 📋 What Happened
 **Incident Details:**
-- **Player**: Mehdi Taremi
-- **Team**: Iran (Away)
-- **Decision Type**: Penalty
-- **Reason**: Handball in penalty area
+- **Player**: Lautaro Martinez
+- **Team**: Argentina (Home)
+- **Decision Type**: VAR Review — Goal Disallowed
+- **Reason**: Offside
 
 ### 🎥 VAR Review Process
-**Initial On-Field Decision**: Play on
-**VAR Check**: Possible handball
-**Final Decision**: Penalty awarded to Belgium
+**Initial On-Field Decision**: Goal awarded
+**VAR Check**: Possible offside in build-up
+**Final Decision**: Goal disallowed
 **Outcome**: Overturned ✗
 
 ### 📖 The Official Rule Applied
-According to FIFA Law 12, it is an offence if a player 
-"touches the ball with their hand/arm when it has made 
-their body unnaturally bigger"...
+According to FIFA Law 11, a player is in an offside position
+if any part of the head, body or feet is nearer to the
+opponents' goal line than both the ball and the
+second-last opponent...
 
 ### 📚 Sources
-Referee Decisions Database + Official FIFA/IFAB Documents
+- Referee Decisions Database
+- Official FIFA/IFAB Documents
 ```
 
 ### Combined Questions (Multi-Agent)
@@ -509,8 +485,8 @@ query_fifa_documents(question="handball rules")
 Get VAR-reviewable decisions from World Cup 2026 matches.
 ```python
 query_referee_decisions(
-    home_team="Belgium",
-    away_team="Iran",
+    home_team="Argentina",
+    away_team="Algeria",
     var_only=True  # Optional: filter only VAR-reviewed
 )
 # Returns: Match incidents with decision details

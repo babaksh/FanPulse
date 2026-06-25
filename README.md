@@ -198,10 +198,21 @@ attacking excellence, with 2,323 goals scored...
 
 ## 🚀 Quick Start
 
+> **Environment Note:** FanPulse runs entirely inside **LangFlow Desktop**. The Python components are loaded and executed by LangFlow itself — you do **not** run any Python scripts manually. Once you install Python, LangFlow, and import the workflow JSON, the system is ready!
+
+---
+
 ### Prerequisites
-- Python 3.11+
-- Ollama (for local IBM Granite)
-- LangFlow Desktop
+
+| Requirement | Required? | Notes |
+|---|---|---|
+| **Python 3.11+** | ✅ Yes | LangFlow needs Python to execute the custom tool components |
+| **LangFlow Desktop** | ✅ Yes | The entire workflow runs here — download from [langflow.org](https://www.langflow.org/) |
+| **Ollama + IBM Granite** | ✅ Yes (for local) | Download from [ollama.com](https://ollama.com), then run `ollama pull granite4.1:8b`. Alternatively use IBM Granite Cloud API. |
+| `pip install -r requirements.txt` | ✅ Yes | Required libraries (pandas, faiss-cpu, etc.) must be installed in the same Python environment that LangFlow uses |
+| Virtual environment setup | ⚠️ Optional | Recommended to keep dependencies clean, but not strictly required |
+
+---
 
 ### Installation
 
@@ -210,47 +221,71 @@ attacking excellence, with 2,323 goals scored...
 git clone https://github.com/babaksh/FanPulse.git
 cd FanPulse
 
-# 2. Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3. Install dependencies
+# 2. Install dependencies into the Python environment that LangFlow uses
 pip install -r requirements.txt
 
-# 4. Install Ollama and pull IBM Granite
-# Download from: https://ollama.com
+# 3. Pull IBM Granite via Ollama
 ollama pull granite4.1:8b
-
-# 5. Install LangFlow Desktop
-# Download from: https://www.langflow.org/
 ```
+
+> ⚠️ **Important:** Make sure you run `pip install` in the **same Python environment** that LangFlow Desktop is using. If you install in a separate venv but LangFlow uses the system Python, the components will fail to import.
+
+---
+
+### Required Data Files
+
+FanPulse uses backend data that lives **outside LangFlow** — these files must be present in your local copy of the repository. The workflow JSON references them by absolute path (see step 2 of Setup below).
+
+Copy the project folder to your machine and make sure the following data is intact:
+
+#### 📊 `data/match_data/` — Match Results & Tactical Data
+
+| File | Source | Description |
+|---|---|---|
+| **`results.csv`** | IBM Lab | ~49,000 international matches from 1872–2026. Result data sourced and provided through IBM Lab infrastructure. Updated daily. |
+| **`tactical_data.csv`** | Added manually | Detailed tactical stats (41 metrics) for all World Cup 2026 matches played so far — formations, possession, shots, passing, pressing intensity, etc. Collected via WhoScored scraper and updated continuously as new matches are played. |
+| **`data_schema.json`** | Added manually | Full schema reference used by AI agents to understand every column, calculated metric, and query pattern in both CSV files. The model reads this to interpret data correctly. |
+
+#### 🟥 `data/referee_decisions/` — VAR & Red Card Decisions
+
+JSON files, one per match, containing VAR-reviewable incidents: goals under review, penalty decisions, and red card events. The VAR-Lens agent queries these to explain real match decisions in the context of FIFA laws.
+
+
+#### 📚 `data/vector_stores/var_lens/` — FIFA Rules Knowledge Base
+
+A pre-built FAISS vector store containing FIFA/IFAB documents, parsed via IBM Docling and embedded. This is the retrieval backend for the VAR-Lens agent's RAG pipeline. The files `index.faiss` and `index.pkl` must be present — they are already built and included in the repository.
+
+---
 
 ### Setup in LangFlow
 
-1. **Import Workflow**
-   - Open LangFlow Desktop
-   - Import: `langflow_workflows/FanPulse_Multi_Agent.json`
+**Step 1 — Import Workflow**
+- Open LangFlow Desktop
+- Import: `langflow_workflows/FanPulse_Multi_Agent.json`
 
-2. **Update File Paths** ⚠️
-   - Open each custom component
-   - Replace `d:/MyPythonProjects/FanPulse/` with your actual path
-   - Components to update:
-     - `query_fifa_docs_tool.py`
-     - `query_referee_decisions_tool.py`
-     - `analyze_team_tool.py`
-     - `compare_teams_tool.py`
-     - `get_tactical_data_tool.py`
-     - `get_team_stats_tool.py`
-     - `query_csv_tool.py`
-     - `read_schema_tool.py`
+**Step 2 — Update Absolute File Paths** ⚠️
+Each custom component has a hardcoded base path (`d:/MyPythonProjects/FanPulse/`). You must update this to match where you cloned the repository on your machine.
 
-3. **Configure IBM Granite**
-   - Select "Ollama" → "granite4.1:8b" in each agent
-   - Or configure IBM Granite Cloud API
+Open each component listed below and replace the base path:
 
-4. **Run!**
-   - Click "Run" button
-   - Start asking questions
+| Component | File |
+|---|---|
+| `query_fifa_docs_tool.py` | VAR-Lens: FIFA rules retrieval |
+| `query_referee_decisions_tool.py` | VAR-Lens: match decision lookup |
+| `analyze_team_tool.py` | Tactical Pulse: team analysis |
+| `compare_teams_tool.py` | Tactical Pulse: team comparison |
+| `get_tactical_data_tool.py` | Tactical Pulse: tactical stats |
+| `get_team_stats_tool.py` | Tactical Pulse: team statistics |
+| `query_csv_tool.py` | Tactical Pulse: CSV queries |
+| `read_schema_tool.py` | Reads `data_schema.json` for the agent |
+
+**Step 3 — Configure IBM Granite**
+- In each agent node, select **Ollama** → **`granite4.1:8b`**
+- Or configure the IBM Granite Cloud API credentials
+
+**Step 4 — Run!**
+- Click the **Run** button in LangFlow
+- Start asking questions in the chat panel
 
 ---
 

@@ -27,13 +27,14 @@ Based on all available World Cup 2026 data, no matches meet this criterion.
 ```
 
 **🚨 ZERO-TOLERANCE RULES for empty results — violating any of these is a critical failure:**
-- ❌ Do NOT add any section headers — no **Answer**, no **Explanation**, no **Why this is the case**, no **Note**, no **Conclusion**, no **What This Means**, no **How This Was Determined**, no **Limitations & Caveats**, no **Suggested Next Steps**
+- ❌ Do NOT add any section headers or synthesis blocks — no **Answer**, no **Explanation**, no **Why this is the case**, no **Note**, no **Conclusion**, no **Synthesis**, no **Summary**, no **What This Means**, no **How This Was Determined**, no **Limitations & Caveats**, no **Suggested Next Steps**, no emoji-prefixed header of any kind
 - ❌ Do NOT explain why the tool returned empty — forbidden phrases: "data not loaded", "not yet ingested", "database may be empty", "only contains older matches", "the current load covers", "as of the available data"
 - ❌ Do NOT mention table names, file names, column names, or internal identifiers — forbidden: `tactical_data`, `results`, `WC_2026`, `tournament_filter`, `query_csv`, any backtick-wrapped name
-- ❌ Do NOT suggest "re-run later", "verify data load", "check with administrators", "if additional matches become available", "a re-run of the query could reveal"
+- ❌ Do NOT suggest "re-run later", "verify data load", "check with administrators", "if additional matches become available", "a re-run of the query could reveal", "additional queries can be made"
 - ❌ Do NOT number your reasoning steps or list bullet points explaining the query logic
 - ❌ Do NOT fabricate stats or use training knowledge to fill the gap
-- ✅ Maximum three sentences total — template line 1 is mandatory, lines 2 and 3 are optional
+- ✅ Maximum three plain sentences — no markdown formatting, no headers, no bullet points, no horizontal rules
+- ✅ Line 1: mandatory template opener
 - ✅ Line 2 (if used): pure football insight only — never a technical or data explanation
 - ✅ Line 3 (if used): one concrete alternative you can actually provide right now
 

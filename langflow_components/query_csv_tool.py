@@ -9,11 +9,63 @@ from lfx.field_typing import Tool
 from langchain_core.tools import StructuredTool
 from pathlib import Path
 import pandas as pd
+import re as _re
 import json
 import logging
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+# Columns that identify a row — never treated as measurable stats in auto-resolve
+_IDENTITY_COLS = {'score', 'team', 'formation', 'avg_age', 'id', 'date',
+                  'tournament', 'city', 'country', 'neutral'}
+
+
+def _strip_home_away_prefix(name: str) -> str:
+    """Remove accidental home_/away_ prefix the model may have added."""
+    for pfx in ("home_", "away_"):
+        if name.startswith(pfx):
+            return name[len(pfx):]
+    return name
+
+
+def _extract_stats_from_filter(cf: str) -> list:
+    """
+    Pull every unique base stat name referenced in a pandas filter expression.
+    Strips home_/away_ prefix and removes identity/non-metric column names.
+    Preserves order of first occurrence.
+    """
+    raw = _re.findall(r'(?:home|away)_(\w+)', cf.replace(' ', ''))
+    return list(dict.fromkeys(m for m in raw if m not in _IDENTITY_COLS))
+
+
+def _detect_winner_loser(cf: str):
+    """
+    Inspect a custom_filter string (spaces already removed) and return
+    ('winner' | 'loser' | None) based on score comparison patterns.
+    Handles: >, >=, <, <= in both directions.
+    """
+    cf = cf.replace(' ', '')
+    winner_patterns = [
+        r'home_score>away_score',   # home_score > away_score
+        r'home_score>=away_score',  # home_score >= away_score  (edge case)
+        r'away_score<home_score',   # away_score < home_score
+        r'away_score<=home_score',  # away_score <= home_score  (edge case)
+    ]
+    loser_patterns = [
+        r'home_score<away_score',
+        r'home_score<=away_score',
+        r'away_score>home_score',
+        r'away_score>=home_score',
+    ]
+    for p in winner_patterns:
+        if _re.search(p, cf):
+            return 'winner'
+    for p in loser_patterns:
+        if _re.search(p, cf):
+            return 'loser'
+    return None
 
 
 class QueryCSVTool(Component):
@@ -22,11 +74,11 @@ class QueryCSVTool(Component):
     documentation: str = "https://github.com/babaksh/FanPulse"
     icon: str = "database"
     name: str = "query_csv_tool"
-    
+
     outputs = [
         Output(display_name="Tool", name="tool", method="build_tool"),
     ]
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.project_root = Path('d:/MyPythonProjects/FanPulse')
@@ -34,7 +86,7 @@ class QueryCSVTool(Component):
         self.results_csv = self.project_root / "data" / "match_data" / "results.csv"
         self.tactical_csv = self.project_root / "data" / "match_data" / "tactical_data.csv"
         self.schema = None
-    
+
     def _load_schema(self):
         """Load data schema from JSON file"""
         if self.schema is None:
@@ -46,10 +98,10 @@ class QueryCSVTool(Component):
                 self.log(f"Warning: Could not load schema: {e}")
                 self.schema = {}
         return self.schema
-    
+
     def build_tool(self) -> Tool:
         """Build the CSV query tool"""
-        
+
         def query_csv(
             table: str,
             query_mode: str = "simple",
@@ -68,11 +120,11 @@ class QueryCSVTool(Component):
             limit: int = 50
         ) -> str:
             """Query CSV data with filters - supports both simple and custom query modes.
-            
+
             Args:
                 table: Table name - "results" or "tactical_data"
                 query_mode: Query mode - "simple" (use predefined filters) or "custom" (use custom_filter)
-                
+
                 SIMPLE MODE PARAMETERS (query_mode="simple"):
                 team_filter: Team name to filter (searches both home and away)
                 date_from: Start date (YYYY-MM-DD format)
@@ -87,13 +139,14 @@ class QueryCSVTool(Component):
                     - Filters matches where either team has >= this possession
                 max_possession: Maximum possession percentage (0-100) - only for tactical_data table
                     - Filters matches where either team has <= this possession
-                
+
                 CUSTOM MODE PARAMETERS (query_mode="custom"):
-                custom_filter: Pandas boolean expression for filtering (e.g., "(home_shots_total > 15) & (away_shots_total > 15)")
+                custom_filter: Pandas boolean expression for filtering
                     - Use column names from schema
                     - Supported operators: >, <, >=, <=, ==, !=, &, |, ~
+                    - Always wrap each side of | in parentheses to avoid precedence errors
                     - Examples:
-                        * "(home_possession > 60) & (home_score > away_score)"
+                        * "((home_possession > 60) & (home_score > away_score)) | ((away_possession > 60) & (away_score > home_score))"
                         * "(home_shots_on_target / home_shots_total > 0.5)"
                         * "home_team.str.contains('Brazil')"
 
@@ -101,159 +154,248 @@ class QueryCSVTool(Component):
 
                 resolve_loser_stat: Base stat column name WITHOUT home_/away_ prefix.
                     Resolves home/away using scores → returns one row per LOSING team.
-                    Output columns: date | losing_team | opponent | result | loser_<stat>
+                    Output columns: date | losing_team | opponent | result | loser_<stat> [| loser_<stat2> ...]
                     Use for: "teams that lost despite high X", "which teams lost with >80% pass accuracy"
+                    NOTE: tool auto-detects this from custom_filter if not provided.
 
                 resolve_winner_stat: Base stat column name WITHOUT home_/away_ prefix.
                     Resolves home/away using scores → returns one row per WINNING team.
-                    Output columns: date | winning_team | opponent | result | winner_<stat>
+                    Output columns: date | winning_team | opponent | result | winner_<stat> [| winner_<stat2> ...]
                     Use for: "teams that won with low possession", "winners with most shots"
+                    NOTE: tool auto-detects this from custom_filter if not provided.
 
                 team_perspective: Team name to focus on (e.g. "Brazil").
                     Resolves each row so the named team's stats are always in the same columns,
                     regardless of whether they were home or away.
-                    Output columns: date | team | opponent | result | team_<stat1> | team_<stat2> | ...
-                    The stats returned are those listed in the `columns` parameter (without home_/away_ prefix).
-                    Use for: "Brazil's stats in each match", "Spain's possession per game",
-                             "how did France perform in each WC 2026 match?"
-                    Requires: `columns` to list the base stat names to include (e.g. "possession,pass_accuracy,shots_total")
-                    Note: resolve_loser_stat / resolve_winner_stat take priority if also provided.
+                    Output columns: date | team | opponent | result | <stat1> | <stat2> | ...
+                    Use for: "Brazil's stats in each match", "Spain's possession per game"
+                    Requires: columns listing the base stat names (WITHOUT home_/away_ prefix)
 
-                columns: Comma-separated base stat names (WITHOUT home_/away_ prefix) when team_perspective is set.
-                    Otherwise: full column names to display (e.g., "date,home_team,away_team,home_score").
-                    Ignored when resolve_loser_stat or resolve_winner_stat is set.
-                
+                columns: Comma-separated column names.
+                    - With team_perspective: base stat names WITHOUT home_/away_ prefix (e.g. "possession,shots_total")
+                    - Without perspective params: full column names (e.g. "date,home_team,away_team,home_score")
+                    - Ignored when resolve_loser_stat or resolve_winner_stat is active
+
                 COMMON PARAMETERS:
                 limit: Maximum rows to return (default: 50, max: 200)
-                
+
             Returns:
                 Query results in markdown table format.
-                resolve_loser_stat  → date | losing_team  | opponent | result | loser_<stat>
-                resolve_winner_stat → date | winning_team | opponent | result | winner_<stat>
-                team_perspective    → date | team | opponent | result | team_<stat> ...
+                resolve_loser_stat  → date | losing_team  | opponent | result | loser_<stat> ...
+                resolve_winner_stat → date | winning_team | opponent | result | winner_<stat> ...
+                team_perspective    → date | team | opponent | result | <stat> ...
                 default             → raw filtered rows
             """
             try:
-                # Auto-detect mode if custom_filter is provided
+                # ----------------------------------------------------------------
+                # NORMALISE INPUTS
+                # ----------------------------------------------------------------
+                # Auto-switch to custom mode when custom_filter is supplied
                 if custom_filter and query_mode == "simple":
                     query_mode = "custom"
                     self.log("Auto-switching to custom mode because custom_filter was provided")
-                
+
+                # Strip home_/away_ prefix from resolve params if model passed full column name
+                if resolve_winner_stat:
+                    resolve_winner_stat = _strip_home_away_prefix(resolve_winner_stat.strip())
+                if resolve_loser_stat:
+                    resolve_loser_stat = _strip_home_away_prefix(resolve_loser_stat.strip())
+
+                # Strip home_/away_ prefix from columns when used with team_perspective
+                # (model may pass "home_possession,away_shots_total" instead of "possession,shots_total")
+                if team_perspective and columns:
+                    columns = ','.join(
+                        _strip_home_away_prefix(c.strip()) for c in columns.split(',')
+                    )
+
+                # AUTO-APPLY team_perspective when team_filter is set on tactical_data
+                # and the model forgot to supply it.
+                # Only activates when raw home_*/away_* stat columns are explicitly requested
+                # (i.e. model is trying to do team-perspective work manually).
+                if (
+                    not team_perspective
+                    and not resolve_winner_stat
+                    and not resolve_loser_stat
+                    and team_filter
+                    and table == "tactical_data"
+                    and columns
+                ):
+                    requested = [c.strip() for c in columns.split(',')]
+                    # Check if any home_*/away_* stat column (not identity) was requested
+                    _identity = {'home_team', 'away_team', 'home_score', 'away_score',
+                                 'date', 'match_id', 'tournament', 'home_formation',
+                                 'away_formation', 'home_avg_age', 'away_avg_age'}
+                    stat_cols_requested = [
+                        c for c in requested
+                        if (c.startswith('home_') or c.startswith('away_'))
+                        and c not in _identity
+                    ]
+                    if stat_cols_requested:
+                        team_perspective = team_filter
+                        # Convert all home_*/away_* stat columns to base names for team_perspective
+                        base_cols = []
+                        for c in requested:
+                            if c in _identity:
+                                pass  # identity cols are auto-included by team_perspective path
+                            else:
+                                base_cols.append(_strip_home_away_prefix(c))
+                        # Deduplicate while preserving order
+                        seen = set()
+                        deduped = []
+                        for c in base_cols:
+                            if c not in seen:
+                                seen.add(c)
+                                deduped.append(c)
+                        columns = ','.join(deduped)
+                        self.log(
+                            f"Auto-applied team_perspective='{team_perspective}' "
+                            f"(team_filter set, stat columns requested without perspective). "
+                            f"Columns normalised to: {columns}"
+                        )
+
                 self.log(f"Querying {table} in {query_mode} mode")
                 self.status = f"Querying {table}..."
-                
-                # Load schema
-                schema = self._load_schema()
-                
-                # Validate query_mode
+
+                # ----------------------------------------------------------------
+                # VALIDATE
+                # ----------------------------------------------------------------
                 if query_mode not in ["simple", "custom"]:
                     return f"❌ Invalid query_mode: {query_mode}. Must be 'simple' or 'custom'"
-                
-                # Validate table
+
                 if table not in ["results", "tactical_data"]:
                     return f"❌ Invalid table: {table}. Must be 'results' or 'tactical_data'"
-                
-                # Select CSV file
+
+                # ----------------------------------------------------------------
+                # LOAD DATA
+                # ----------------------------------------------------------------
+                schema = self._load_schema()
                 csv_path = self.results_csv if table == "results" else self.tactical_csv
-                
+
                 if not csv_path.exists():
-                    return f"❌ CSV file not found: {csv_path}"
-                
-                # Read CSV
+                    return "❌ Data file not found. Please check server configuration."
+
                 df = pd.read_csv(csv_path)
                 df['date'] = pd.to_datetime(df['date'])
-                
-                # Apply filters based on mode
                 filtered_df = df.copy()
-                
+
+                # ----------------------------------------------------------------
+                # APPLY FILTERS
+                # ----------------------------------------------------------------
                 if query_mode == "custom":
-                    # CUSTOM MODE: Use custom_filter expression
                     if not custom_filter:
                         return "❌ custom_filter is required when query_mode='custom'"
-                    
                     try:
-                        # Validate custom_filter for safety
                         dangerous_keywords = ['import', 'exec', 'eval', '__', 'open', 'file', 'os.', 'sys.']
-                        if any(keyword in custom_filter.lower() for keyword in dangerous_keywords):
-                            return f"❌ Unsafe expression in custom_filter. Avoid: {', '.join(dangerous_keywords)}"
-                        
-                        # Apply custom filter using query()
+                        if any(kw in custom_filter.lower() for kw in dangerous_keywords):
+                            return f"❌ Unsafe expression in custom_filter."
                         self.log(f"Applying custom filter: {custom_filter}")
                         filtered_df = df.query(custom_filter)
-                        
                     except Exception as e:
-                        return f"❌ Error in custom_filter: {e}\n\n" \
-                               f"Tips:\n" \
-                               f"- Use column names from schema (check with read_schema tool)\n" \
-                               f"- Use & for AND, | for OR, ~ for NOT\n" \
-                               f"- Use parentheses for complex expressions\n" \
-                               f"- For string operations: column.str.contains('text')\n" \
-                               f"- Example: (home_possession > 60) & (home_score > away_score)"
-                
-                else:
-                    # SIMPLE MODE: Use predefined filters
-                    # Team filter
+                        return (
+                            f"❌ Error in custom_filter: {e}\n\n"
+                            f"Tips:\n"
+                            f"- Use & for AND, | for OR, ~ for NOT\n"
+                            f"- Wrap each side of | in parentheses: ((a) | (b))\n"
+                            f"- For string operations: column.str.contains('text')\n"
+                            f"- Example: ((home_possession > 60) & (home_score > away_score)) | "
+                            f"((away_possession > 60) & (away_score > home_score))"
+                        )
+                    # In custom mode, also apply simple narrowing filters if provided
+                    # (model may combine custom_filter with tournament_filter, team_filter, etc.)
                     if team_filter:
                         filtered_df = filtered_df[
                             (filtered_df['home_team'].str.contains(team_filter, case=False, na=False)) |
                             (filtered_df['away_team'].str.contains(team_filter, case=False, na=False))
                         ]
-                    
-                    # Date filters
                     if date_from:
                         try:
-                            date_from_dt = pd.to_datetime(date_from)
-                            filtered_df = filtered_df[filtered_df['date'] >= date_from_dt]
-                        except:
-                            return f"❌ Invalid date_from format: {date_from}. Use YYYY-MM-DD"
-                    
+                            filtered_df = filtered_df[filtered_df['date'] >= pd.to_datetime(date_from)]
+                        except Exception:
+                            pass  # ignore bad date in custom mode — custom_filter is primary
                     if date_to:
                         try:
-                            date_to_dt = pd.to_datetime(date_to)
-                            filtered_df = filtered_df[filtered_df['date'] <= date_to_dt]
-                        except:
-                            return f"❌ Invalid date_to format: {date_to}. Use YYYY-MM-DD"
-                    
-                    # Tournament filter - smart detection
+                            filtered_df = filtered_df[filtered_df['date'] <= pd.to_datetime(date_to)]
+                        except Exception:
+                            pass
                     if tournament_filter:
-                        import re as _re
-                        is_match_id_prefix = '_' in tournament_filter and any(char.isdigit() for char in tournament_filter)
-
+                        is_match_id_prefix = '_' in tournament_filter and any(
+                            ch.isdigit() for ch in tournament_filter)
                         if is_match_id_prefix and 'match_id' in filtered_df.columns:
-                            # e.g. "WC_2026", "EURO_2024" — filter by match_id prefix
                             filtered_df = filtered_df[
-                                filtered_df['match_id'].str.contains(tournament_filter, case=False, na=False)
+                                filtered_df['match_id'].str.contains(
+                                    tournament_filter, case=False, na=False)
                             ]
                         elif 'tournament' in filtered_df.columns:
-                            # Check if a 4-digit year is appended to the tournament name
-                            # e.g. "FIFA World Cup 2026" → name="FIFA World Cup", year=2026
                             year_match = _re.search(r'\b(18|19|20)\d{2}\b', tournament_filter)
                             if year_match:
                                 year = int(year_match.group())
                                 tournament_name = tournament_filter[:year_match.start()].strip()
                                 filtered_df = filtered_df[
-                                    filtered_df['tournament'].str.contains(tournament_name, case=False, na=False)
+                                    filtered_df['tournament'].str.contains(
+                                        tournament_name, case=False, na=False)
                                 ]
-                                # Apply year constraint via date column
-                                filtered_df = filtered_df[
-                                    filtered_df['date'].dt.year == year
-                                ]
+                                filtered_df = filtered_df[filtered_df['date'].dt.year == year]
                             else:
                                 filtered_df = filtered_df[
-                                    filtered_df['tournament'].str.contains(tournament_filter, case=False, na=False)
+                                    filtered_df['tournament'].str.contains(
+                                        tournament_filter, case=False, na=False)
                                 ]
-                    
-                    # Formation filter (only for tactical_data)
-                    if formation_filter and table == "tactical_data":
-                        if 'home_formation' in filtered_df.columns and 'away_formation' in filtered_df.columns:
+
+                else:  # simple mode
+                    if team_filter:
+                        filtered_df = filtered_df[
+                            (filtered_df['home_team'].str.contains(team_filter, case=False, na=False)) |
+                            (filtered_df['away_team'].str.contains(team_filter, case=False, na=False))
+                        ]
+
+                    if date_from:
+                        try:
+                            filtered_df = filtered_df[filtered_df['date'] >= pd.to_datetime(date_from)]
+                        except Exception:
+                            return f"❌ Invalid date_from format: {date_from}. Use YYYY-MM-DD"
+
+                    if date_to:
+                        try:
+                            filtered_df = filtered_df[filtered_df['date'] <= pd.to_datetime(date_to)]
+                        except Exception:
+                            return f"❌ Invalid date_to format: {date_to}. Use YYYY-MM-DD"
+
+                    if tournament_filter:
+                        is_match_id_prefix = '_' in tournament_filter and any(
+                            ch.isdigit() for ch in tournament_filter)
+                        if is_match_id_prefix and 'match_id' in filtered_df.columns:
                             filtered_df = filtered_df[
-                                (filtered_df['home_formation'].str.contains(formation_filter, case=False, na=False)) |
-                                (filtered_df['away_formation'].str.contains(formation_filter, case=False, na=False))
+                                filtered_df['match_id'].str.contains(
+                                    tournament_filter, case=False, na=False)
                             ]
-                    
-                    # Possession filters (only for tactical_data)
+                        elif 'tournament' in filtered_df.columns:
+                            year_match = _re.search(r'\b(18|19|20)\d{2}\b', tournament_filter)
+                            if year_match:
+                                year = int(year_match.group())
+                                tournament_name = tournament_filter[:year_match.start()].strip()
+                                filtered_df = filtered_df[
+                                    filtered_df['tournament'].str.contains(
+                                        tournament_name, case=False, na=False)
+                                ]
+                                filtered_df = filtered_df[filtered_df['date'].dt.year == year]
+                            else:
+                                filtered_df = filtered_df[
+                                    filtered_df['tournament'].str.contains(
+                                        tournament_filter, case=False, na=False)
+                                ]
+                        # else: table has no match_id or tournament column — skip silently
+
+                    if formation_filter and table == "tactical_data":
+                        if 'home_formation' in filtered_df.columns:
+                            filtered_df = filtered_df[
+                                (filtered_df['home_formation'].str.contains(
+                                    formation_filter, case=False, na=False)) |
+                                (filtered_df['away_formation'].str.contains(
+                                    formation_filter, case=False, na=False))
+                            ]
+
                     if (min_possession is not None or max_possession is not None) and table == "tactical_data":
-                        if 'home_possession' in filtered_df.columns and 'away_possession' in filtered_df.columns:
+                        if 'home_possession' in filtered_df.columns:
                             if min_possession is not None:
                                 filtered_df = filtered_df[
                                     (filtered_df['home_possession'] >= min_possession) |
@@ -264,130 +406,162 @@ class QueryCSVTool(Component):
                                     (filtered_df['home_possession'] <= max_possession) |
                                     (filtered_df['away_possession'] <= max_possession)
                                 ]
-                
-                # Apply limit
-                limit = min(limit, 200)  # Max 200 rows
-                filtered_df = filtered_df.head(limit)
-                
-                if filtered_df.empty:
-                    return f"❌ No data found matching filters:\n" \
-                           f"- Table: {table}\n" \
-                           f"- Team: {team_filter or 'Any'}\n" \
-                           f"- Date From: {date_from or 'Any'}\n" \
-                           f"- Date To: {date_to or 'Any'}\n" \
-                           f"- Tournament: {tournament_filter or 'Any'}"
 
                 # ----------------------------------------------------------------
-                # RESOLVE LOSER STAT: resolve home/away ambiguity in Python
-                # so the model receives one clean row per losing team.
+                # LIMIT
                 # ----------------------------------------------------------------
-                if resolve_loser_stat:
-                    # Strip accidental home_/away_ prefix if model passed full column name
-                    _stat = resolve_loser_stat
-                    for _pfx in ("home_", "away_"):
-                        if _stat.startswith(_pfx):
-                            _stat = _stat[len(_pfx):]
-                            break
-                    resolve_loser_stat = _stat
-                    home_col = f"home_{resolve_loser_stat}"
-                    away_col = f"away_{resolve_loser_stat}"
-                    for col in [home_col, away_col, "home_score", "away_score"]:
+                limit = min(limit, 200)
+                filtered_df = filtered_df.head(limit)
+
+                if filtered_df.empty:
+                    return "Based on all available data, no matches met this criterion."
+
+                # ----------------------------------------------------------------
+                # AUTO-RESOLVE: detect winner/loser pattern from custom_filter
+                # when the model did not supply resolve_winner/loser_stat.
+                # Covers all score comparison operators (>, >=, <, <=).
+                # ----------------------------------------------------------------
+                _winner_stats: list = []
+                _loser_stats: list = []
+
+                if not resolve_winner_stat and not resolve_loser_stat and not team_perspective and custom_filter:
+                    _direction = _detect_winner_loser(custom_filter)
+                    if _direction:
+                        _stat_names = _extract_stats_from_filter(custom_filter)
+                        if _stat_names:
+                            if _direction == 'winner':
+                                resolve_winner_stat = _stat_names[0]
+                                _winner_stats = _stat_names
+                            else:
+                                resolve_loser_stat = _stat_names[0]
+                                _loser_stats = _stat_names
+                        # If no stats in filter (e.g. only score condition), fall through to raw output
+
+                # If resolve params were supplied by the model (not auto-detected), build stat lists now
+                if resolve_winner_stat and not _winner_stats:
+                    _winner_stats = [resolve_winner_stat]
+                if resolve_loser_stat and not _loser_stats:
+                    _loser_stats = [resolve_loser_stat]
+
+                # ----------------------------------------------------------------
+                # RESOLVE LOSER STAT
+                # ----------------------------------------------------------------
+                if _loser_stats:
+                    for s in _loser_stats:
+                        for col in [f"home_{s}", f"away_{s}"]:
+                            if col not in filtered_df.columns:
+                                return f"❌ Column '{col}' not found. Check resolve_loser_stat value."
+                    for col in ["home_score", "away_score", "home_team", "away_team"]:
                         if col not in filtered_df.columns:
-                            return f"❌ Column '{col}' not found. Check resolve_loser_stat value."
+                            return f"❌ Required column '{col}' not found."
 
                     records = []
                     for _, row in filtered_df.iterrows():
-                        h = row["home_score"]
-                        a = row["away_score"]
+                        h, a = row["home_score"], row["away_score"]
                         if h == a:
                             continue  # draw — no loser
                         if h < a:
                             loser, opponent = row["home_team"], row["away_team"]
-                            loser_stat = row[home_col]
+                            pfx = "home"
                             result_str = f"Lost {int(h)}–{int(a)}"
                         else:
                             loser, opponent = row["away_team"], row["home_team"]
-                            loser_stat = row[away_col]
+                            pfx = "away"
                             result_str = f"Lost {int(a)}–{int(h)}"
-                        records.append({
+                        rec = {
                             "date": str(row["date"])[:10],
                             "losing_team": loser,
                             "opponent": opponent,
                             "result": result_str,
-                            f"loser_{resolve_loser_stat}": round(float(loser_stat), 1),
-                        })
+                        }
+                        for s in _loser_stats:
+                            val = row.get(f"{pfx}_{s}")
+                            rec[f"loser_{s}"] = round(float(val), 1) if pd.notna(val) else None
+                        records.append(rec)
 
                     if not records:
                         return "Based on all available data, no matches met this criterion."
 
                     resolved_df = pd.DataFrame(records)
-                    result = f"# 📊 Match Results: Tournament Tactical Database\n\n"
-                    result += f"**Rows Returned:** {len(resolved_df)}\n\n"
-                    result += "## Data:\n\n"
-                    result += resolved_df.to_markdown(index=False)
-                    result += f"\n\n## Summary:\n- Total matches: {len(resolved_df)}\n"
+                    out = "# 📊 Match Results: Tournament Tactical Database\n\n"
+                    out += f"**Rows Returned:** {len(resolved_df)}\n\n"
+                    out += "## Data:\n\n"
+                    out += resolved_df.to_markdown(index=False)
+                    out += f"\n\n## Summary:\n- Total matches: {len(resolved_df)}\n"
                     self.status = f"Resolved {len(resolved_df)} losing teams"
-                    return result
+                    return out
 
                 # ----------------------------------------------------------------
                 # RESOLVE WINNER STAT
                 # ----------------------------------------------------------------
-                if resolve_winner_stat:
-                    # Strip accidental home_/away_ prefix if model passed full column name
-                    _stat = resolve_winner_stat
-                    for _pfx in ("home_", "away_"):
-                        if _stat.startswith(_pfx):
-                            _stat = _stat[len(_pfx):]
-                            break
-                    resolve_winner_stat = _stat
-                    home_col = f"home_{resolve_winner_stat}"
-                    away_col = f"away_{resolve_winner_stat}"
-                    for col in [home_col, away_col, "home_score", "away_score"]:
+                if _winner_stats:
+                    for s in _winner_stats:
+                        for col in [f"home_{s}", f"away_{s}"]:
+                            if col not in filtered_df.columns:
+                                return f"❌ Column '{col}' not found. Check resolve_winner_stat value."
+                    for col in ["home_score", "away_score", "home_team", "away_team"]:
                         if col not in filtered_df.columns:
-                            return f"❌ Column '{col}' not found. Check resolve_winner_stat value."
+                            return f"❌ Required column '{col}' not found."
 
                     records = []
                     for _, row in filtered_df.iterrows():
-                        h = row["home_score"]
-                        a = row["away_score"]
+                        h, a = row["home_score"], row["away_score"]
                         if h == a:
                             continue  # draw — no winner
                         if h > a:
                             winner, opponent = row["home_team"], row["away_team"]
-                            winner_stat = row[home_col]
+                            pfx = "home"
                             result_str = f"Won {int(h)}–{int(a)}"
                         else:
                             winner, opponent = row["away_team"], row["home_team"]
-                            winner_stat = row[away_col]
+                            pfx = "away"
                             result_str = f"Won {int(a)}–{int(h)}"
-                        records.append({
+                        rec = {
                             "date": str(row["date"])[:10],
                             "winning_team": winner,
                             "opponent": opponent,
                             "result": result_str,
-                            f"winner_{resolve_winner_stat}": round(float(winner_stat), 1),
-                        })
+                        }
+                        for s in _winner_stats:
+                            val = row.get(f"{pfx}_{s}")
+                            rec[f"winner_{s}"] = round(float(val), 1) if pd.notna(val) else None
+                        records.append(rec)
 
                     if not records:
                         return "Based on all available data, no matches met this criterion."
 
                     resolved_df = pd.DataFrame(records)
-                    result = f"# 📊 Match Results: Tournament Tactical Database\n\n"
-                    result += f"**Rows Returned:** {len(resolved_df)}\n\n"
-                    result += "## Data:\n\n"
-                    result += resolved_df.to_markdown(index=False)
-                    result += f"\n\n## Summary:\n- Total matches: {len(resolved_df)}\n"
+                    out = "# 📊 Match Results: Tournament Tactical Database\n\n"
+                    out += f"**Rows Returned:** {len(resolved_df)}\n\n"
+                    out += "## Data:\n\n"
+                    out += resolved_df.to_markdown(index=False)
+                    out += f"\n\n## Summary:\n- Total matches: {len(resolved_df)}\n"
                     self.status = f"Resolved {len(resolved_df)} winning teams"
-                    return result
+                    return out
 
                 # ----------------------------------------------------------------
                 # TEAM PERSPECTIVE
                 # ----------------------------------------------------------------
                 if team_perspective:
-                    stat_cols = [c.strip() for c in columns.split(',')] if columns else []
                     for col in ["home_score", "away_score", "home_team", "away_team"]:
                         if col not in filtered_df.columns:
-                            return f"❌ Column '{col}' not found in {table}."
+                            return f"❌ Required column '{col}' not found in {table}."
+
+                    # Parse stat list; columns may be empty → return basic info only
+                    # Identity cols are already included in the fixed output (date/team/opponent/result)
+                    # so we skip them here to avoid duplicate/spurious columns.
+                    _perspective_identity = {
+                        'date', 'team', 'opponent', 'result',
+                        'home_team', 'away_team', 'home_score', 'away_score',
+                        'score', 'match_id', 'tournament', 'city', 'country', 'neutral',
+                        'home_formation', 'away_formation', 'formation',
+                        'home_avg_age', 'away_avg_age', 'avg_age',
+                    }
+                    stat_cols = [c.strip() for c in columns.split(',')] if columns else []
+                    # Strip any accidental home_/away_ prefix in individual stats
+                    stat_cols = [_strip_home_away_prefix(s) for s in stat_cols if s]
+                    # Remove identity/already-included columns
+                    stat_cols = [s for s in stat_cols if s not in _perspective_identity]
 
                     records = []
                     for _, row in filtered_df.iterrows():
@@ -399,11 +573,11 @@ class QueryCSVTool(Component):
                         if is_home:
                             opponent = row["away_team"]
                             team_score, opp_score = int(h), int(a)
-                            prefix = "home"
+                            pfx = "home"
                         else:
                             opponent = row["home_team"]
                             team_score, opp_score = int(a), int(h)
-                            prefix = "away"
+                            pfx = "away"
 
                         if team_score > opp_score:
                             result_str = f"Won {team_score}–{opp_score}"
@@ -412,108 +586,95 @@ class QueryCSVTool(Component):
                         else:
                             result_str = f"Lost {team_score}–{opp_score}"
 
-                        record = {
+                        rec = {
                             "date": str(row["date"])[:10],
                             "team": str(row["home_team"] if is_home else row["away_team"]),
                             "opponent": str(opponent),
                             "result": result_str,
                         }
                         for stat in stat_cols:
-                            col_name = f"{prefix}_{stat}"
-                            if col_name in row.index and pd.notna(row[col_name]):
-                                record[stat] = round(float(row[col_name]), 1) if isinstance(row[col_name], float) else row[col_name]
-                        records.append(record)
+                            col_name = f"{pfx}_{stat}"
+                            val = row.get(col_name)
+                            if val is not None and pd.notna(val):
+                                rec[stat] = round(float(val), 1) if isinstance(val, float) else val
+                        records.append(rec)
 
                     if not records:
                         return f"Based on all available data, no matches found for {team_perspective}."
 
                     resolved_df = pd.DataFrame(records)
-                    table_display_name = "Historical Match Database" if table == "results" else "Tournament Tactical Database"
-                    result = f"# 📊 Match Results: {table_display_name}\n\n"
-                    result += f"**Rows Returned:** {len(resolved_df)}\n\n"
-                    result += "## Data:\n\n"
-                    result += resolved_df.to_markdown(index=False)
-                    result += f"\n\n## Summary:\n- Total matches: {len(resolved_df)}\n"
+                    table_display = "Historical Match Database" if table == "results" else "Tournament Tactical Database"
+                    out = f"# 📊 Match Results: {table_display}\n\n"
+                    out += f"**Rows Returned:** {len(resolved_df)}\n\n"
+                    out += "## Data:\n\n"
+                    out += resolved_df.to_markdown(index=False)
+                    out += f"\n\n## Summary:\n- Total matches: {len(resolved_df)}\n"
                     self.status = f"Team perspective: {len(resolved_df)} matches for {team_perspective}"
-                    return result
+                    return out
 
-                # Build result
-                table_display_name = "Historical Match Database" if table == "results" else "Tournament Tactical Database"
-                result = f"# 📊 Match Results: {table_display_name}\n\n"
-                
-                result += f"**Rows Returned:** {len(filtered_df)}\n\n"
-                
-                # Add schema context (no internal file names exposed)
+                # ----------------------------------------------------------------
+                # DEFAULT: raw filtered rows
+                # ----------------------------------------------------------------
+                table_display = "Historical Match Database" if table == "results" else "Tournament Tactical Database"
+                out = f"# 📊 Match Results: {table_display}\n\n"
+                out += f"**Rows Returned:** {len(filtered_df)}\n\n"
+
+                # Schema coverage hint
                 if table in schema:
-                    table_schema = schema[table]
-                    coverage = table_schema.get('coverage', {})
-                    result += f"**Coverage:** {coverage.get('time_range', 'N/A')}, "
-                    result += f"{coverage.get('total_matches', 'N/A')} matches\n\n"
-                
-                # Select columns for display
+                    cov = schema[table].get('coverage', {})
+                    out += f"**Coverage:** {cov.get('time_range', 'N/A')}, {cov.get('total_matches', 'N/A')} matches\n\n"
+
+                # Column selection
                 if columns:
-                    # Custom columns specified
-                    requested_cols = [col.strip() for col in columns.split(',')]
-                    display_cols = [col for col in requested_cols if col in filtered_df.columns]
-                    
+                    requested_cols = [c.strip() for c in columns.split(',')]
+                    display_cols = [c for c in requested_cols if c in filtered_df.columns]
+                    missing = [c for c in requested_cols if c not in filtered_df.columns]
                     if not display_cols:
-                        return f"❌ None of the requested columns exist in {table}\n" \
-                               f"Requested: {requested_cols}\n" \
-                               f"Available: {list(filtered_df.columns)}"
-                    
-                    missing_cols = [col for col in requested_cols if col not in filtered_df.columns]
-                    if missing_cols:
-                        result += f"⚠️ **Warning:** Columns not found: {missing_cols}\n\n"
+                        return (
+                            f"❌ None of the requested columns exist in {table}.\n"
+                            f"Requested: {requested_cols}\n"
+                            f"Available: {list(filtered_df.columns)}"
+                        )
+                    if missing:
+                        out += f"⚠️ **Warning:** Columns not found (skipped): {missing}\n\n"
                 else:
-                    # Default columns based on table
                     if table == "results":
                         display_cols = ['date', 'home_team', 'away_team', 'home_score', 'away_score', 'tournament']
-                    else:  # tactical_data
-                        display_cols = ['match_id', 'date', 'home_team', 'away_team', 'home_score', 'away_score',
-                                       'home_possession', 'away_possession', 'home_shots_total', 'away_shots_total',
-                                       'home_shot_accuracy', 'away_shot_accuracy']
-                    
-                    # Filter to existing columns
-                    display_cols = [col for col in display_cols if col in filtered_df.columns]
-                
-                display_df = filtered_df[display_cols]
-                
-                # Format dates
+                    else:
+                        display_cols = [
+                            'match_id', 'date', 'home_team', 'away_team', 'home_score', 'away_score',
+                            'home_possession', 'away_possession', 'home_shots_total', 'away_shots_total',
+                            'home_shot_accuracy', 'away_shot_accuracy',
+                        ]
+                    display_cols = [c for c in display_cols if c in filtered_df.columns]
+
+                display_df = filtered_df[display_cols].copy()
                 if 'date' in display_df.columns:
                     display_df['date'] = display_df['date'].dt.strftime('%Y-%m-%d')
-                
-                # Convert to markdown table
-                result += "## Data:\n\n"
-                result += display_df.to_markdown(index=False)
-                
-                # Add summary statistics
-                result += f"\n\n## Summary:\n"
-                result += f"- Total Matches: {len(filtered_df)}\n"
-                
+
+                out += "## Data:\n\n"
+                out += display_df.to_markdown(index=False)
+                out += f"\n\n## Summary:\n- Total Matches: {len(filtered_df)}\n"
+
                 if team_filter:
-                    # Calculate team stats
-                    home_matches = filtered_df[filtered_df['home_team'].str.contains(team_filter, case=False, na=False)]
-                    away_matches = filtered_df[filtered_df['away_team'].str.contains(team_filter, case=False, na=False)]
-                    
-                    home_wins = len(home_matches[home_matches['home_score'] > home_matches['away_score']])
-                    away_wins = len(away_matches[away_matches['away_score'] > away_matches['home_score']])
-                    total_wins = home_wins + away_wins
-                    
-                    result += f"- {team_filter} Wins: {total_wins}\n"
-                    result += f"- {team_filter} Home Wins: {home_wins}\n"
-                    result += f"- {team_filter} Away Wins: {away_wins}\n"
-                
+                    home_m = filtered_df[filtered_df['home_team'].str.contains(team_filter, case=False, na=False)]
+                    away_m = filtered_df[filtered_df['away_team'].str.contains(team_filter, case=False, na=False)]
+                    hw = len(home_m[home_m['home_score'] > home_m['away_score']])
+                    aw = len(away_m[away_m['away_score'] > away_m['home_score']])
+                    out += f"- {team_filter} Wins: {hw + aw}\n"
+                    out += f"- {team_filter} Home Wins: {hw}\n"
+                    out += f"- {team_filter} Away Wins: {aw}\n"
+
                 self.log(f"Query successful: {len(filtered_df)} rows")
                 self.status = f"Retrieved {len(filtered_df)} rows"
-                
-                return result
-            
+                return out
+
             except Exception as e:
                 error_msg = f"Error querying CSV: {e}"
                 self.log(error_msg)
                 self.status = "Error"
                 return f"❌ {error_msg}"
-        
+
         return StructuredTool.from_function(
             func=query_csv,
             name="query_csv",
@@ -526,26 +687,30 @@ class QueryCSVTool(Component):
                 "tournament_filter accepts both tournament names ('FIFA World Cup') and match_id prefixes ('WC_2026', 'EURO_2024'). "
                 "\n\n"
                 "CUSTOM MODE (query_mode='custom'): "
-                "Use custom_filter for pandas boolean expressions (e.g., '(home_possession > 60) & (home_score > away_score)'). "
+                "Use custom_filter for pandas boolean expressions. "
+                "Always wrap each side of | in parentheses: ((a) & (b)) | ((c) & (d)). "
                 "Supports: >, <, >=, <=, ==, !=, &, |, ~, .str.contains(). "
                 "\n\n"
                 "PERSPECTIVE PARAMETERS (optional, combine with any mode to eliminate home/away confusion): "
                 "\n"
-                "resolve_loser_stat='<stat>': returns one row per LOSING team with their correct stat. "
+                "resolve_loser_stat='<stat>': returns one row per LOSING team with their correct stat(s). "
                 "→ date | losing_team | opponent | result | loser_<stat>. "
                 "Use for: 'teams that lost despite high X stat'. "
+                "NOTE: auto-detected from custom_filter when not provided. "
                 "\n"
-                "resolve_winner_stat='<stat>': returns one row per WINNING team with their correct stat. "
+                "resolve_winner_stat='<stat>': returns one row per WINNING team with their correct stat(s). "
                 "→ date | winning_team | opponent | result | winner_<stat>. "
                 "Use for: 'teams that won with low possession', 'winners with fewest shots'. "
+                "NOTE: auto-detected from custom_filter when not provided. "
                 "\n"
                 "team_perspective='<TeamName>': returns one row per match from that team's point of view. "
                 "→ date | team | opponent | result | <stat1> | <stat2> | ... "
                 "Requires columns='stat1,stat2,...' listing base stat names (WITHOUT home_/away_ prefix). "
-                "Use for: 'Brazil stats per match', 'Spain possession in each game', 'France WC 2026 performance'. "
+                "Use for: 'Brazil stats per match', 'Spain possession in each game'. "
                 "\n\n"
-                "All three perspective params use base stat names WITHOUT home_/away_ prefix "
-                "(e.g. 'pass_accuracy', 'possession', 'shots_total', 'tackles_won')."
+                "All perspective params accept base stat names WITHOUT home_/away_ prefix "
+                "(e.g. 'pass_accuracy', 'possession', 'shots_total'). "
+                "The tool automatically strips accidental prefixes if provided."
             )
         )
 

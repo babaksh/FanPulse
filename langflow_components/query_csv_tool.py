@@ -12,6 +12,7 @@ import pandas as pd
 import re as _re
 import json
 import logging
+import difflib
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,18 @@ logger = logging.getLogger(__name__)
 # Columns that identify a row — never treated as measurable stats in auto-resolve
 _IDENTITY_COLS = {'score', 'team', 'formation', 'avg_age', 'id', 'date',
                   'tournament', 'city', 'country', 'neutral'}
+
+
+def _fuzzy_match_column(requested: str, available: list, cutoff: float = 0.82) -> str | None:
+    """
+    Return the best-matching column name from `available` for a misspelled `requested`.
+    Returns None if no close match found above `cutoff`.
+    Only matches within the same home_/away_ prefix family to avoid cross-side confusion.
+    """
+    matches = difflib.get_close_matches(requested, available, n=1, cutoff=cutoff)
+    if matches:
+        return matches[0]
+    return None
 
 
 def _strip_home_away_prefix(name: str) -> str:
@@ -221,16 +234,34 @@ class QueryCSVTool(Component):
                     and columns
                 ):
                     requested = [c.strip() for c in columns.split(',')]
-                    # Check if any home_*/away_* stat column (not identity) was requested
+                    # Known base stat names in tactical_data (without home_/away_ prefix)
+                    _known_stats = {
+                        'possession', 'shots_total', 'shots_on_target', 'shots_blocked',
+                        'shot_accuracy', 'passes_total', 'pass_accuracy', 'key_passes',
+                        'tackles_won', 'tackle_success', 'interceptions', 'clearances',
+                        'aerials_won', 'attacking_intensity', 'defensive_intensity',
+                        'formation', 'avg_age',
+                    }
                     _identity = {'home_team', 'away_team', 'home_score', 'away_score',
-                                 'date', 'match_id', 'tournament', 'home_formation',
-                                 'away_formation', 'home_avg_age', 'away_avg_age'}
-                    stat_cols_requested = [
+                                 'date', 'match_id', 'tournament'}
+                    # Stat cols with home_/away_ prefix (excluding identity)
+                    stat_cols_prefixed = [
                         c for c in requested
                         if (c.startswith('home_') or c.startswith('away_'))
                         and c not in _identity
                     ]
-                    if stat_cols_requested:
+                    # Base-name stat cols (no prefix, known tactical stat)
+                    stat_cols_base = [c for c in requested if c in _known_stats]
+
+                    # If BOTH home_X and away_X of the same stat are requested, the model wants
+                    # both teams side by side (e.g. match analysis) — do NOT apply team_perspective.
+                    base_names_home = {c[5:] for c in stat_cols_prefixed if c.startswith('home_')}
+                    base_names_away = {c[5:] for c in stat_cols_prefixed if c.startswith('away_')}
+                    wants_both_sides = bool(base_names_home & base_names_away)
+
+                    has_stats = bool(stat_cols_prefixed or stat_cols_base)
+
+                    if has_stats and not wants_both_sides:
                         team_perspective = team_filter
                         # Convert all home_*/away_* stat columns to base names for team_perspective
                         base_cols = []
@@ -554,8 +585,6 @@ class QueryCSVTool(Component):
                         'date', 'team', 'opponent', 'result',
                         'home_team', 'away_team', 'home_score', 'away_score',
                         'score', 'match_id', 'tournament', 'city', 'country', 'neutral',
-                        'home_formation', 'away_formation', 'formation',
-                        'home_avg_age', 'away_avg_age', 'avg_age',
                     }
                     stat_cols = [c.strip() for c in columns.split(',')] if columns else []
                     # Strip any accidental home_/away_ prefix in individual stats
@@ -624,19 +653,34 @@ class QueryCSVTool(Component):
                     cov = schema[table].get('coverage', {})
                     out += f"**Coverage:** {cov.get('time_range', 'N/A')}, {cov.get('total_matches', 'N/A')} matches\n\n"
 
-                # Column selection
+                # Column selection — with typo/fuzzy correction
                 if columns:
                     requested_cols = [c.strip() for c in columns.split(',')]
-                    display_cols = [c for c in requested_cols if c in filtered_df.columns]
-                    missing = [c for c in requested_cols if c not in filtered_df.columns]
+                    available_cols = list(filtered_df.columns)
+                    display_cols = []
+                    corrected = []   # (original, corrected) pairs for logging
+                    truly_missing = []
+                    for rc in requested_cols:
+                        if rc in filtered_df.columns:
+                            display_cols.append(rc)
+                        else:
+                            # Try fuzzy match — auto-correct typos like "away_tackels_won"
+                            suggestion = _fuzzy_match_column(rc, available_cols)
+                            if suggestion:
+                                display_cols.append(suggestion)
+                                corrected.append((rc, suggestion))
+                            else:
+                                truly_missing.append(rc)
+                    if corrected:
+                        self.log(f"Auto-corrected column typos: {corrected}")
                     if not display_cols:
                         return (
                             f"❌ None of the requested columns exist in {table}.\n"
                             f"Requested: {requested_cols}\n"
-                            f"Available: {list(filtered_df.columns)}"
+                            f"Available: {available_cols}"
                         )
-                    if missing:
-                        out += f"⚠️ **Warning:** Columns not found (skipped): {missing}\n\n"
+                    if truly_missing:
+                        out += f"⚠️ **Warning:** Columns not found (skipped): {truly_missing}\n\n"
                 else:
                     if table == "results":
                         display_cols = ['date', 'home_team', 'away_team', 'home_score', 'away_score', 'tournament']
@@ -664,6 +708,17 @@ class QueryCSVTool(Component):
                     out += f"- {team_filter} Wins: {hw + aw}\n"
                     out += f"- {team_filter} Home Wins: {hw}\n"
                     out += f"- {team_filter} Away Wins: {aw}\n"
+                    # List opponents so the model knows both teams are already in this result set
+                    # and does NOT need a second query for the opponent.
+                    if 'home_team' in filtered_df.columns and 'away_team' in filtered_df.columns:
+                        opponents = []
+                        for _, r in filtered_df.iterrows():
+                            if team_filter.lower() in str(r['home_team']).lower():
+                                opponents.append(str(r['away_team']))
+                            else:
+                                opponents.append(str(r['home_team']))
+                        out += f"- Opponents in this result: {', '.join(opponents)}\n"
+                        out += f"⚠️ Both home and away stats for ALL opponents above are already included in the rows above — no need to query any opponent separately.\n"
 
                 self.log(f"Query successful: {len(filtered_df)} rows")
                 self.status = f"Retrieved {len(filtered_df)} rows"

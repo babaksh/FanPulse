@@ -282,6 +282,13 @@ class QueryCSVTool(Component):
                 # so the model receives one clean row per losing team.
                 # ----------------------------------------------------------------
                 if resolve_loser_stat:
+                    # Strip accidental home_/away_ prefix if model passed full column name
+                    _stat = resolve_loser_stat
+                    for _pfx in ("home_", "away_"):
+                        if _stat.startswith(_pfx):
+                            _stat = _stat[len(_pfx):]
+                            break
+                    resolve_loser_stat = _stat
                     home_col = f"home_{resolve_loser_stat}"
                     away_col = f"away_{resolve_loser_stat}"
                     for col in [home_col, away_col, "home_score", "away_score"]:
@@ -326,6 +333,13 @@ class QueryCSVTool(Component):
                 # RESOLVE WINNER STAT
                 # ----------------------------------------------------------------
                 if resolve_winner_stat:
+                    # Strip accidental home_/away_ prefix if model passed full column name
+                    _stat = resolve_winner_stat
+                    for _pfx in ("home_", "away_"):
+                        if _stat.startswith(_pfx):
+                            _stat = _stat[len(_pfx):]
+                            break
+                    resolve_winner_stat = _stat
                     home_col = f"home_{resolve_winner_stat}"
                     away_col = f"away_{resolve_winner_stat}"
                     for col in [home_col, away_col, "home_score", "away_score"]:

@@ -9,7 +9,6 @@ An intelligent multi-agent system that demystifies VAR decisions and provides ta
 [![Docling](https://img.shields.io/badge/IBM-Docling-green)](https://github.com/DS4SD/docling)
 [![Langflow](https://img.shields.io/badge/Langflow-Multi--Agent-purple)](https://www.langflow.org/)
 [![Python](https://img.shields.io/badge/Python-3.11+-yellow)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
@@ -49,24 +48,24 @@ User Question → Orchestrator → Right Agent → Expert Answer
 
 #### 🎭 **FanPulse Orchestrator**
 Smart coordinator that understands your question and routes it automatically:
-- 🧠 Analyzes intent (VAR rules vs tactical analysis)
-- 🔀 Routes to the right specialist
-- ⚡ Calls multiple agents in parallel when needed
-- 🎨 Combines results into unified answers
+- Analyzes intent (VAR rules vs tactical analysis)
+- Routes to the right specialist
+- Calls multiple agents in parallel when needed
+- Combines results into unified answers
 
 #### 🔍 **VAR-Lens Agent** 
 Your personal VAR expert explaining referee decisions:
-- 📚 **658-vector knowledge base** from 7 official FIFA/IFAB documents
-- 🎯 Real match incidents database (World Cup 2026)
-- 📖 Clear explanations with source citations
-- 🤖 Powered by IBM Granite for natural language understanding
+- **658-vector knowledge base** from 7 official FIFA/IFAB documents
+- Real match incidents database (World Cup 2026)
+- Clear explanations with source citations
+- Powered by IBM Granite for natural language understanding
 
 #### ⚽ **Tactical Pulse Agent**
 Your tactical analyst providing performance insights:
-- 📊 **49,000+ historical matches** (1872-2026)
-- 🏆 **65 World Cup 2026 matches** with detailed tactical data
-- 🎯 Advanced metrics: possession, xG, shots, passes, formations
-- 🤖 AI-powered insights using IBM Granite
+- **49,000+ historical matches** (1872-2026)
+- **65 World Cup 2026 matches** with detailed tactical data
+- Advanced metrics: possession, xG, shots, passes, formations
+- AI-powered insights using IBM Granite
 
 ---
 

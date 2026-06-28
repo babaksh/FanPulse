@@ -130,7 +130,7 @@ class VARLensAgent(ToolCallingAgentComponent):
             model=self.model,
             user_id=self.user_id,
             max_tokens=max_tokens,
-            temperature=0.3,  # Low temperature for precise tool calling
+            temperature=0.2,  # Low temperature for precise tool calling
         )
 
     async def get_agent_requirements(self):

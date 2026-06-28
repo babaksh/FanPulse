@@ -439,10 +439,10 @@ class QueryCSVTool(Component):
                                 ]
 
                 # ----------------------------------------------------------------
-                # LIMIT
+                # LIMIT (cap only — applied per-path after resolve to avoid
+                # under-counting when draws are skipped during winner/loser resolve)
                 # ----------------------------------------------------------------
                 limit = min(limit, 200)
-                filtered_df = filtered_df.head(limit)
 
                 if filtered_df.empty:
                     return "Based on all available data, no matches met this criterion."
@@ -513,7 +513,7 @@ class QueryCSVTool(Component):
                     if not records:
                         return "Based on all available data, no matches met this criterion."
 
-                    resolved_df = pd.DataFrame(records)
+                    resolved_df = pd.DataFrame(records).head(limit)
                     out = "# 📊 Match Results: Tournament Tactical Database\n\n"
                     out += f"**Rows Returned:** {len(resolved_df)}\n\n"
                     out += "## Data:\n\n"
@@ -561,7 +561,7 @@ class QueryCSVTool(Component):
                     if not records:
                         return "Based on all available data, no matches met this criterion."
 
-                    resolved_df = pd.DataFrame(records)
+                    resolved_df = pd.DataFrame(records).head(limit)
                     out = "# 📊 Match Results: Tournament Tactical Database\n\n"
                     out += f"**Rows Returned:** {len(resolved_df)}\n\n"
                     out += "## Data:\n\n"
@@ -631,7 +631,7 @@ class QueryCSVTool(Component):
                     if not records:
                         return f"Based on all available data, no matches found for {team_perspective}."
 
-                    resolved_df = pd.DataFrame(records)
+                    resolved_df = pd.DataFrame(records).head(limit)
                     table_display = "Historical Match Database" if table == "results" else "Tournament Tactical Database"
                     out = f"# 📊 Match Results: {table_display}\n\n"
                     out += f"**Rows Returned:** {len(resolved_df)}\n\n"
@@ -646,6 +646,68 @@ class QueryCSVTool(Component):
                 # ----------------------------------------------------------------
                 table_display = "Historical Match Database" if table == "results" else "Tournament Tactical Database"
                 out = f"# 📊 Match Results: {table_display}\n\n"
+
+                # ----------------------------------------------------------------
+                # FORMATION EXPAND: when formation_filter is active and no columns
+                # override, expand each row into one entry per team that used the
+                # requested formation — so the agent never has to do home/away mapping.
+                # ----------------------------------------------------------------
+                if (
+                    formation_filter
+                    and table == "tactical_data"
+                    and not columns  # only when agent didn't ask for specific raw columns
+                    and 'home_formation' in filtered_df.columns
+                    and 'home_team' in filtered_df.columns
+                ):
+                    records = []
+                    for _, row in filtered_df.iterrows():
+                        h_form = str(row.get('home_formation', ''))
+                        a_form = str(row.get('away_formation', ''))
+                        h_match = formation_filter.lower() in h_form.lower()
+                        a_match = formation_filter.lower() in a_form.lower()
+                        h, a = row['home_score'], row['away_score']
+                        date_str = str(row['date'])[:10]
+
+                        def _result(team_score, opp_score):
+                            if team_score > opp_score:
+                                return 'Win'
+                            elif team_score == opp_score:
+                                return 'Draw'
+                            return 'Loss'
+
+                        if h_match:
+                            records.append({
+                                'date': date_str,
+                                'team': row['home_team'],
+                                'opponent': row['away_team'],
+                                'score': f"{int(h)}–{int(a)}",
+                                'result': _result(h, a),
+                                'formation': h_form,
+                            })
+                        if a_match:
+                            records.append({
+                                'date': date_str,
+                                'team': row['away_team'],
+                                'opponent': row['home_team'],
+                                'score': f"{int(a)}–{int(h)}",
+                                'result': _result(a, h),
+                                'formation': a_form,
+                            })
+
+                    if not records:
+                        return "Based on all available data, no matches met this criterion."
+
+                    resolved_df = pd.DataFrame(records).head(limit)
+                    out += f"**Rows Returned:** {len(resolved_df)}\n\n"
+                    out += "## Data:\n\n"
+                    out += resolved_df.to_markdown(index=False)
+                    out += f"\n\n## Summary:\n- Total Matches: {len(filtered_df)} | Teams using {formation_filter}: {len(records)}\n"
+                    self.status = f"Formation expand: {len(resolved_df)} entries for {formation_filter}"
+                    return out
+
+                # ----------------------------------------------------------------
+                # DEFAULT: raw rows (no formation_filter, or caller specified columns)
+                # ----------------------------------------------------------------
                 out += f"**Rows Returned:** {len(filtered_df)}\n\n"
 
                 # Schema coverage hint
@@ -692,7 +754,7 @@ class QueryCSVTool(Component):
                         ]
                     display_cols = [c for c in display_cols if c in filtered_df.columns]
 
-                display_df = filtered_df[display_cols].copy()
+                display_df = filtered_df[display_cols].head(limit).copy()
                 if 'date' in display_df.columns:
                     display_df['date'] = display_df['date'].dt.strftime('%Y-%m-%d')
 

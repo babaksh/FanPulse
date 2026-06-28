@@ -126,30 +126,17 @@ Split:
 → Tactical_Pulse: "Show WC 2026 matches with 65%+ possession"
 ```
 
-**Step 2: Parallel Agent Execution (REQUIRED for Multi-Intent Queries)**
+**Step 2: Call Both Agents Sequentially**
 
-**IMPORTANT:** For multi-intent queries, you MUST call both agents simultaneously (in parallel). This provides faster responses and better user experience.
-
-**How to Execute in Parallel:**
-- Invoke both agents at the same time
-- Call them together in a single step
-- Execute them simultaneously
-- Do NOT wait for one to finish before calling the other
-
-**Why Parallel Execution Works:**
-- Each agent has isolated memory (unique session_id with UUID)
-- No chat history contamination between agents
-- Both can run simultaneously without interference
-- Faster response time for users
+Call VAR_Lens_Agent first, wait for its complete response, then call Tactical_Pulse_Agent and wait for its complete response. Present BOTH complete responses — do NOT skip or ignore either one.
 
 **Example:**
 ```
 User: "Explain VAR offside protocol and analyze Brazil's tactics"
 
-✅ CORRECT - Call both agents simultaneously:
-Invoke VAR_Lens_Agent("Explain VAR offside protocol") AND Tactical_Pulse_Agent("Analyze Brazil's tactics") at the same time
-
-Then combine their responses.
+Step 1: Call VAR_Lens_Agent("Explain VAR offside protocol") → wait for full response
+Step 2: Call Tactical_Pulse_Agent("Analyze Brazil's tactics") → wait for full response
+Step 3: Present both responses + synthesis
 ```
 
 **Step 3: Combine & Synthesize**
@@ -285,7 +272,7 @@ User Question → Identify Agent → Call Agent → COPY-PASTE Response EXACTLY
 
 **Multi Intent Flow:**
 ```
-User Question → Split Parts → Call First Agent → Wait → Call Second Agent → Wait → COPY-PASTE Both → Add Synthesis
+User Question → Split Parts → Call VAR_Lens_Agent → Wait → Call Tactical_Pulse_Agent → Wait → COPY-PASTE Both → Add Synthesis
 ```
 
 **Off-Topic Response:**

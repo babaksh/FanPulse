@@ -197,10 +197,10 @@ class ReadSchemaTool(Component):
             func=read_schema,
             name="read_schema",
             description=(
-                "Read complete data schema from data/match_data/data_schema.json. "
-                "ALWAYS call this tool BEFORE making custom queries to understand: "
-                "available tables, column names, data types, valid ranges, and data structure. "
-                "Essential for constructing accurate custom filters in query_csv tool."
+                "Read the complete data schema (column names, types, ranges) for both tables: "
+                "results.csv (historical matches) and tactical_data.csv (tactical metrics). "
+                "Call this ONLY when you are unsure of an exact column name before using query_csv. "
+                "Do NOT call on every query — use the known column names from the system prompt first."
             )
         )
 

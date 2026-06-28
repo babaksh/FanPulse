@@ -278,22 +278,17 @@ class QueryRefereeDecisionsTool(Component):
             func=query_referee_decisions,
             name="query_referee_decisions",
             description=(
-                "Query referee decisions and VAR reviews from World Cup 2026 matches. Returns detailed JSON with:\n"
-                "- Decision details: minute, type (yellow_card/red_card/penalty), description, player, reason\n"
-                "- VAR information: review_type (cardUpgrade/goalCheck/penaltyCheck), initial_decision, final_decision, confirmed status\n"
-                "- Player data: player_id, is_home flag\n"
-                "- Match context: teams, date, tournament, venue, city\n"
-                "- Summary statistics: total decisions, VAR reviews, card counts\n\n"
-                "Filters available:\n"
-                "- minute: Get decisions at specific minute\n"
-                "- decision_type: Filter by 'yellow_card', 'red_card', 'penalty', etc.\n"
-                "- var_only: Set to true to only see VAR-reviewed decisions\n\n"
-                "Use for questions like:\n"
-                "- 'What happened at minute 82?'\n"
-                "- 'Show me all VAR decisions in this match'\n"
-                "- 'Why was the red card given?'\n"
-                "- 'What was the initial decision before VAR review?'\n\n"
-                "Always combine with query_fifa_documents to explain the official FIFA/IFAB rules."
+                "Query VAR-reviewable decisions and direct red cards from World Cup 2026 matches. "
+                "DATABASE CONTAINS ONLY: (1) var_review events — goals disallowed, penalties awarded/not awarded, "
+                "card upgrades, mistaken identity; (2) red_card events — direct red cards shown by referee. "
+                "Yellow cards and non-VAR incidents are NOT in this database.\n\n"
+                "Returns JSON with: minute, type (var_review / red_card), player, var_decision object "
+                "(review_type, outcome, note), match context (teams, date, tournament).\n\n"
+                "Filters: minute (specific minute), decision_type ('var_review' or 'red_card'), "
+                "var_only=True (only var_review events, excludes red_card).\n\n"
+                "Use for: 'What happened at minute 82?', 'Why was the goal disallowed?', "
+                "'Was there a VAR review?', 'Why was the red card given?'. "
+                "Always combine with query_fifa_documents to explain the official rule applied."
             )
         )
 

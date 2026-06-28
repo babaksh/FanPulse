@@ -140,7 +140,7 @@ class FanPulseOrchestrator(ToolCallingAgentComponent):
             model=self.model,
             user_id=self.user_id,
             max_tokens=self._get_max_tokens_value(),
-            temperature=0.1,  # Low temperature for precise tool calling
+            temperature=0.1,
         )
 
     async def get_agent_requirements(self):

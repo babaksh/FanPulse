@@ -199,10 +199,9 @@ class CompareTeamsTool(Component):
                 return json.dumps(result, indent=2)
             
             except Exception as e:
-                error_msg = f"Error in compare_teams tool: {e}"
-                self.log(error_msg)
+                self.log(f"Error in compare_teams tool: {e}")
                 self.status = "Error"
-                return error_msg
+                return json.dumps({"error": str(e)}, ensure_ascii=False)
         
         return StructuredTool.from_function(
             func=compare_teams,

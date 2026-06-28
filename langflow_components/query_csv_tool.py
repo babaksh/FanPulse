@@ -214,6 +214,22 @@ class QueryCSVTool(Component):
                 if resolve_loser_stat:
                     resolve_loser_stat = _strip_home_away_prefix(resolve_loser_stat.strip())
 
+                # Warn immediately when columns is combined with resolve_winner/loser_stat.
+                # These modes build their own output columns — extra columns are impossible to merge.
+                # Return an error so the model knows to fix its call instead of looping.
+                if columns and (resolve_winner_stat or resolve_loser_stat):
+                    mode = "resolve_winner_stat" if resolve_winner_stat else "resolve_loser_stat"
+                    return json.dumps({
+                        "error": (
+                            f"Invalid call: `columns` cannot be used together with `{mode}`. "
+                            f"`{mode}` builds its own output columns automatically "
+                            f"(date | winning_team/losing_team | opponent | result | winner_/loser_<stat>). "
+                            "Remove the `columns` parameter and retry. "
+                            "To get additional stats per winner/loser, add more base stat names to "
+                            f"`{mode}` instead — e.g. resolve_winner_stat='possession,shots_total,key_passes'."
+                        )
+                    }, ensure_ascii=False)
+
                 # Strip home_/away_ prefix from columns when used with team_perspective
                 # (model may pass "home_possession,away_shots_total" instead of "possession,shots_total")
                 if team_perspective and columns:
@@ -468,11 +484,79 @@ class QueryCSVTool(Component):
                                 _loser_stats = _stat_names
                         # If no stats in filter (e.g. only score condition), fall through to raw output
 
-                # If resolve params were supplied by the model (not auto-detected), build stat lists now
+                # ----------------------------------------------------------------
+                # FILTER COMPLETENESS GUARD:
+                # When resolve_winner_stat or resolve_loser_stat is active and a
+                # custom_filter covers only ONE side (only home or only away score
+                # comparison), automatically expand it to cover both sides.
+                #
+                # Strategy: "side-swap" — swap every home_X↔away_X token in the
+                # original filter to produce the mirror expression, then combine
+                # with OR.  This handles BOTH fixed-value and cross-column filters:
+                #
+                #   Fixed-value (possession < 45):
+                #     "(home_score > away_score) & (home_possession < 45)"
+                #   → mirror: "(away_score > home_score) & (away_possession < 45)"
+                #   → result:  original | mirror   ✅
+                #
+                #   Cross-column (possession > opponent's):
+                #     "(home_possession > away_possession) & (home_score < away_score)"
+                #   → mirror: "(away_possession > home_possession) & (away_score < home_score)"
+                #   → result:  original | mirror   ✅
+                # ----------------------------------------------------------------
+                if custom_filter and (resolve_winner_stat or resolve_loser_stat):
+                    _cf_clean = custom_filter.replace(' ', '')
+
+                    # Detect which score-sides are already present
+                    _has_home_win  = bool(_re.search(r'home_score>away_score|away_score<home_score', _cf_clean))
+                    _has_away_win  = bool(_re.search(r'away_score>home_score|home_score<away_score', _cf_clean))
+                    _has_home_loss = bool(_re.search(r'home_score<away_score|away_score>home_score', _cf_clean))
+                    _has_away_loss = bool(_re.search(r'away_score<home_score|home_score>away_score', _cf_clean))
+
+                    _needs_expand = (
+                        (resolve_winner_stat and _has_home_win and not _has_away_win) or
+                        (resolve_loser_stat  and _has_home_loss and not _has_away_loss)
+                    )
+
+                    if _needs_expand:
+                        # Build the mirror expression by swapping every home_X ↔ away_X token.
+                        # We use a placeholder to avoid double-swapping:
+                        #   home_X  →  __HOME_X__  (step 1)
+                        #   away_X  →  home_X      (step 2)
+                        #   __HOME_X__  →  away_X  (step 3)
+                        _mirror = _re.sub(r'\bhome_', '__HOME_', custom_filter)
+                        _mirror = _re.sub(r'\baway_', 'home_', _mirror)
+                        _mirror = _mirror.replace('__HOME_', 'away_')
+
+                        custom_filter = f"({custom_filter}) | ({_mirror})"
+                        self.log(f"Auto-expanded filter to cover both sides: {custom_filter}")
+                        # Re-apply filter to the full dataframe (not the already-filtered one)
+                        try:
+                            filtered_df = df.query(custom_filter)
+                            if tournament_filter:
+                                is_match_id_prefix = '_' in tournament_filter and any(
+                                    ch.isdigit() for ch in tournament_filter)
+                                if is_match_id_prefix and 'match_id' in filtered_df.columns:
+                                    filtered_df = filtered_df[
+                                        filtered_df['match_id'].str.contains(
+                                            tournament_filter, case=False, na=False)
+                                    ]
+                                elif 'tournament' in filtered_df.columns:
+                                    filtered_df = filtered_df[
+                                        filtered_df['tournament'].str.contains(
+                                            tournament_filter, case=False, na=False)
+                                    ]
+                        except Exception as _e:
+                            self.log(f"Auto-expand failed ({_e}), keeping original filter result")
+
+                # If resolve params were supplied by the model (not auto-detected), build stat lists now.
+                # Support comma-separated multi-stat: "possession,shots_total,key_passes"
                 if resolve_winner_stat and not _winner_stats:
-                    _winner_stats = [resolve_winner_stat]
+                    _winner_stats = [_strip_home_away_prefix(s.strip())
+                                     for s in resolve_winner_stat.split(',') if s.strip()]
                 if resolve_loser_stat and not _loser_stats:
-                    _loser_stats = [resolve_loser_stat]
+                    _loser_stats = [_strip_home_away_prefix(s.strip())
+                                    for s in resolve_loser_stat.split(',') if s.strip()]
 
                 # ----------------------------------------------------------------
                 # RESOLVE LOSER STAT

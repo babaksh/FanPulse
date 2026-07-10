@@ -1,0 +1,25 @@
+{
+  "match_id": "WC_2026-07-01_BELGIUM_SENEGAL",
+  "match_info": {
+    "home_team": "Belgium",
+    "away_team": "Senegal",
+    "date": "2026-07-01",
+    "tournament": "FIFA World Cup"
+  },
+  "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 120,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Tielemans Y.",
+        "player_id": "GtkTQyib",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Youri Tielemans (Belgium) wins the battle of wills and sends an unstoppable penalty past Mory Diaw into the top right corner."
+      }
+    }
+  ]
+}

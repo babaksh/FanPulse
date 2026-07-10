@@ -1,23 +1,23 @@
 {
-  "match_id": "WC_2026-06-26_SPAIN_URUGUAY",
+  "match_id": "WC_2026-07-01_BOSNIA_AND_HERZEGOVINA_UNITED_STATES",
   "match_info": {
-    "home_team": "Spain",
-    "away_team": "Uruguay",
-    "date": "2026-06-26",
+    "home_team": "Bosnia and Herzegovina",
+    "away_team": "United States",
+    "date": "2026-07-01",
     "tournament": "FIFA World Cup"
   },
   "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
   "events": [
     {
-      "minute": 90,
+      "minute": 64,
       "type": "red_card",
       "var_reviewed": false,
-      "description": "Red card: Canobbio A. (serious foul)",
-      "player": "Canobbio A.",
-      "player_id": "rFeX9AIm",
+      "description": "Red card: Balogun F. (serious foul)",
+      "player": "Balogun F.",
+      "player_id": "rVZLmUsU",
       "is_home": true,
       "reason": "serious foul",
-      "note": "Agustin Canobbio (Uruguay) makes a horrible challenge on his opponent and receives a red card from the referee!"
+      "note": "RED card! Folarin Balogun (USA) can’t believe it as the referee orders him from the pitch following the VAR review."
     }
   ]
 }

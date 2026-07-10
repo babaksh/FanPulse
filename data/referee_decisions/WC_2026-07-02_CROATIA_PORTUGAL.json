@@ -1,0 +1,64 @@
+{
+  "match_id": "WC_2026-07-02_CROATIA_PORTUGAL",
+  "match_info": {
+    "home_team": "Croatia",
+    "away_team": "Portugal",
+    "date": "2026-07-02",
+    "tournament": "FIFA World Cup"
+  },
+  "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 61,
+      "type": "var_review",
+      "description": "VAR - Goal disallowed: Ronaldo C. (offside)",
+      "var_decision": {
+        "review_type": "goalDisallowed",
+        "player": "Ronaldo C.",
+        "player_id": "WGOY4FSt",
+        "is_home": true,
+        "outcome": "goal_disallowed",
+        "note": "The goal by Portugal is DISALLOWED on the advice of the video assistant referee due to an offside."
+      }
+    },
+    {
+      "minute": 68,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Ronaldo C.",
+        "player_id": "WGOY4FSt",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Cristiano Ronaldo (Portugal) makes no mistake from the penalty spot after waiting for Dominik Livakovic to move before rolling the ball into the middle of the goal!"
+      }
+    },
+    {
+      "minute": 81,
+      "type": "var_review",
+      "description": "VAR - Goal disallowed: Sucic P. (offside)",
+      "var_decision": {
+        "review_type": "goalDisallowed",
+        "player": "Sucic P.",
+        "player_id": "dMS6iFY2",
+        "is_home": false,
+        "outcome": "goal_disallowed",
+        "note": "Celebrations are cut short for Croatia as the referee indicates NO GOAL after the VAR review shows it was offside!"
+      }
+    },
+    {
+      "minute": 90,
+      "type": "var_review",
+      "description": "VAR - Goal disallowed: Gvardiol J. (offside)",
+      "var_decision": {
+        "review_type": "goalDisallowed",
+        "player": "Gvardiol J.",
+        "player_id": "86K1f1fd",
+        "is_home": false,
+        "outcome": "goal_disallowed",
+        "note": "The referee looks satisfied after his VAR review and duly disallows the goal for offside. The Croatia players look gutted."
+      }
+    }
+  ]
+}

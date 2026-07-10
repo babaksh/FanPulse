@@ -1,9 +1,9 @@
 {
-  "match_id": "WC_2026-06-26_SPAIN_URUGUAY",
+  "match_id": "WC_2026-06-30_ECUADOR_MEXICO",
   "match_info": {
-    "home_team": "Spain",
-    "away_team": "Uruguay",
-    "date": "2026-06-26",
+    "home_team": "Ecuador",
+    "away_team": "Mexico",
+    "date": "2026-06-30",
     "tournament": "FIFA World Cup"
   },
   "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
@@ -12,12 +12,12 @@
       "minute": 90,
       "type": "red_card",
       "var_reviewed": false,
-      "description": "Red card: Canobbio A. (serious foul)",
-      "player": "Canobbio A.",
-      "player_id": "rFeX9AIm",
-      "is_home": true,
-      "reason": "serious foul",
-      "note": "Agustin Canobbio (Uruguay) makes a horrible challenge on his opponent and receives a red card from the referee!"
+      "description": "Red card: Hincapie P. (unsportsmanlike conduct)",
+      "player": "Hincapie P.",
+      "player_id": "2TTElOLP",
+      "is_home": false,
+      "reason": "unsportsmanlike conduct",
+      "note": ""
     }
   ]
 }

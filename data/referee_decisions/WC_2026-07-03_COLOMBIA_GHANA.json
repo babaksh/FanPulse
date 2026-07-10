@@ -1,24 +1,24 @@
 {
-  "match_id": "WC_2026-06-24_BRAZIL_SCOTLAND",
+  "match_id": "WC_2026-07-03_COLOMBIA_GHANA",
   "match_info": {
-    "home_team": "Brazil",
-    "away_team": "Scotland",
-    "date": "2026-06-24",
+    "home_team": "Colombia",
+    "away_team": "Ghana",
+    "date": "2026-07-03",
     "tournament": "FIFA World Cup"
   },
   "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
   "events": [
     {
-      "minute": 22,
+      "minute": 56,
       "type": "var_review",
-      "description": "VAR - Goal disallowed: Vinicius Junior (foul)",
+      "description": "VAR - Goal disallowed: Diaz L. (offside)",
       "var_decision": {
         "review_type": "goalDisallowed",
-        "player": "Vinicius Junior",
-        "player_id": "CbwQ4Mws",
-        "is_home": false,
+        "player": "Diaz L.",
+        "player_id": "SKjMUHVm",
+        "is_home": true,
         "outcome": "goal_disallowed",
-        "note": "Celebrations are cut short for Brazil as the referee indicates NO GOAL after the VAR review due to a foul in the build-up play."
+        "note": "Luis Diaz (Colombia) collects a killer pass inside the box that puts him one-on-one against the goalkeeper. He scores, drilling a low drive deep inside the left post!"
       }
     }
   ]

@@ -1,0 +1,25 @@
+{
+  "match_id": "WC_2026-06-14_CURACAO_GERMANY",
+  "match_info": {
+    "home_team": "Curaçao",
+    "away_team": "Germany",
+    "date": "2026-06-14",
+    "tournament": "FIFA World Cup"
+  },
+  "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 45,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Havertz K.",
+        "player_id": "rH8BZWiI",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Kai Havertz (Germany) wins the battle of wills and sends an unstoppable penalty past Eloy Room into the bottom left corner."
+      }
+    }
+  ]
+}

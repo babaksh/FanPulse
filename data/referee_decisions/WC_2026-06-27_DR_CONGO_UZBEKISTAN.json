@@ -1,37 +1,37 @@
 {
-  "match_id": "WC_2026-06-16_AUSTRIA_JORDAN",
+  "match_id": "WC_2026-06-27_DR_CONGO_UZBEKISTAN",
   "match_info": {
-    "home_team": "Austria",
-    "away_team": "Jordan",
-    "date": "2026-06-16",
+    "home_team": "DR Congo",
+    "away_team": "Uzbekistan",
+    "date": "2026-06-27",
     "tournament": "FIFA World Cup"
   },
   "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
   "events": [
     {
-      "minute": 67,
+      "minute": 17,
       "type": "var_review",
-      "description": "VAR - Goal disallowed: Arnautovic M. (handball)",
+      "description": "VAR - Goal disallowed: Mbuku N. (foul)",
       "var_decision": {
         "review_type": "goalDisallowed",
-        "player": "Arnautovic M.",
-        "player_id": "WvR2ASLR",
+        "player": "Mbuku N.",
+        "player_id": "thMu3O3c",
         "is_home": true,
         "outcome": "goal_disallowed",
-        "note": "Here comes the VAR verdict. NO GOAL for Austria due to a handball in the build-up play."
+        "note": "The goal by D.R. Congo is DISALLOWED on the advice of the video assistant referee due to a foul."
       }
     },
     {
-      "minute": 90,
+      "minute": 68,
       "type": "var_review",
       "description": "VAR - Penalty awarded",
       "var_decision": {
         "review_type": "penaltyAwarded",
-        "player": "Arnautovic M.",
-        "player_id": "WvR2ASLR",
+        "player": "Wissa Y.",
+        "player_id": "b35gWzB2",
         "is_home": true,
         "outcome": "penalty_awarded",
-        "note": "Goal! Marko Arnautovic (Austria) wins the battle of wills and sends an unstoppable penalty past Yazeed Abulaila into left side of the goal."
+        "note": "Goal! Yoane Wissa (D.R. Congo) wins the battle of wills and sends an unstoppable penalty past Abduvakhid Nematov into the bottom right corner."
       }
     }
   ]

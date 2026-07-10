@@ -18,6 +18,19 @@
       "is_home": false,
       "reason": "tripping",
       "note": "Tarik Muharemovic (Bosnia & Herzegovina) reacts stupidly and the referee shows him a deserved red card!"
+    },
+    {
+      "minute": 90,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Xhaka G.",
+        "player_id": "QBHCDKff",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "GOAL! That’s a great strike from the spot by Granit Xhaka (Switzerland) low into the right of the net, giving goalkeeper Nikola Vasilj no chance!"
+      }
     }
   ]
 }

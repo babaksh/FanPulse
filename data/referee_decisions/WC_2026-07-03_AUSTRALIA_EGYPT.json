@@ -1,0 +1,116 @@
+{
+  "match_id": "WC_2026-07-03_AUSTRALIA_EGYPT",
+  "match_info": {
+    "home_team": "Australia",
+    "away_team": "Egypt",
+    "date": "2026-07-03",
+    "tournament": "FIFA World Cup"
+  },
+  "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 1,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Souttar H.",
+        "player_id": "Aw73uj0d",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Harry Souttar (Australia) misses the penalty! His poor effort goes well over the crossbar."
+      }
+    },
+    {
+      "minute": 1,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Saber M.",
+        "player_id": "0jjhyAGn",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "GOAL! Mahmoud Saber (Egypt) sends the penalty kick into the left of the net."
+      }
+    },
+    {
+      "minute": 2,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Irvine J.",
+        "player_id": "SvwMecZH",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "GOAL! That’s a great strike from the spot by Jackson Irvine (Australia) into the right of the net, giving goalkeeper Oufa Shobeir no chance!"
+      }
+    },
+    {
+      "minute": 2,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Rabia R.",
+        "player_id": "bwAESBbp",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Rami Rabia (Egypt) steps up to take the penalty and leaves the keeper helpless with a low shot inside the left post."
+      }
+    },
+    {
+      "minute": 3,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Mabil A.",
+        "player_id": "EZJnz8L7",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Awer Mabil (Australia) sends the keeper the wrong way and scores into the bottom left corner."
+      }
+    },
+    {
+      "minute": 3,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Salah M.",
+        "player_id": "08FBycgB",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Mohamed Salah (Egypt) smartly converts the penalty. He strikes the ball into the middle of the goal, leaving the goalkeeper stranded."
+      }
+    },
+    {
+      "minute": 4,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Herrington L.",
+        "player_id": "4ApZ8wCi",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Lucas Herrington (Australia) misses the penalty as he smashes the ball against the crossbar!"
+      }
+    },
+    {
+      "minute": 4,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Abdelmaguid H.",
+        "player_id": "h2HkF6cf",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Hossam Abdelmaguid (Egypt) wins the battle of wills and sends an unstoppable penalty past Mathew Ryan into left side of the goal."
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "match_id": "WC_2026-06-18_CZECHIA_SOUTH_AFRICA",
+  "match_info": {
+    "home_team": "Czechia",
+    "away_team": "South Africa",
+    "date": "2026-06-18",
+    "tournament": "FIFA World Cup"
+  },
+  "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 83,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Mokoena T.",
+        "player_id": "MFTeufFd",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "GOAL! That’s a great strike from the spot by Teboho Mokoena (South Africa) low into the left of the net, giving goalkeeper Matej Kovar no chance!"
+      }
+    }
+  ]
+}

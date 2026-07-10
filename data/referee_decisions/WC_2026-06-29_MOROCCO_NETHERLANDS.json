@@ -1,0 +1,142 @@
+{
+  "match_id": "WC_2026-06-29_MOROCCO_NETHERLANDS",
+  "match_info": {
+    "home_team": "Morocco",
+    "away_team": "Netherlands",
+    "date": "2026-06-29",
+    "tournament": "FIFA World Cup"
+  },
+  "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 1,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Koopmeiners T.",
+        "player_id": "lOCjQkeo",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Teun Koopmeiners (Netherlands) wins the battle of wills and sends an unstoppable penalty past Bono into the bottom right corner."
+      }
+    },
+    {
+      "minute": 1,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "El Aynaoui N.",
+        "player_id": "f3mqZ2x6",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Neil El Aynaoui (Morocco) fails to score from the penalty spot! His effort only crashes against the crossbar."
+      }
+    },
+    {
+      "minute": 2,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Kluivert J.",
+        "player_id": "fq4lU5sI",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Justin Kluivert (Netherlands) fails to convert the penalty kick! His effort hits the left post."
+      }
+    },
+    {
+      "minute": 2,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Rahimi S.",
+        "player_id": "OYfFre1D",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Bart Verbruggen gets a hand on the penalty from Soufiane Rahimi (Morocco), but can't stop it from flying into the bottom left corner."
+      }
+    },
+    {
+      "minute": 3,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Weghorst W.",
+        "player_id": "tpWMDFoL",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "GOAL! Wout Weghorst (Netherlands) sends the penalty high into the top left hand corner of the net."
+      }
+    },
+    {
+      "minute": 3,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Talbi C.",
+        "player_id": "Ayswm5ri",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Chemsdine Talbi (Morocco) wins the battle of wills and sends an unstoppable penalty past Bart Verbruggen into right side of the goal."
+      }
+    },
+    {
+      "minute": 4,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Timber Q.",
+        "player_id": "Ag97KtSd",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Quinten Timber (Netherlands) misses the penalty! His poor effort goes well wide of the left post."
+      }
+    },
+    {
+      "minute": 4,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Hakimi A.",
+        "player_id": "MqFBkBsp",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Achraf Hakimi (Morocco) fails to score from the penalty spot! His effort crashes against the left post."
+      }
+    },
+    {
+      "minute": 5,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Summerville C.",
+        "player_id": "EaRET7t6",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Crysencio Summerville (Netherlands) places the ball on the penalty spot and sends it towards the top of the net. His effort isn't powerful nor precise enough, allowing Bono to keep the ball out of the net."
+      }
+    },
+    {
+      "minute": 5,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Saibari I.",
+        "player_id": "WzSmqNMQ",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "Ismael Saibari (Morocco) converts the penalty with ease by slotting the ball into the bottom left corner of the goal after the goalkeeper guesses wrong and dives the opposite way!"
+      }
+    }
+  ]
+}

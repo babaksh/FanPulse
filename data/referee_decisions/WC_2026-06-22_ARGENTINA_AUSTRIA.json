@@ -1,0 +1,25 @@
+{
+  "match_id": "WC_2026-06-22_ARGENTINA_AUSTRIA",
+  "match_info": {
+    "home_team": "Argentina",
+    "away_team": "Austria",
+    "date": "2026-06-22",
+    "tournament": "FIFA World Cup"
+  },
+  "data_note": "This file contains two types of events: (1) VAR-reviewed decisions (type: var_review) — goals disallowed, penalties, card upgrades, mistaken identity; (2) Direct red cards (type: red_card, var_reviewed: false) — shown by referee without VAR. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 9,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Messi L.",
+        "player_id": "vgOOdZbd",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Lionel Messi (Argentina) can't convert the spot kick. It goes narrowly wide of the right post."
+      }
+    }
+  ]
+}

@@ -313,7 +313,8 @@ Output columns: `date | team | opponent | score | result | formation`
 - **NEVER manually exclude, re-filter, or second-guess any row.** If a row looks wrong, you are misreading columns — the tool's data is correct.
 - If you used `resolve_winner_stat` or `resolve_loser_stat`, the output has `winner_[stat]` / `loser_[stat]` columns — present those directly.
 - If output has raw `home_*` / `away_*` columns and you need to identify winners/losers — stop and re-query with PATTERN A or B instead of doing it manually.
-- **If the tool returns `Warning: Columns not found (skipped)`** — those column names do not exist. DO NOT retry the same call. Fix the column names and call once, or proceed with the columns that were returned.
+- **If the tool returns `Warning: Columns not found (skipped): ['team']`** — `team` is not a column. The correct columns are `home_team` and `away_team`. Fix immediately and call once with the correct names. **DO NOT repeat the same call.**
+- **If the tool returns `Warning: Columns not found (skipped)`** for any column — stop, identify the correct column name from the Known Column Names list above, and call ONCE with the fixed name. Never retry the identical call.
 
 ---
 

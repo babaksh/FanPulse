@@ -1,0 +1,49 @@
+{
+  "match_id": "WC_2026-07-05_ENGLAND_MEXICO",
+  "match_info": {
+    "home_team": "England",
+    "away_team": "Mexico",
+    "date": "2026-07-05",
+    "tournament": "FIFA World Cup"
+  },
+  "var_protocol_note": "This file contains only VAR-reviewable decisions according to FIFA/IFAB protocol: Goals, Penalties, Red Cards, and Mistaken Identity. Yellow cards and other non-VAR incidents are excluded.",
+  "events": [
+    {
+      "minute": 54,
+      "type": "red_card",
+      "var_reviewed": false,
+      "description": "Red card: Quansah J. (serious foul)",
+      "player": "Quansah J.",
+      "player_id": "KtIpCeFE",
+      "is_home": false,
+      "reason": "serious foul",
+      "note": ""
+    },
+    {
+      "minute": 60,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Kane H.",
+        "player_id": "v5HSlEAa",
+        "is_home": false,
+        "outcome": "penalty_awarded",
+        "note": "GOAL! That’s a great strike from the spot by Harry Kane (England) into the left of the net, giving goalkeeper Raul Rangel no chance!"
+      }
+    },
+    {
+      "minute": 69,
+      "type": "var_review",
+      "description": "VAR - Penalty awarded",
+      "var_decision": {
+        "review_type": "penaltyAwarded",
+        "player": "Jimenez R.",
+        "player_id": "ENwqg0Pd",
+        "is_home": true,
+        "outcome": "penalty_awarded",
+        "note": "Goal! Raul Jimenez (Mexico) puts the ball into the bottom left corner past the outstretched arm of Jordan Pickford."
+      }
+    }
+  ]
+}
